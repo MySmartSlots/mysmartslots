@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms &amp; Conditions — MySmartSlots</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0f1117;
+      --muted: #5a5f72;
+      --rule: #e4e6ed;
+      --accent: #2a52be;
+      --bg: #fafaf8;
+      --card: #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,250,248,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+      padding: 18px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 600; font-size: 18px;
+      color: var(--ink); text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .nav-back {
+      font-size: 13px; color: var(--muted);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+    .nav-back::before { content: "←"; }
+
+    .hero {
+      padding: 80px 40px 56px;
+      max-width: 760px; margin: 0 auto;
+      border-bottom: 1px solid var(--rule);
+    }
+    .hero-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300; font-size: clamp(36px, 6vw, 56px);
+      line-height: 1.1; letter-spacing: -1.5px;
+      color: var(--ink); margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero-meta {
+      font-size: 13px; color: var(--muted);
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+
+    .content {
+      max-width: 760px; margin: 0 auto;
+      padding: 64px 40px 120px;
+    }
+
+    section {
+      margin-bottom: 56px;
+      animation: fadeUp 0.5s ease both;
+    }
+    section:nth-child(2) { animation-delay: 0.05s; }
+    section:nth-child(3) { animation-delay: 0.1s; }
+    section:nth-child(4) { animation-delay: 0.15s; }
+    section:nth-child(5) { animation-delay: 0.2s; }
+    section:nth-child(6) { animation-delay: 0.25s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400; font-size: 22px;
+      letter-spacing: -0.4px; color: var(--ink);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    p { margin-bottom: 14px; font-size: 15px; color: #2a2d38; }
+    p:last-child { margin-bottom: 0; }
+
+    ul {
+      margin: 12px 0 14px 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    ul li {
+      font-size: 15px; color: #2a2d38;
+      padding: 6px 0 6px 20px;
+      position: relative;
+      border-bottom: 1px solid var(--rule);
+    }
+    ul li:last-child { border-bottom: none; }
+    ul li::before {
+      content: "—";
+      position: absolute; left: 0;
+      color: var(--accent); font-weight: 500;
+    }
+
+    .highlight-box {
+      background: #fff8ed;
+      border-left: 3px solid #e8a020;
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 14px; color: #5a3a00;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 32px 40px;
+      max-width: 760px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      font-size: 12px; color: var(--muted);
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero { padding: 48px 20px 40px; }
+      .content { padding: 40px 20px 80px; }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="https://mysmartslots.com" class="nav-logo">MySmartSlots</a>
+  <a href="https://mysmartslots.com" class="nav-back">Back to Home</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-label">Legal</div>
+  <h1>Terms &amp; <em>Conditions</em></h1>
+  <div class="hero-meta">
+    <span>Effective Date: April 16, 2026</span>
+    <span>Clair Group LLC (DBA MySmartSlots)</span>
+    <span>Kansas</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <section>
+    <h2>1. Agreement to Terms</h2>
+    <p>By accessing or using MySmartSlots services, including our website at mysmartslots.com, AI chat widget, SMS tools, or any related services, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services.</p>
+    <p>These Terms constitute a legally binding agreement between you and Clair Group LLC (DBA MySmartSlots), a limited liability company registered in the state of Kansas.</p>
+  </section>
+
+  <section>
+    <h2>2. Description of Services</h2>
+    <p>MySmartSlots provides AI-powered appointment booking and business communication tools for small businesses, including but not limited to:</p>
+    <ul>
+      <li>AI chat widgets for websites (FAQ and booking automation)</li>
+      <li>SMS-based appointment reminders and confirmations</li>
+      <li>Lead re-engagement messaging</li>
+      <li>Automated follow-up communications</li>
+      <li>Calendar and scheduling integrations</li>
+    </ul>
+    <p>We reserve the right to modify, suspend, or discontinue any part of our services at any time with reasonable notice.</p>
+  </section>
+
+  <section>
+    <h2>3. Client Responsibilities</h2>
+    <p>If you are a business client using MySmartSlots tools on your website or for your customers, you agree to:</p>
+    <ul>
+      <li>Obtain all necessary consents from your end users before collecting their data through our tools</li>
+      <li>Comply with applicable laws including the Telephone Consumer Protection Act (TCPA) for SMS communications</li>
+      <li>Not use our services for spam, harassment, or any unlawful purpose</li>
+      <li>Keep your account credentials and API integrations secure</li>
+      <li>Provide accurate business information used to configure AI responses</li>
+    </ul>
+    <div class="highlight-box">
+      <strong>SMS Compliance Notice:</strong> If you use our SMS features, you are responsible for ensuring your customers have opted in to receive text messages. Violations of TCPA regulations are your responsibility as the business operator.
+    </div>
+  </section>
+
+  <section>
+    <h2>4. AI-Generated Content Disclaimer</h2>
+    <p>Our chat widget and messaging tools use artificial intelligence (Anthropic's Claude) to generate responses. By using these features, you acknowledge that:</p>
+    <ul>
+      <li>AI responses may occasionally be inaccurate, incomplete, or inappropriate</li>
+      <li>MySmartSlots does not guarantee the accuracy of AI-generated content</li>
+      <li>Business clients are responsible for reviewing and customizing AI prompts to reflect accurate business information</li>
+      <li>End users should not rely solely on AI-generated responses for critical decisions</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>5. Payment & Billing</h2>
+    <p>Service fees, if applicable, are outlined in your service agreement or onboarding documentation. You agree to pay all fees associated with your use of MySmartSlots services.</p>
+    <p>Third-party costs — including Anthropic API usage fees, Twilio SMS charges, and Render hosting — are separate from MySmartSlots fees and are governed by the respective third-party terms of service.</p>
+    <p>We reserve the right to suspend services for non-payment.</p>
+  </section>
+
+  <section>
+    <h2>6. Intellectual Property</h2>
+    <p>All content, branding, code, and materials associated with MySmartSlots are the property of Clair Group LLC and are protected by applicable intellectual property laws. You may not copy, reproduce, or distribute our materials without written permission.</p>
+    <p>Custom configurations, prompts, or content you provide remain your property. By providing them, you grant us a limited license to use them solely to deliver our services to you.</p>
+  </section>
+
+  <section>
+    <h2>7. Limitation of Liability</h2>
+    <p>To the fullest extent permitted by Kansas law, Clair Group LLC shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of our services, including but not limited to:</p>
+    <ul>
+      <li>Lost revenue or business opportunities</li>
+      <li>Missed appointments due to technical failures</li>
+      <li>Errors in AI-generated responses</li>
+      <li>Third-party service outages (Twilio, Anthropic, Render, etc.)</li>
+    </ul>
+    <p>Our total liability to you shall not exceed the amount you paid us in the 30 days preceding the claim.</p>
+  </section>
+
+  <section>
+    <h2>8. Indemnification</h2>
+    <p>You agree to indemnify and hold harmless Clair Group LLC, its members, employees, and agents from any claims, damages, or expenses (including legal fees) arising from your use of our services, your violation of these Terms, or your violation of any third-party rights.</p>
+  </section>
+
+  <section>
+    <h2>9. Termination</h2>
+    <p>Either party may terminate services with reasonable written notice. We reserve the right to immediately suspend or terminate access if we determine you are using our services in violation of these Terms or applicable law.</p>
+    <p>Upon termination, your right to use our services ceases immediately. Provisions that by their nature should survive termination (including liability limitations and indemnification) will remain in effect.</p>
+  </section>
+
+  <section>
+    <h2>10. Governing Law</h2>
+    <p>These Terms shall be governed by and construed in accordance with the laws of the State of Kansas, without regard to its conflict of law provisions. Any disputes arising under these Terms shall be subject to the exclusive jurisdiction of the courts located in Kansas.</p>
+  </section>
+
+  <section>
+    <h2>11. Changes to These Terms</h2>
+    <p>We may update these Terms from time to time. When we do, we will update the effective date at the top of this page. Your continued use of our services after any changes constitutes acceptance of the updated Terms.</p>
+  </section>
+
+  <section>
+    <h2>12. Contact</h2>
+    <p>For questions about these Terms, contact us at:</p>
+    <p>Clair Group LLC (DBA MySmartSlots)<br />
+    Kansas, United States<br />
+    <a href="mailto:legal@mysmartslots.com">legal@mysmartslots.com</a><br />
+    <a href="https://mysmartslots.com">mysmartslots.com</a></p>
+  </section>
+
+</div>
+
+<footer>
+  <span>© 2026 Clair Group LLC. All rights reserved.</span>
+  <span>
+    <a href="/privacy-policy.html">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="/terms.html">Terms &amp; Conditions</a> &nbsp;·&nbsp;
+    <a href="https://mysmartslots.com">Home</a>
+  </span>
+</footer>
+
+</body>
+</html>

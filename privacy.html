@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — MySmartSlots</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0f1117;
+      --muted: #5a5f72;
+      --rule: #e4e6ed;
+      --accent: #2a52be;
+      --bg: #fafaf8;
+      --card: #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,250,248,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+      padding: 18px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 600; font-size: 18px;
+      color: var(--ink); text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .nav-back {
+      font-size: 13px; color: var(--muted);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+    .nav-back::before { content: "←"; }
+
+    /* HERO */
+    .hero {
+      padding: 80px 40px 56px;
+      max-width: 760px; margin: 0 auto;
+      border-bottom: 1px solid var(--rule);
+    }
+    .hero-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300; font-size: clamp(36px, 6vw, 56px);
+      line-height: 1.1; letter-spacing: -1.5px;
+      color: var(--ink); margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero-meta {
+      font-size: 13px; color: var(--muted);
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+
+    /* CONTENT */
+    .content {
+      max-width: 760px; margin: 0 auto;
+      padding: 64px 40px 120px;
+    }
+
+    section {
+      margin-bottom: 56px;
+      animation: fadeUp 0.5s ease both;
+    }
+    section:nth-child(2) { animation-delay: 0.05s; }
+    section:nth-child(3) { animation-delay: 0.1s; }
+    section:nth-child(4) { animation-delay: 0.15s; }
+    section:nth-child(5) { animation-delay: 0.2s; }
+    section:nth-child(6) { animation-delay: 0.25s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400; font-size: 22px;
+      letter-spacing: -0.4px; color: var(--ink);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    p { margin-bottom: 14px; font-size: 15px; color: #2a2d38; }
+    p:last-child { margin-bottom: 0; }
+
+    ul {
+      margin: 12px 0 14px 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    ul li {
+      font-size: 15px; color: #2a2d38;
+      padding: 6px 0 6px 20px;
+      position: relative;
+      border-bottom: 1px solid var(--rule);
+    }
+    ul li:last-child { border-bottom: none; }
+    ul li::before {
+      content: "—";
+      position: absolute; left: 0;
+      color: var(--accent); font-weight: 500;
+    }
+
+    .highlight-box {
+      background: #f0f4ff;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 14px; color: #1a2460;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 32px 40px;
+      max-width: 760px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      font-size: 12px; color: var(--muted);
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero { padding: 48px 20px 40px; }
+      .content { padding: 40px 20px 80px; }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="https://mysmartslots.com" class="nav-logo">MySmartSlots</a>
+  <a href="https://mysmartslots.com" class="nav-back">Back to Home</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-label">Legal</div>
+  <h1>Privacy <em>Policy</em></h1>
+  <div class="hero-meta">
+    <span>Effective Date: April 16, 2026</span>
+    <span>Clair Group LLC (DBA MySmartSlots)</span>
+    <span>Kansas</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <section>
+    <h2>1. Who We Are</h2>
+    <p>MySmartSlots is a DBA of Clair Group LLC, a limited liability company registered in the state of Kansas. We provide AI-powered appointment booking and communication tools for small businesses. References to "we," "us," or "our" in this policy refer to Clair Group LLC.</p>
+    <p>If you have questions about this policy, contact us at: <a href="mailto:privacy@mysmartslots.com">privacy@mysmartslots.com</a></p>
+  </section>
+
+  <section>
+    <h2>2. Information We Collect</h2>
+    <p>When you or your customers interact with MySmartSlots tools — including our AI chat widget — we may collect the following:</p>
+    <ul>
+      <li>Full name</li>
+      <li>Phone number</li>
+      <li>Email address</li>
+      <li>Appointment details (service type, preferred date and time)</li>
+      <li>Chat conversation content (messages typed into our chat widget)</li>
+      <li>Basic usage data (pages visited, time of interaction)</li>
+    </ul>
+    <p>We do not collect payment information, social security numbers, or government-issued ID data.</p>
+  </section>
+
+  <section>
+    <h2>3. How We Use Your Information</h2>
+    <p>Information collected is used solely to:</p>
+    <ul>
+      <li>Facilitate appointment bookings on behalf of our business clients</li>
+      <li>Send appointment confirmations and reminders via SMS or email</li>
+      <li>Respond to inquiries submitted through the chat widget</li>
+      <li>Improve the performance and accuracy of our services</li>
+    </ul>
+    <p>We do not sell, rent, or trade your personal information to third parties for marketing purposes.</p>
+  </section>
+
+  <section>
+    <h2>4. Third-Party Services</h2>
+    <p>Our platform relies on the following third-party services, each with their own privacy practices:</p>
+    <div class="highlight-box">
+      <strong>Anthropic (Claude AI)</strong> — Chat messages entered into our widget are processed by Anthropic's Claude API to generate responses. Anthropic may retain data per their own privacy policy at <a href="https://www.anthropic.com/privacy" target="_blank">anthropic.com/privacy</a>.
+    </div>
+    <ul>
+      <li><strong>Twilio</strong> — Used to send and receive SMS messages. Subject to Twilio's privacy policy.</li>
+      <li><strong>Render</strong> — Our backend infrastructure provider. Data transits through Render's servers.</li>
+      <li><strong>Google (Gmail API)</strong> — Used where email reply features are enabled.</li>
+    </ul>
+    <p>By using our services, you acknowledge that data may be processed by these third parties.</p>
+  </section>
+
+  <section>
+    <h2>5. Data Retention</h2>
+    <p>We retain personal information only as long as necessary to provide our services or as required by law. Booking and contact data is retained for a period of 12 months unless a shorter retention period is requested.</p>
+    <p>You may request deletion of your data at any time by contacting us at <a href="mailto:privacy@mysmartslots.com">privacy@mysmartslots.com</a>.</p>
+  </section>
+
+  <section>
+    <h2>6. Data Security</h2>
+    <p>We implement reasonable technical and organizational measures to protect your information from unauthorized access, loss, or misuse. This includes encrypted data transmission (HTTPS) and secure API key management.</p>
+    <p>No method of transmission over the internet is 100% secure. We cannot guarantee absolute security, but we are committed to protecting your data to the best of our ability.</p>
+  </section>
+
+  <section>
+    <h2>7. Your Rights</h2>
+    <p>Depending on your location, you may have the right to:</p>
+    <ul>
+      <li>Access the personal data we hold about you</li>
+      <li>Request correction of inaccurate data</li>
+      <li>Request deletion of your data</li>
+      <li>Opt out of future communications</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at <a href="mailto:privacy@mysmartslots.com">privacy@mysmartslots.com</a>.</p>
+  </section>
+
+  <section>
+    <h2>8. Children's Privacy</h2>
+    <p>Our services are not directed at children under the age of 13. We do not knowingly collect personal information from children. If you believe we have inadvertently collected such information, please contact us immediately.</p>
+  </section>
+
+  <section>
+    <h2>9. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we do, we will update the effective date at the top of this page. Continued use of our services after any changes constitutes acceptance of the updated policy.</p>
+  </section>
+
+  <section>
+    <h2>10. Contact</h2>
+    <p>Clair Group LLC (DBA MySmartSlots)<br />
+    Kansas, United States<br />
+    <a href="mailto:privacy@mysmartslots.com">privacy@mysmartslots.com</a><br />
+    <a href="https://mysmartslots.com">mysmartslots.com</a></p>
+  </section>
+
+</div>
+
+<footer>
+  <span>© 2026 Clair Group LLC. All rights reserved.</span>
+  <span>
+    <a href="/privacy-policy.html">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="/terms.html">Terms &amp; Conditions</a> &nbsp;·&nbsp;
+    <a href="https://mysmartslots.com">Home</a>
+  </span>
+</footer>
+
+</body>
+</html>

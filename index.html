@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Automated Scheduling for Trade Businesses</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --accent: #00C896;
+  --accent-hover: #00dfa8;
+  --accent-glow: rgba(0,200,150,0.10);
+  --accent-glow2: rgba(0,200,150,0.06);
+  --dark:  #07100D;
+  --dark2: #0C1610;
+  --dark3: #122018;
+  --dark4: #192C21;
+  --border:  rgba(0,200,150,0.13);
+  --border2: rgba(255,255,255,0.07);
+  --border3: rgba(255,255,255,0.04);
+  --text:  #E6F2EC;
+  --muted: #658C78;
+  --muted2:#3A5448;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { font-family:var(--font-body); background:var(--dark); color:var(--text); line-height:1.6; overflow-x:hidden; }
+a { text-decoration:none; color:inherit; }
+.container { max-width:1120px; margin:0 auto; padding:0 2rem; }
+.accent { color:var(--accent); }
+.eyebrow {
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:11px; font-weight:600; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:1rem;
+}
+.eyebrow::before { content:''; display:block; width:20px; height:2px; background:var(--accent); }
+.btn {
+  display:inline-block; padding:13px 28px; border-radius:var(--radius-sm);
+  font-family:var(--font-body); font-weight:600; font-size:14px;
+  cursor:pointer; transition:all .2s; border:none; letter-spacing:.01em;
+}
+.btn-primary { background:var(--accent); color:#040f09; }
+.btn-primary:hover { background:var(--accent-hover); transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,200,150,.22); }
+.btn-ghost { background:transparent; color:var(--text); border:1px solid var(--border2); }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+h2 { font-family:var(--font-display); font-size:clamp(32px,4.5vw,52px); line-height:1.02; letter-spacing:-.02em; font-weight:800; }
+h3 { font-family:var(--font-display); font-weight:700; }
+.sec-hdr { text-align:center; margin-bottom:3.5rem; }
+.sec-hdr p { font-size:16px; color:var(--muted); max-width:540px; margin:.9rem auto 0; line-height:1.8; }
+.fade-up { opacity:0; transform:translateY(22px); transition:opacity .6s ease,transform .6s ease; }
+.fade-up.visible { opacity:1; transform:translateY(0); }
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  padding:1rem 0; background:rgba(7,16,13,.93);
+  backdrop-filter:blur(16px); border-bottom:1px solid var(--border2);
+}
+.nav-inner { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.logo { font-family:var(--font-display); font-size:21px; font-weight:800; letter-spacing:-.02em; white-space:nowrap; }
+.logo span { color:var(--accent); }
+.nav-links { display:flex; gap:1.75rem; list-style:none; }
+.nav-links a { font-size:13px; font-weight:500; color:var(--muted); transition:color .2s; }
+.nav-links a:hover { color:var(--text); }
+.nav-right { display:flex; align-items:center; gap:1rem; }
+.nav-phone { font-size:13px; font-weight:600; color:var(--accent); white-space:nowrap; }
+.hero {
+  min-height:100vh; display:flex; align-items:center;
+  padding:8rem 0 5rem; position:relative; overflow:hidden;
+}
+.hero-glow {
+  position:absolute; top:-10%; left:50%; transform:translateX(-50%);
+  width:900px; height:600px;
+  background:radial-gradient(ellipse, rgba(0,200,150,.07) 0%, transparent 68%);
+  pointer-events:none;
+}
+.hero-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+h1 { font-family:var(--font-display); font-size:clamp(48px,6vw,78px); line-height:.97; letter-spacing:-.03em; font-weight:800; margin-bottom:1.75rem; }
+.hero-sub { font-size:16px; color:var(--muted); line-height:1.82; max-width:460px; margin-bottom:2.5rem; }
+.hero-btns { display:flex; gap:1rem; flex-wrap:wrap; }
+.hero-trust { display:flex; align-items:center; gap:1.5rem; margin-top:2.5rem; flex-wrap:wrap; }
+.tp { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); font-weight:500; }
+.tp::before { content:'✓'; color:var(--accent); font-weight:700; }
+
+/* ── HERO CHAT DEMO ── */
+.hero-chat-demo {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(0,0,0,.55);
+  display: flex;
+  flex-direction: column;
+  height: 480px;
+}
+.demo-bar {
+  background: var(--dark3);
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-bottom: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+.dot { width:10px; height:10px; border-radius:50%; }
+.dot-r{background:#E85D5D;} .dot-y{background:#E8C05D;} .dot-g{background:#00C896;}
+.demo-bar-lbl { font-size:11px; color:var(--muted); margin-left:4px; font-weight:500; }
+.demo-bar-status {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--accent); font-weight: 600;
+}
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+.demo-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--dark);
+}
+.demo-messages::-webkit-scrollbar { width: 3px; }
+.demo-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.dmsg {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: msgIn .3s ease both;
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+.dmsg.bot {
+  background: var(--dark2);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border2);
+  align-self: flex-start;
+}
+.dmsg.user {
+  background: var(--accent);
+  color: #040f09;
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+  font-weight: 500;
+}
+.demo-typing {
+  display: flex; gap: 4px; align-items: center;
+  background: var(--dark2);
+  padding: 10px 14px; border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border2);
+  align-self: flex-start;
+}
+.demo-typing span {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--muted);
+  animation: bounce 1.2s infinite ease-in-out;
+}
+.demo-typing span:nth-child(2) { animation-delay: .2s; }
+.demo-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+
+.demo-input-row {
+  display: flex; gap: 8px; padding: 12px 14px;
+  border-top: 1px solid var(--border2);
+  background: var(--dark2);
+  flex-shrink: 0;
+}
+.demo-input {
+  flex: 1;
+  background: var(--dark);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+}
+.demo-input:focus { border-color: var(--accent); }
+.demo-input::placeholder { color: var(--muted2); }
+.demo-send {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--accent);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, transform .1s;
+  flex-shrink: 0;
+}
+.demo-send:hover { background: var(--accent-hover); }
+.demo-send:active { transform: scale(.93); }
+.demo-send svg { width: 15px; height: 15px; }
+.demo-powered {
+  padding: 6px 14px;
+  background: var(--dark3);
+  border-top: 1px solid var(--border3);
+  font-size: 10px;
+  color: var(--muted2);
+  text-align: center;
+  flex-shrink: 0;
+}
+.demo-powered span { color: var(--accent); font-weight: 600; }
+
+/* trust bar */
+.trust-bar { border-top:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:1.25rem 0; background:var(--dark2); }
+.trust-bar-inner { display:flex; align-items:center; justify-content:center; gap:2.5rem; flex-wrap:wrap; }
+.tbi { font-size:12px; color:var(--muted); font-weight:500; display:flex; align-items:center; gap:7px; }
+.tbi-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+.problem-sec { background:var(--dark2); border-top:1px solid var(--border2); padding:6rem 0; }
+.prob-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
+.prob-text p { font-size:15px; color:var(--muted); line-height:1.85; margin-bottom:1.25rem; }
+.prob-list { list-style:none; margin-top:1.75rem; }
+.prob-list li { display:flex; align-items:flex-start; gap:12px; padding:.9rem 0; border-bottom:1px solid var(--border2); font-size:14px; color:var(--muted); line-height:1.6; }
+.prob-list li:last-child { border-bottom:none; }
+.pi { width:22px; height:22px; border-radius:50%; background:rgba(0,200,150,.1); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; margin-top:1px; }
+.loss-box { background:var(--dark3); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2.5rem; text-align:center; }
+.loss-num { font-family:var(--font-display); font-size:clamp(64px,8vw,96px); color:var(--accent); line-height:1; font-weight:800; }
+.loss-label { font-size:15px; color:var(--muted); margin-top:1rem; line-height:1.6; max-width:260px; margin-inline:auto; }
+.loss-sub { margin-top:1.75rem; padding-top:1.5rem; border-top:1px solid var(--border2); font-size:13px; color:var(--muted); line-height:1.7; }
+.services-sec { padding:6rem 0; border-top:1px solid var(--border2); }
+.svc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; }
+.svc-card { background:var(--dark2); border:1px solid var(--border2); border-radius:var(--radius-md); padding:1.75rem; position:relative; overflow:hidden; transition:all .3s; }
+.svc-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); transform:scaleX(0); transition:transform .3s; transform-origin:left; }
+.svc-card:hover { border-color:var(--border); transform:translateY(-3px); }
+.svc-card:hover::before { transform:scaleX(1); }
+.svc-icon { font-size:26px; margin-bottom:1rem; display:block; }
+.svc-card h3 { font-size:15px; font-weight:700; margin-bottom:.5rem; color:var(--text); }
+.svc-card p { font-size:13px; color:var(--muted); line-height:1.75; }
+.how-sec { background:var(--dark2); border-top:1px solid var(--border2); padding:6rem 0; }
+.steps { display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative; }
+.steps::before { content:''; position:absolute; top:25px; left:12.5%; right:12.5%; height:1px; background:var(--border2); z-index:0; }
+.step { text-align:center; padding:0 1.25rem; position:relative; z-index:1; }
+.step-n { width:50px; height:50px; border-radius:50%; background:var(--dark); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; font-family:var(--font-display); font-size:18px; font-weight:800; color:var(--muted); transition:all .3s; }
+.step:hover .step-n { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.step h3 { font-size:14px; font-weight:600; margin-bottom:.5rem; color:var(--text); }
+.step p { font-size:12px; color:var(--muted); line-height:1.7; }
+.avail-sec { padding:6rem 0; border-top:1px solid var(--border2); }
+.avail-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+.avail-text p { font-size:15px; color:var(--muted); line-height:1.8; margin-bottom:1.25rem; }
+.hours-card { background:var(--dark2); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
+.hours-hdr { background:var(--dark3); padding:13px 1.5rem; border-bottom:1px solid var(--border2); display:flex; align-items:center; gap:10px; }
+.hours-hdr-title { font-size:13px; font-weight:600; color:var(--text); }
+.hours-body { padding:1.25rem; }
+.day-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border2); }
+.day-row:last-child { border-bottom:none; }
+.day-name { font-size:13px; font-weight:600; color:var(--text); width:110px; }
+.day-time { font-size:13px; color:var(--muted); }
+.ds { font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; }
+.ds-open { background:rgba(0,200,150,.1); color:var(--accent); }
+.ds-closed { background:rgba(255,255,255,.05); color:var(--muted2); }
+.hours-foot { padding:1rem 1.25rem; background:var(--accent-glow); border-top:1px solid var(--border); font-size:12px; color:var(--accent); font-weight:500; text-align:center; }
+.auto-box { margin-top:1.5rem; padding:1.25rem; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--accent-glow); }
+.auto-box h4 { font-size:14px; font-weight:600; color:var(--text); margin-bottom:.5rem; }
+.auto-box p { font-size:13px; color:var(--muted); line-height:1.65; }
+.pricing-sec { background:var(--dark2); border-top:1px solid var(--border2); padding:6rem 0; }
+.pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+.pc { background:var(--dark3); border:1px solid var(--border2); border-radius:var(--radius-lg); padding:2rem; position:relative; }
+.pc.featured { border-color:var(--accent); background:linear-gradient(155deg,var(--dark3),rgba(0,200,150,.05)); }
+.pop-badge { position:absolute; top:16px; right:16px; background:var(--accent); color:#040f09; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:4px 12px; border-radius:100px; }
+.pc-tier { font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); margin-bottom:.5rem; }
+.pc-name { font-family:var(--font-display); font-size:24px; font-weight:800; color:var(--text); margin-bottom:.5rem; }
+.pc-desc { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:1.5rem; min-height:48px; }
+.pc-price { display:flex; align-items:flex-end; gap:3px; margin-bottom:.35rem; }
+.pc-dollar { font-family:var(--font-display); font-size:52px; font-weight:800; color:var(--text); line-height:1; }
+.pc-mo { font-size:14px; color:var(--muted); padding-bottom:8px; }
+.pc-setup { font-size:12px; color:var(--muted); margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border2); }
+.pc-setup span { color:var(--accent); }
+.feat-list { list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:2rem; }
+.feat-list li { font-size:13px; color:var(--muted); display:flex; align-items:flex-start; gap:9px; line-height:1.5; }
+.feat-list li strong { color:var(--text); font-weight:600; }
+.fc { color:var(--accent); font-size:12px; font-weight:700; flex-shrink:0; margin-top:2px; }
+.fx { color:var(--muted2); font-size:12px; flex-shrink:0; margin-top:2px; }
+.pc-btn { width:100%; text-align:center; padding:13px; font-size:14px; }
+.pc-note { font-size:11px; color:var(--muted); text-align:center; margin-top:10px; }
+.pricing-guarantee { text-align:center; margin-top:2rem; font-size:13px; color:var(--muted); }
+.pricing-guarantee span { color:var(--accent); font-weight:600; }
+.compare-wrap { margin-top:3rem; overflow-x:auto; }
+.compare-table { width:100%; border-collapse:collapse; font-size:13px; }
+.compare-table th { font-family:var(--font-display); font-weight:700; padding:14px 16px; text-align:left; border-bottom:1px solid var(--border2); color:var(--text); }
+.compare-table th:not(:first-child) { text-align:center; }
+.compare-table td { padding:12px 16px; border-bottom:1px solid var(--border3); color:var(--muted); }
+.compare-table td:not(:first-child) { text-align:center; }
+.compare-table tr:last-child td { border-bottom:none; }
+.compare-table .col-feat { font-weight:500; color:var(--text); }
+.compare-table .col-tier { color:var(--accent); font-weight:700; font-size:12px; }
+.chk { color:var(--accent); font-weight:700; }
+.dash { color:var(--muted2); }
+.compare-table tr:hover td { background:rgba(255,255,255,.02); }
+.ind-sec { padding:6rem 0; border-top:1px solid var(--border2); }
+.ind-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-top:3rem; }
+.ind-card { border:1px solid var(--border2); border-radius:var(--radius-md); padding:1.5rem 1.25rem; text-align:center; transition:all .2s; }
+.ind-card:hover { border-color:var(--accent); background:var(--accent-glow); }
+.ind-emoji { font-size:28px; margin-bottom:.6rem; display:block; }
+.ind-card h4 { font-size:14px; font-weight:600; color:var(--text); margin-bottom:.3rem; }
+.ind-card p { font-size:11px; color:var(--muted); }
+.about-sec { background:var(--dark2); border-top:1px solid var(--border2); padding:6rem 0; }
+.about-grid { display:grid; grid-template-columns:1fr 1.1fr; gap:5rem; align-items:center; }
+.about-text p { font-size:15px; color:var(--muted); line-height:1.85; margin-bottom:1.25rem; }
+.qblock { border-left:3px solid var(--accent); padding-left:1.5rem; margin:2rem 0; }
+.qblock p { font-size:17px; color:var(--text); font-style:italic; font-weight:500; line-height:1.7; margin:0; }
+.vals { list-style:none; display:flex; flex-direction:column; gap:1rem; margin-top:1.75rem; }
+.vals li { display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--muted); line-height:1.6; }
+.vi { width:26px; height:26px; border-radius:6px; background:rgba(0,200,150,.1); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.results-panel { background:var(--dark3); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; }
+.rp-hdr { font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem; }
+.rr { display:flex; justify-content:space-between; align-items:center; padding:1.1rem 0; border-bottom:1px solid var(--border2); }
+.rr:last-child { border-bottom:none; padding-bottom:0; }
+.rr-label { font-size:13px; color:var(--muted); }
+.rr-bar-wrap { width:120px; height:4px; background:var(--dark4); border-radius:2px; margin-top:5px; }
+.rr-bar { height:100%; background:var(--accent); border-radius:2px; }
+.rr-val { font-family:var(--font-display); font-size:26px; font-weight:700; color:var(--accent); }
+.gbox { margin-top:1.5rem; padding:1.25rem; background:var(--accent-glow); border-radius:8px; border:1px solid var(--border); }
+.gbox p { font-size:13px; color:var(--muted); line-height:1.7; }
+.testi-sec { padding:6rem 0; border-top:1px solid var(--border2); }
+.testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-top:3rem; }
+.tc { background:var(--dark2); border:1px solid var(--border2); border-radius:var(--radius-md); padding:1.75rem; }
+.stars { color:var(--accent); font-size:13px; letter-spacing:2px; margin-bottom:1rem; }
+.tc-text { font-size:14px; color:var(--muted); line-height:1.8; font-style:italic; margin-bottom:1.5rem; }
+.tc-author { display:flex; align-items:center; gap:10px; }
+.tc-av { width:38px; height:38px; border-radius:50%; background:rgba(0,200,150,.12); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--accent); }
+.tc-name { font-size:13px; font-weight:600; color:var(--text); }
+.tc-co { font-size:11px; color:var(--muted); }
+.cta-sec { padding:6rem 0; border-top:1px solid var(--border2); text-align:center; position:relative; overflow:hidden; }
+.cta-glow { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 60%,rgba(0,200,150,.07),transparent 65%); pointer-events:none; }
+.cta-sec h2 { margin-bottom:1.25rem; }
+.cta-sec > .container > p { font-size:17px; color:var(--muted); max-width:500px; margin:0 auto 2.5rem; line-height:1.75; }
+.cta-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+.cta-note { margin-top:1.25rem; font-size:12px; color:var(--muted); }
+.contact-sec { background:var(--dark2); border-top:1px solid var(--border2); padding:6rem 0; }
+.contact-grid { display:grid; grid-template-columns:1fr 1.2fr; gap:5rem; align-items:start; }
+.ci-info p { font-size:15px; color:var(--muted); line-height:1.8; margin-bottom:2rem; }
+.cdet { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--muted); margin-bottom:1rem; }
+.cdet-icon { color:var(--accent); width:18px; }
+.form-wrap { background:var(--dark3); border:1px solid var(--border2); border-radius:var(--radius-lg); padding:2rem; }
+.fg { margin-bottom:1.1rem; }
+label { display:block; font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+input,textarea,select { width:100%; background:var(--dark); border:1px solid var(--border2); border-radius:7px; padding:11px 14px; font-family:var(--font-body); font-size:14px; color:var(--text); transition:border-color .2s; outline:none; appearance:none; }
+input:focus,textarea:focus,select:focus { border-color:var(--accent); }
+textarea { resize:vertical; min-height:110px; }
+select option { background:var(--dark2); }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.btn-full { width:100%; text-align:center; padding:15px; font-size:15px; }
+.form-legal { font-size:11px; color:var(--muted); text-align:center; margin-top:10px; }
+footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
+.footer-inner { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:2rem; margin-bottom:3rem; }
+.footer-brand p { font-size:12px; color:var(--muted); max-width:220px; line-height:1.6; margin-top:.75rem; }
+.fc-col h5 { font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; }
+.fc-col ul { list-style:none; display:flex; flex-direction:column; gap:.6rem; }
+.fc-col ul a { font-size:13px; color:var(--muted); transition:color .2s; }
+.fc-col ul a:hover { color:var(--text); }
+.footer-bottom { border-top:1px solid var(--border2); padding-top:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+.footer-bottom p { font-size:12px; color:var(--muted2); }
+.form-success { display:none; text-align:center; padding:2rem; }
+.form-success h3 { font-family:var(--font-display); font-size:22px; color:var(--accent); margin-bottom:.75rem; }
+.form-success p { font-size:14px; color:var(--muted); line-height:1.7; }
+
+/* ── FLOATING CHAT WIDGET ── */
+#sms-chat-bubble {
+  position:fixed; bottom:24px; right:24px; z-index:9999;
+  width:56px; height:56px; border-radius:50%;
+  background:var(--accent); box-shadow:0 4px 24px rgba(0,200,150,.4);
+  cursor:pointer; border:none; display:flex; align-items:center; justify-content:center;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+#sms-chat-bubble:hover { transform:scale(1.08); box-shadow:0 6px 32px rgba(0,200,150,.55); }
+#sms-chat-bubble svg { width:24px; height:24px; }
+#sms-chat-bubble .bubble-badge {
+  position:absolute; top:-2px; right:-2px;
+  width:14px; height:14px; border-radius:50%;
+  background:#E85D5D; border:2px solid var(--dark);
+  animation: badgePulse 2s infinite;
+}
+@keyframes badgePulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+
+#sms-chat-window {
+  position:fixed; bottom:92px; right:24px; z-index:9998;
+  width:340px; max-height:520px;
+  background:var(--dark2); border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:0 16px 56px rgba(0,0,0,.5);
+  display:flex; flex-direction:column; overflow:hidden;
+  font-family:var(--font-body);
+  transform:translateY(16px) scale(0.97); opacity:0;
+  pointer-events:none;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s ease;
+}
+#sms-chat-window.open { transform:translateY(0) scale(1); opacity:1; pointer-events:all; }
+
+#sms-chat-header {
+  background:var(--dark3); color:var(--text);
+  padding:14px 18px; display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid var(--border2);
+}
+#sms-chat-header .avatar {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--accent-glow); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+#sms-chat-header .info { flex:1; }
+#sms-chat-header .name { font-weight:600; font-size:14px; }
+#sms-chat-header .status { font-size:11px; color:var(--accent); margin-top:1px; display:flex; align-items:center; gap:4px; }
+#sms-chat-close { background:none; border:none; color:var(--muted); opacity:.7; cursor:pointer; font-size:20px; line-height:1; padding:0; }
+#sms-chat-close:hover { opacity:1; color:var(--text); }
+
+#sms-chat-messages {
+  flex:1; overflow-y:auto; padding:16px;
+  display:flex; flex-direction:column; gap:10px;
+  background:var(--dark);
+}
+#sms-chat-messages::-webkit-scrollbar { width:3px; }
+#sms-chat-messages::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+.sms-msg {
+  max-width:82%; padding:10px 14px; border-radius:16px;
+  font-size:13.5px; line-height:1.45; animation:msgIn .2s ease;
+}
+.sms-msg.bot { background:var(--dark2); color:var(--text); border-bottom-left-radius:4px; border:1px solid var(--border2); align-self:flex-start; }
+.sms-msg.user { background:var(--accent); color:#040f09; border-bottom-right-radius:4px; align-self:flex-end; font-weight:500; }
+.sms-typing { display:flex; gap:4px; align-items:center; background:var(--dark2); padding:10px 14px; border-radius:16px; border-bottom-left-radius:4px; border:1px solid var(--border2); align-self:flex-start; }
+.sms-typing span { width:7px; height:7px; border-radius:50%; background:var(--muted); animation:bounce 1.2s infinite ease-in-out; }
+.sms-typing span:nth-child(2){animation-delay:.2s;} .sms-typing span:nth-child(3){animation-delay:.4s;}
+.sms-booking-card { background:var(--accent-glow); border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:13px; color:var(--text); align-self:stretch; margin-top:4px; }
+.sms-booking-card strong { display:block; margin-bottom:6px; font-size:13.5px; color:var(--accent); }
+
+#sms-chat-input-row { display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--border2); background:var(--dark2); }
+#sms-chat-input { flex:1; border:1.5px solid var(--border2); border-radius:10px; padding:9px 12px; font-size:13.5px; font-family:inherit; color:var(--text); background:var(--dark); outline:none; resize:none; max-height:80px; transition:border-color .15s; }
+#sms-chat-input:focus { border-color:var(--accent); }
+#sms-chat-input::placeholder { color:var(--muted2); }
+#sms-chat-send { width:38px; height:38px; border-radius:10px; flex-shrink:0; background:var(--accent); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s,transform .1s; align-self:flex-end; }
+#sms-chat-send:hover { background:var(--accent-hover); }
+#sms-chat-send:active { transform:scale(.94); }
+#sms-chat-send svg { width:17px; height:17px; }
+#sms-chat-powered { padding:6px 14px; background:var(--dark3); border-top:1px solid var(--border3); font-size:10px; color:var(--muted2); text-align:center; }
+#sms-chat-powered span { color:var(--accent); font-weight:600; }
+
+@media(max-width:960px){
+  .hero-grid,.prob-grid,.about-grid,.contact-grid,.avail-grid{grid-template-columns:1fr;gap:2.5rem;}
+  .hero-visual{display:none;}
+  .steps{grid-template-columns:1fr 1fr;}.steps::before{display:none;}
+  .svc-grid,.pricing-grid{grid-template-columns:1fr;}
+  .ind-grid{grid-template-columns:1fr 1fr;}
+  .testi-grid{grid-template-columns:1fr;}
+  .nav-links{display:none;}
+}
+@media(max-width:600px){
+  .svc-grid,.steps,.ind-grid{grid-template-columns:1fr;}
+  .frow{grid-template-columns:1fr;}
+  #sms-chat-window{width:calc(100vw - 32px); right:16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="logo">My<span>Smart</span>Slots</div>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#availability">Hours</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="tel:7853290202" class="nav-phone">785-329-0202</a>
+      <a href="#contact" class="btn btn-primary">Free Audit</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Stop Losing Jobs to Missed Calls</div>
+        <h1>Every Call.<br/>Every Slot.<br/><span class="accent">Every Job.</span></h1>
+        <p class="hero-sub">My Smart Slots automates your entire customer follow-up pipeline — missed call texts, AI chat booking, SMS confirmations, reminders, and review requests — so your schedule stays full without lifting a finger.</p>
+        <div class="hero-btns">
+          <a href="#contact" class="btn btn-primary">Get My Free Audit</a>
+          <a href="#pricing" class="btn btn-ghost">See Pricing</a>
+        </div>
+        <div class="hero-trust">
+          <span class="tp">No website rebuild needed</span>
+          <span class="tp">Live in 24 hours</span>
+          <span class="tp">30-day guarantee</span>
+        </div>
+      </div>
+
+      <!-- ── HERO CHAT DEMO ── -->
+      <div class="hero-visual">
+        <div class="hero-chat-demo">
+          <div class="demo-bar">
+            <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+            <span class="demo-bar-lbl">AI Booking Assistant — Live Demo</span>
+            <div class="demo-bar-status"><div class="live-dot"></div> Online</div>
+          </div>
+          <div class="demo-messages" id="demo-messages"></div>
+          <div class="demo-input-row">
+            <input class="demo-input" id="demo-input" type="text" placeholder="Ask anything or try booking…" autocomplete="off"/>
+            <button class="demo-send" id="demo-send" aria-label="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#040f09" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+          <div class="demo-powered">Powered by <span>Claude AI</span> · This is your actual chatbot</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="trust-bar">
+  <div class="container">
+    <div class="trust-bar-inner">
+      <span class="tbi"><span class="tbi-dot"></span>Missed call auto-text in seconds</span>
+      <span class="tbi"><span class="tbi-dot"></span>AI chat books jobs 24/7</span>
+      <span class="tbi"><span class="tbi-dot"></span>SMS confirms every appointment</span>
+      <span class="tbi"><span class="tbi-dot"></span>Auto review requests after every job</span>
+      <span class="tbi"><span class="tbi-dot"></span>Mon–Fri 8am–6pm CT support</span>
+    </div>
+  </div>
+</div>
+
+<section class="problem-sec" id="problem">
+  <div class="container">
+    <div class="prob-grid">
+      <div class="prob-text fade-up">
+        <div class="eyebrow">The Problem</div>
+        <h2>Your Phone Rings. Nobody Follows Up. Job Goes to a Competitor.</h2>
+        <p>You're good at your trade. But running the phone, confirming appointments, chasing no-shows, and asking for reviews? That's a full-time job on top of your actual job — and most contractors can't keep up.</p>
+        <p>The result is a slow leak of revenue you never see. Calls that go to voicemail and never get called back. Customers who booked but didn't confirm. Jobs that ghosted. Reviews that never got asked for.</p>
+        <ul class="prob-list">
+          <li><span class="pi">▲</span>Missed calls during a job — customer doesn't leave a voicemail, calls your competitor instead</li>
+          <li><span class="pi">▲</span>Bookings that never got confirmed — crew shows up to an empty house</li>
+          <li><span class="pi">▲</span>Happy customers who would've left a 5-star review — nobody ever asked</li>
+          <li><span class="pi">▲</span>Cold leads sitting in your phone — no system to bring them back</li>
+        </ul>
+      </div>
+      <div class="fade-up">
+        <div class="loss-box">
+          <div class="loss-num">$6,400</div>
+          <p class="loss-label">Average monthly revenue lost by a 3-truck trade company from unrecovered leads and empty schedule gaps.</p>
+          <p class="loss-sub">My Smart Slots automates every single one of these touchpoints — so the leak stops without you hiring anyone new.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services-sec" id="services">
+  <div class="container">
+    <div class="sec-hdr fade-up">
+      <div class="eyebrow" style="justify-content:center;">What We Do</div>
+      <h2>10 Automations. One Platform. Zero Extra Staff.</h2>
+      <p>Every service My Smart Slots offers is included below. Each one runs automatically once we set it up for your business.</p>
+    </div>
+    <div class="svc-grid">
+      <div class="svc-card fade-up"><span class="svc-icon">💬</span><h3>AI Chat Booking</h3><p>A smart chatbot lives on your customer's website and answers questions, captures lead info, and books appointments directly — 24 hours a day, 7 days a week, with no staff required.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">📲</span><h3>Missed Call Text Back</h3><p>The moment a call goes unanswered, your customer automatically receives a text with a booking link. Most people will book right there — before they even think about calling someone else.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">✅</span><h3>SMS Confirmations</h3><p>Every time a job gets booked, an automatic SMS goes out to confirm the appointment — date, time, and details. Your customer is locked in and your crew shows up to a real job.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">🔔</span><h3>Appointment Reminders</h3><p>Automated reminders go out before every appointment — 24 hours ahead and again the morning of. No-shows drop dramatically. Your schedule becomes predictable again.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">📱</span><h3>Live SMS Chat</h3><p>Customers can text your business number and get instant intelligent responses — scheduling questions, pricing info, availability — handled automatically in real time.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">⭐</span><h3>Post-Job Follow-Up</h3><p>After every completed job, an automatic message goes out to the customer asking how it went and requesting a review. More 5-star reviews. More trust. More inbound calls.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">🔄</span><h3>Lead Re-Engagement</h3><p>Old leads, cold inquiries, and past customers who haven't booked recently get a professional automated re-engagement sequence — bringing them back to your calendar without you lifting a finger.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">📧</span><h3>Partial Email Replies</h3><p>When a customer emails or submits a web form, an instant automated reply goes back acknowledging their inquiry and directing them toward booking — keeping them warm while you're on the job.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">📅</span><h3>Calendar Sync</h3><p>We connect directly to your existing Google or Outlook calendar, or set up a free Calendly for you. Every booking lands exactly where it needs to — no double-booking, no manual entry.</p></div>
+      <div class="svc-card fade-up"><span class="svc-icon">📊</span><h3>Monthly Report</h3><p>Every month you receive a clear report showing calls recovered, jobs booked, confirmations sent, reviews generated, and estimated revenue impact — straight numbers, no fluff.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="how-sec" id="how-it-works">
+  <div class="container">
+    <div class="sec-hdr fade-up">
+      <div class="eyebrow" style="justify-content:center;">The Process</div>
+      <h2>Live in 24 Hours. Zero Disruption.</h2>
+      <p>We plug into what you already have — no new software for you to learn, no changes to how your team operates.</p>
+    </div>
+    <div class="steps">
+      <div class="step fade-up"><div class="step-n">01</div><h3>Free Audit</h3><p>We map your current call and lead flow to show exactly what's slipping and what it costs you per month.</p></div>
+      <div class="step fade-up"><div class="step-n">02</div><h3>We Set Everything Up</h3><p>Chatbot, SMS flows, calendar sync, confirmation sequences — all configured and tested within 24 hours.</p></div>
+      <div class="step fade-up"><div class="step-n">03</div><h3>Automations Go Live</h3><p>Every touchpoint runs on its own — missed calls texted, bookings confirmed, reminders sent, reviews requested.</p></div>
+      <div class="step fade-up"><div class="step-n">04</div><h3>You Just Work the Jobs</h3><p>Appointments land in your calendar. Your crew shows up. We report monthly on everything we handled.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="avail-sec" id="availability">
+  <div class="container">
+    <div class="avail-grid">
+      <div class="avail-text fade-up">
+        <div class="eyebrow">Our Availability</div>
+        <h2>Support Hours &amp; Always-On Automation</h2>
+        <p>Our team is available Monday through Friday, 8am–6pm Central Time for onboarding, account management, and any questions you have.</p>
+        <p>The automations themselves — missed call texts, AI chat, SMS confirmations, reminders, and review requests — run 24 hours a day, 7 days a week. Your business keeps working even when everyone's asleep.</p>
+        <p style="font-size:13px;color:var(--muted);">🕐 Support hours listed in Central Time (CT).</p>
+        <div class="auto-box">
+          <h4>⚡ Automations Run 24/7</h4>
+          <p>Missed calls get texted back within seconds at 2am just like 2pm. The AI chatbot books jobs over the weekend. Reminders go out on time every time — automatically.</p>
+        </div>
+      </div>
+      <div class="fade-up">
+        <div class="hours-card">
+          <div class="hours-hdr"><div class="live-dot"></div><span class="hours-hdr-title">My Smart Slots — Support Hours (CT)</span></div>
+          <div class="hours-body">
+            <div class="day-row"><span class="day-name">Monday</span><span class="day-time">8:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+            <div class="day-row"><span class="day-name">Tuesday</span><span class="day-time">8:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+            <div class="day-row"><span class="day-name">Wednesday</span><span class="day-time">8:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+            <div class="day-row"><span class="day-name">Thursday</span><span class="day-time">8:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+            <div class="day-row"><span class="day-name">Friday</span><span class="day-time">8:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+            <div class="day-row"><span class="day-name">Saturday</span><span class="day-time">Closed</span><span class="ds ds-closed">Closed</span></div>
+            <div class="day-row"><span class="day-name">Sunday</span><span class="day-time">Closed</span><span class="ds ds-closed">Closed</span></div>
+          </div>
+          <div class="hours-foot">🤖 Automations active 24/7 — even when we're closed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing-sec" id="pricing">
+  <div class="container">
+    <div class="sec-hdr fade-up">
+      <div class="eyebrow" style="justify-content:center;">Pricing</div>
+      <h2>Three Plans. Pick What Fits Your Business.</h2>
+      <p>Every plan includes a one-time $199 setup fee and a 30-day results guarantee. No long-term contracts — ever.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pc fade-up">
+        <div class="pc-tier">Starter</div>
+        <div class="pc-name">Core Automation</div>
+        <div class="pc-desc">The essentials to stop no-shows and keep every booked job on the calendar.</div>
+        <div class="pc-price"><span class="pc-dollar">$125</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-setup">+ <span>$199 one-time setup fee</span></div>
+        <ul class="feat-list">
+          <li><span class="fc">✓</span><span><strong>AI Chat Booking</strong> — 24/7 booking on your site</span></li>
+          <li><span class="fc">✓</span><span><strong>SMS Confirmations</strong> — auto-confirms every booking</span></li>
+          <li><span class="fc">✓</span><span><strong>Appointment Reminders</strong> — reduces no-shows automatically</span></li>
+          <li><span class="fc">✓</span><span><strong>Calendar Sync</strong> — Google, Outlook, or Calendly</span></li>
+          <li><span class="fc">✓</span><span><strong>Monthly Report</strong> — clear results every month</span></li>
+          <li><span class="fx">–</span><span style="color:var(--muted2)">Missed call text back</span></li>
+          <li><span class="fx">–</span><span style="color:var(--muted2)">Live SMS chat</span></li>
+          <li><span class="fx">–</span><span style="color:var(--muted2)">Post-job follow-up &amp; reviews</span></li>
+          <li><span class="fx">–</span><span style="color:var(--muted2)">Lead re-engagement</span></li>
+          <li><span class="fx">–</span><span style="color:var(--muted2)">Email replies</span></li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost pc-btn">Get Started</a>
+        <p class="pc-note">Best for solo operators &amp; 1–2 truck crews</p>
+      </div>
+      <div class="pc featured fade-up">
+        <div class="pop-badge">Most Popular</div>
+        <div class="pc-tier">Pro</div>
+        <div class="pc-name">Full Automation</div>
+        <div class="pc-desc">Every real-time touchpoint covered — calls, texts, chats, confirmations, reminders, and reviews.</div>
+        <div class="pc-price"><span class="pc-dollar">$225</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-setup">+ <span>$199 one-time setup fee</span></div>
+        <ul class="feat-list">
+          <li><span class="fc">✓</span><span>Everything in Starter</span></li>
+          <li><span class="fc">✓</span><span><strong>Missed Call Text Back</strong> — booking link sent instantly</span></li>
+          <li><span class="fc">✓</span><span><strong>Live SMS Chat</strong> — customers text, system responds</span></li>
+          <li><span class="fc">✓</span><span><strong>Post-Job Follow-Up</strong> — asks for reviews automatically</span></li>
+          <li><span class="fc">✓</span><span><strong>Auto SMS Replies</strong> — inbound texts answered instantly</span></li>
+          <li><span class="fx">–</span><span style="color:var(--muted2)">Lead re-engagement campaigns</span></li>
+          <li><span class="fx">–</span><span style="color:var(--muted2)">Partial email replies</span></li>
+        </ul>
+        <a href="#contact" class="btn btn-primary pc-btn">Get Started</a>
+        <p class="pc-note">Best for 3–6 truck operations</p>
+      </div>
+      <div class="pc fade-up">
+        <div class="pc-tier">Elite</div>
+        <div class="pc-name">Total Pipeline</div>
+        <div class="pc-desc">The complete system — every automation plus re-engagement and email replies to bring back every lead.</div>
+        <div class="pc-price"><span class="pc-dollar">$375</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-setup">+ <span>$199 one-time setup fee</span></div>
+        <ul class="feat-list">
+          <li><span class="fc">✓</span><span>Everything in Pro</span></li>
+          <li><span class="fc">✓</span><span><strong>Lead Re-Engagement</strong> — brings cold leads back automatically</span></li>
+          <li><span class="fc">✓</span><span><strong>Partial Email Replies</strong> — instant responses to inquiries &amp; form submissions</span></li>
+          <li><span class="fc">✓</span><span>Priority same-day support</span></li>
+          <li><span class="fc">✓</span><span>Dedicated account manager</span></li>
+          <li><span class="fc">✓</span><span>Quarterly strategy review call</span></li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost pc-btn">Get Started</a>
+        <p class="pc-note">Best for 7+ trucks &amp; multi-location</p>
+      </div>
+    </div>
+    <div class="compare-wrap fade-up">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="width:42%">Feature</th>
+            <th><span class="col-tier">Starter</span><br/>$125/mo</th>
+            <th><span class="col-tier">Pro</span><br/>$225/mo</th>
+            <th><span class="col-tier">Elite</span><br/>$375/mo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="col-feat">AI Chat Booking (24/7)</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">SMS Confirmations</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Appointment Reminders</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Calendar Sync</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Monthly Report</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Missed Call Text Back</td><td><span class="dash">—</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Live SMS Chat</td><td><span class="dash">—</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Auto SMS Replies</td><td><span class="dash">—</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Post-Job Follow-Up &amp; Reviews</td><td><span class="dash">—</span></td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Lead Re-Engagement</td><td><span class="dash">—</span></td><td><span class="dash">—</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Partial Email Replies</td><td><span class="dash">—</span></td><td><span class="dash">—</span></td><td><span class="chk">✓</span></td></tr>
+          <tr><td class="col-feat">Dedicated Account Manager</td><td><span class="dash">—</span></td><td><span class="dash">—</span></td><td><span class="chk">✓</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pricing-guarantee fade-up" style="margin-top:2rem;">
+      All plans include a <span>30-day results guarantee</span> — no measurable improvement in 30 days, month two is free. &nbsp;·&nbsp; Cancel anytime.
+    </div>
+  </div>
+</section>
+
+<section class="ind-sec" id="industries">
+  <div class="container">
+    <div class="sec-hdr fade-up">
+      <div class="eyebrow" style="justify-content:center;">Who We Serve</div>
+      <h2>Built Exclusively for the Trades</h2>
+      <p>We only work with blue collar service businesses. We know your seasons, your schedules, and exactly what your customers expect.</p>
+    </div>
+    <div class="ind-grid">
+      <div class="ind-card fade-up"><span class="ind-emoji">🔧</span><h4>Plumbing</h4><p>Emergency calls, installs &amp; drain service</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">❄️</span><h4>HVAC</h4><p>Seasonal installs, repairs &amp; maintenance</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">⚡</span><h4>Electrical</h4><p>Residential &amp; commercial service</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">🏠</span><h4>Roofing</h4><p>Storm work, installs &amp; inspections</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">🔨</span><h4>General Contracting</h4><p>Remodels, repairs &amp; project work</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">🐛</span><h4>Pest Control</h4><p>Recurring plans &amp; emergency calls</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">🌿</span><h4>Lawn &amp; Landscaping</h4><p>Seasonal &amp; recurring maintenance</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">🚗</span><h4>Auto Service</h4><p>Appointment shops &amp; mobile techs</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="about-sec" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text fade-up">
+        <div class="eyebrow">Our Mission</div>
+        <h2>We Built This for the People Who Keep Everything Running</h2>
+        <p>My Smart Slots was created for one reason — to make sure every customer who reaches out to your business gets a response, every booked slot stays on the calendar, and every completed job has a chance to turn into a review.</p>
+        <p>We work exclusively with trade contractors because we believe the people who keep homes warm, pipes flowing, and power on deserve a business partner who actually understands their world — the chaos of busy season, the dispatcher with three calls at once, the crew member who can't answer the phone mid-job.</p>
+        <div class="qblock"><p>"A great contractor shouldn't have to be a great marketer. We handle the follow-up so you can stay focused on the work."</p></div>
+        <ul class="vals">
+          <li><span class="vi">◉</span><span><strong style="color:var(--text)">Trade-only.</strong> We don't work with retail, restaurants, or anyone else. Just contractors.</span></li>
+          <li><span class="vi">◉</span><span><strong style="color:var(--text)">Zero disruption.</strong> We plug into what you have — no rebuilding, no new tools for your team.</span></li>
+          <li><span class="vi">◉</span><span><strong style="color:var(--text)">Full transparency.</strong> Monthly reports show exactly what we did and what it was worth.</span></li>
+          <li><span class="vi">◉</span><span><strong style="color:var(--text)">Results guaranteed.</strong> 30 days — measurable improvement or month two is free.</span></li>
+        </ul>
+      </div>
+      <div class="fade-up">
+        <div class="results-panel">
+          <div class="rp-hdr">Average Client Results — First 60 Days</div>
+          <div class="rr"><div><div class="rr-label">Leads Recovered</div><div class="rr-bar-wrap"><div class="rr-bar" style="width:82%"></div></div></div><div class="rr-val">+82%</div></div>
+          <div class="rr"><div><div class="rr-label">No-Show Rate Reduction</div><div class="rr-bar-wrap"><div class="rr-bar" style="width:64%"></div></div></div><div class="rr-val">−64%</div></div>
+          <div class="rr"><div><div class="rr-label">Review Volume Increase</div><div class="rr-bar-wrap"><div class="rr-bar" style="width:75%"></div></div></div><div class="rr-val">+75%</div></div>
+          <div class="rr"><div><div class="rr-label">Avg. Monthly Revenue Added</div><div class="rr-bar-wrap"><div class="rr-bar" style="width:85%"></div></div></div><div class="rr-val">$3.8k</div></div>
+          <div class="gbox"><p><strong style="color:var(--text)">Our Guarantee:</strong> If you don't see measurable improvement in the first 30 days, you don't pay for month two — no questions asked.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="testi-sec" id="testimonials">
+  <div class="container">
+    <div class="sec-hdr fade-up">
+      <div class="eyebrow" style="justify-content:center;">Results</div>
+      <h2>What Contractors Are Saying</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="tc fade-up"><div class="stars">★★★★★</div><p class="tc-text">"The missed call text back alone is worth every penny. A customer I would have lost called me back within an hour because they got a text with a booking link. That job paid for three months of the service."</p><div class="tc-author"><div class="tc-av">R</div><div><div class="tc-name">Rick D.</div><div class="tc-co">Owner — Diamond Plumbing Co.</div></div></div></div>
+      <div class="tc fade-up"><div class="stars">★★★★★</div><p class="tc-text">"I used to lose a job every week to a no-show. Since the reminders went live I've had maybe two in two months. The chatbot also books jobs while I'm on a service call. It's wild how much it handles."</p><div class="tc-author"><div class="tc-av">T</div><div><div class="tc-name">Tanya M.</div><div class="tc-co">Owner — Arctic HVAC Solutions</div></div></div></div>
+      <div class="tc fade-up"><div class="stars">★★★★★</div><p class="tc-text">"The post-job follow-up is something I always meant to do but never had time for. Now it happens automatically and my Google reviews have gone from 12 to 41 in 90 days. That alone brought in new customers."</p><div class="tc-author"><div class="tc-av">J</div><div><div class="tc-name">James W.</div><div class="tc-co">Owner — ProForce Electric</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <div class="cta-glow"></div>
+  <div class="container" style="position:relative;z-index:1;">
+    <div class="eyebrow fade-up" style="justify-content:center;">Ready to Plug the Leak?</div>
+    <h2 class="fade-up">See Exactly What Your Business<br/><span class="accent">Is Losing Every Month</span></h2>
+    <p class="fade-up">We'll run a free audit — no pitch, no obligation. You'll see exactly how many calls went unanswered, how many bookings went unconfirmed, and what it's costing you.</p>
+    <div class="cta-btns fade-up">
+      <a href="#contact" class="btn btn-primary">Claim My Free Audit</a>
+      <a href="tel:7853290202" class="btn btn-ghost">Call 785-329-0202</a>
+    </div>
+    <p class="cta-note fade-up">No contracts. $199 setup. 30-day guarantee on every plan.</p>
+  </div>
+</section>
+
+<section class="contact-sec" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="ci-info fade-up">
+        <div class="eyebrow">Get In Touch</div>
+        <h2>Let's Talk About Your Business</h2>
+        <p>Fill out the form and we'll get back to you within one business day to schedule your free audit. No pitch — just a straight conversation about where your revenue is going and how we stop it.</p>
+        <div class="cdet"><span class="cdet-icon">📞</span><a href="tel:7853290202" style="color:var(--muted)">785-329-0202</a></div>
+        <div class="cdet"><span class="cdet-icon">✉️</span><a href="mailto:hello@mysmartslots.com" style="color:var(--muted)">hello@mysmartslots.com</a></div>
+        <div class="cdet"><span class="cdet-icon">📍</span><span>Serving trade contractors nationwide</span></div>
+        <div class="cdet"><span class="cdet-icon">🕐</span><span>Mon–Fri, 8:00 AM – 6:00 PM CT</span></div>
+        <div style="margin-top:1.75rem;padding:1.25rem;border:1px solid var(--border2);border-radius:8px;">
+          <p style="font-size:13px;color:var(--muted);line-height:1.7;">⚡ <strong style="color:var(--text)">Response within 4 hours</strong> on business days. Need to talk now? Call us directly.</p>
+        </div>
+      </div>
+      <div class="fade-up">
+        <form class="form-wrap" id="audit-form" action="https://formspree.io/f/mlgadvnl" method="POST">
+          <div class="frow">
+            <div class="fg"><label>First Name</label><input type="text" name="first_name" placeholder="Mike" required/></div>
+            <div class="fg"><label>Last Name</label><input type="text" name="last_name" placeholder="Johnson" required/></div>
+          </div>
+          <div class="fg"><label>Company Name</label><input type="text" name="company" placeholder="Johnson Plumbing LLC" required/></div>
+          <div class="frow">
+            <div class="fg"><label>Phone Number</label><input type="tel" name="phone" placeholder="(555) 000-0000" required/></div>
+            <div class="fg"><label>Email Address</label><input type="email" name="email" placeholder="mike@company.com" required/></div>
+          </div>
+          <div class="fg">
+            <label>Your Trade</label>
+            <select name="trade">
+              <option value="">Select your trade...</option>
+              <option>Plumbing</option><option>HVAC / Heating &amp; Cooling</option>
+              <option>Electrical</option><option>Roofing</option>
+              <option>General Contracting</option><option>Pest Control</option>
+              <option>Lawn &amp; Landscaping</option><option>Auto Service</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="frow">
+            <div class="fg">
+              <label>Fleet Size</label>
+              <select name="fleet_size">
+                <option value="">Select...</option>
+                <option>Solo / 1 truck</option><option>2–3 trucks</option>
+                <option>4–6 trucks</option><option>7+ trucks</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Plan I'm Interested In</label>
+              <select name="plan">
+                <option value="">Not sure yet</option>
+                <option>Starter — $125/mo</option>
+                <option>Pro — $225/mo</option>
+                <option>Elite — $375/mo</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Biggest Challenge Right Now</label><textarea name="message" placeholder="Missed calls, no-shows, empty slots, not enough reviews..."></textarea></div>
+          <input type="hidden" name="_subject" value="🔔 New Audit Request — My Smart Slots"/>
+          <input type="hidden" name="_replyto" value="hello@mysmartslots.com"/>
+          <button type="submit" class="btn btn-primary btn-full" id="submit-btn">Request My Free Audit</button>
+          <p class="form-legal">We respect your privacy. No spam, ever.</p>
+        </form>
+        <div class="form-success" id="form-success">
+          <h3>✓ Request Received!</h3>
+          <p>We'll reach out within 4 business hours to schedule your free audit.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">My<span>Smart</span>Slots</div>
+        <p>Automated scheduling &amp; follow-up for trade contractors nationwide.</p>
+      </div>
+      <div class="fc-col">
+        <h5>Services</h5>
+        <ul>
+          <li><a href="#services">AI Chat Booking</a></li>
+          <li><a href="#services">Missed Call Text Back</a></li>
+          <li><a href="#services">SMS Confirmations</a></li>
+          <li><a href="#services">Appointment Reminders</a></li>
+          <li><a href="#services">Post-Job Follow-Up</a></li>
+          <li><a href="#services">Live SMS Chat</a></li>
+        </ul>
+      </div>
+      <div class="fc-col">
+        <h5>More Services</h5>
+        <ul>
+          <li><a href="#services">Lead Re-Engagement</a></li>
+          <li><a href="#services">Email Replies</a></li>
+          <li><a href="#services">Calendar Sync</a></li>
+          <li><a href="#services">Monthly Reports</a></li>
+        </ul>
+      </div>
+      <div class="fc-col">
+        <h5>Pricing</h5>
+        <ul>
+          <li><a href="#pricing">Starter — $125/mo</a></li>
+          <li><a href="#pricing">Pro — $225/mo</a></li>
+          <li><a href="#pricing">Elite — $375/mo</a></li>
+          <li><a href="#pricing">+ $199 setup fee</a></li>
+        </ul>
+      </div>
+      <div class="fc-col">
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="tel:7853290202">785-329-0202</a></li>
+          <li><a href="mailto:hello@mysmartslots.com">hello@mysmartslots.com</a></li>
+          <li><a href="#availability">Mon–Fri 8am–6pm CT</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 My Smart Slots. All rights reserved.</p>
+      <p>Built for the trades.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ── FLOATING CHAT BUBBLE ── -->
+<button id="sms-chat-bubble" aria-label="Chat with us">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#040f09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <div class="bubble-badge"></div>
+</button>
+
+<div id="sms-chat-window" role="dialog" aria-label="Chat with My Smart Slots">
+  <div id="sms-chat-header">
+    <div class="avatar">💬</div>
+    <div class="info">
+      <div class="name">My Smart Slots</div>
+      <div class="status"><div class="live-dot"></div> AI Assistant · Online 24/7</div>
+    </div>
+    <button id="sms-chat-close" aria-label="Close">×</button>
+  </div>
+  <div id="sms-chat-messages"></div>
+  <div id="sms-chat-input-row">
+    <textarea id="sms-chat-input" rows="1" placeholder="Ask a question or book an appointment…"></textarea>
+    <button id="sms-chat-send" aria-label="Send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#040f09" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <div id="sms-chat-powered">Powered by <span>Claude AI</span></div>
+</div>
+
+<script>
+const RENDER_URL = 'https://mysmartslots-chat.onrender.com';
+
+// ── Scroll animations ──
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+// ── Formspree ──
+document.getElementById('audit-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try {
+    const res = await fetch(this.action, { method:'POST', body:new FormData(this), headers:{'Accept':'application/json'} });
+    if(res.ok) { this.style.display='none'; document.getElementById('form-success').style.display='block'; }
+    else { btn.textContent='Something went wrong — call 785-329-0202'; btn.style.background='#7a1a1a'; btn.disabled=false; }
+  } catch { btn.textContent='Error — email hello@mysmartslots.com'; btn.style.background='#7a1a1a'; btn.disabled=false; }
+});
+
+// ── Hero demo chat (calls your Render server) ──
+(function() {
+  const msgsEl = document.getElementById('demo-messages');
+  const inputEl = document.getElementById('demo-input');
+  const sendBtn = document.getElementById('demo-send');
+  if (!msgsEl) return;
+
+  let history = [];
+
+  function addMsg(text, role) {
+    const el = document.createElement('div');
+    el.className = 'dmsg ' + role;
+    el.textContent = text;
+    msgsEl.appendChild(el);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function showTyping() {
+    const el = document.createElement('div');
+    el.className = 'demo-typing';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    msgsEl.appendChild(el);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    return el;
+  }
+
+  // Greeting
+  setTimeout(() => addMsg("👋 Hi! I'm the My Smart Slots AI assistant. Ask me anything about our services, pricing, or how it all works!", 'bot'), 600);
+
+  async function send() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    inputEl.value = '';
+    addMsg(text, 'user');
+    history.push({ role: 'user', content: text });
+    const typing = showTyping();
+    sendBtn.disabled = true;
+    try {
+      const res = await fetch(RENDER_URL + '/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+      const data = await res.json();
+      typing.remove();
+      const reply = data.reply || data.error || 'Sorry, something went wrong.';
+      addMsg(reply, 'bot');
+      history.push({ role: 'assistant', content: reply });
+    } catch {
+      typing.remove();
+      addMsg("Sorry, I couldn't connect right now. Try again in a moment!", 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', send);
+  inputEl.addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); send(); } });
+})();
+
+// ── Floating chat widget (also calls Render) ──
+(function() {
+  const bubble = document.getElementById('sms-chat-bubble');
+  const win = document.getElementById('sms-chat-window');
+  const msgsEl = document.getElementById('sms-chat-messages');
+  const inputEl = document.getElementById('sms-chat-input');
+  const sendBtn = document.getElementById('sms-chat-send');
+
+  let history = [];
+  let opened = false;
+
+  function addMsg(text, role) {
+    const el = document.createElement('div');
+    el.className = 'sms-msg ' + role;
+    el.textContent = text;
+    msgsEl.appendChild(el);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function showTyping() {
+    const el = document.createElement('div');
+    el.className = 'sms-typing';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    msgsEl.appendChild(el);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    return el;
+  }
+
+  function showBookingCard(b) {
+    const card = document.createElement('div');
+    card.className = 'sms-booking-card';
+    card.innerHTML = `<strong>✅ Booking Received!</strong>
+      <div>Name: ${b.name||'—'}</div>
+      <div>Contact: ${b.contact||'—'}</div>
+      <div>Service: ${b.service||'—'}</div>
+      <div>Time: ${b.datetime||'—'}</div>`;
+    msgsEl.appendChild(card);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  async function send() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+    addMsg(text, 'user');
+    history.push({ role: 'user', content: text });
+    const typing = showTyping();
+    sendBtn.disabled = true;
+    try {
+      const res = await fetch(RENDER_URL + '/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+      const data = await res.json();
+      typing.remove();
+      const reply = data.reply || data.error || 'Sorry, something went wrong.';
+      addMsg(reply, 'bot');
+      history.push({ role: 'assistant', content: reply });
+      if (data.booking) showBookingCard(data.booking);
+    } catch {
+      typing.remove();
+      addMsg('Sorry, I had trouble connecting. Please try again!', 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+  }
+
+  bubble.addEventListener('click', () => {
+    const isOpen = win.classList.toggle('open');
+    if (isOpen && !opened) {
+      opened = true;
+      // Remove the badge once opened
+      const badge = bubble.querySelector('.bubble-badge');
+      if (badge) badge.remove();
+      setTimeout(() => addMsg("👋 Hi! How can I help you today? I can answer questions or help you book an appointment.", 'bot'), 300);
+    }
+    if (isOpen) inputEl.focus();
+  });
+
+  document.getElementById('sms-chat-close').addEventListener('click', () => win.classList.remove('open'));
+
+  sendBtn.addEventListener('click', send);
+  inputEl.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+  inputEl.addEventListener('input', () => {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 80) + 'px';
+  });
+})();
+</script>
+</body>
+</html>
