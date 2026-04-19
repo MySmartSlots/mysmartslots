@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Smart Slots — Rep Portal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #1a1a2e; --blue: #1455a4; --light-blue: #e8f0fb;
+      --mid-blue: #a8c8f0; --white: #ffffff; --gray-bg: #f4f6fb;
+      --gray-border: #e0e4f0; --gray-text: #555; --green: #1e7a3a;
+      --green-bg: #d6f0dd; --orange: #c45c00; --orange-bg: #fff0e0;
+      --yellow: #fff9c4; --red: #c0392b; --red-bg: #fdf0f0;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-bg); color: var(--navy); }
+
+    #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); }
+    .login-box { background: var(--white); border-radius: 16px; padding: 2.5rem 2rem; width: 340px; text-align: center; }
+    .login-logo { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+    .login-sub { font-size: 13px; color: var(--gray-text); margin-bottom: 1.5rem; }
+    .login-box input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 14px; margin-bottom: 10px; font-family: inherit; outline: none; }
+    .login-box input:focus { border-color: var(--blue); }
+    .login-btn { width: 100%; padding: 11px; background: var(--blue); color: var(--white); border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+    .login-btn:hover { opacity: 0.88; }
+    .login-error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
+
+    #app { display: none; min-height: 100vh; flex-direction: column; }
+    .topbar { background: var(--navy); color: var(--white); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar-logo { font-size: 15px; font-weight: 700; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .rep-badge { background: rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .logout-btn { background: none; border: 1px solid rgba(255,255,255,0.25); color: var(--white); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+    .logout-btn:hover { background: rgba(255,255,255,0.1); }
+
+    .personalizer { background: var(--yellow); border-bottom: 1px solid #e0d000; padding: 10px 1.5rem; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .personalizer label { font-size: 12px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+    .personalizer input { padding: 6px 10px; border: 1.5px solid #ccc; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; flex: 1; min-width: 130px; }
+    .personalizer input:focus { border-color: var(--blue); }
+    .p-hint { font-size: 11px; color: #7a6000; width: 100%; }
+
+    .nav-tabs { background: var(--white); border-bottom: 1px solid var(--gray-border); display: flex; overflow-x: auto; padding: 0 1rem; position: sticky; top: 56px; z-index: 99; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { padding: 13px 15px; font-size: 13px; font-weight: 500; white-space: nowrap; color: var(--gray-text); border-bottom: 2.5px solid transparent; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+    .nav-tab:hover { color: var(--blue); }
+    .nav-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+    .nav-tab.admin-tab { color: var(--orange); }
+    .nav-tab.admin-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+    .content { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .card { background: var(--white); border: 1px solid var(--gray-border); border-radius: 12px; padding: 1.25rem; margin-bottom: 16px; }
+    .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--blue); margin-bottom: 1rem; }
+
+    .script-block { margin-bottom: 14px; }
+    .script-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--white); background: var(--blue); padding: 4px 10px; border-radius: 4px 4px 0 0; display: inline-block; }
+    .script-label.note { background: var(--orange); }
+    .script-label.tip { background: var(--green); }
+    .script-text { background: var(--gray-bg); border: 1px solid var(--gray-border); border-radius: 0 8px 8px 8px; padding: 12px 14px; font-size: 14px; line-height: 1.75; color: var(--navy); }
+    .script-text.note { background: var(--orange-bg); border-color: #f5c6a0; }
+    .script-text.tip { background: var(--green-bg); border-color: #a0d8b0; }
+
+    .obj-card { border: 1px solid var(--gray-border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .obj-question { background: var(--light-blue); padding: 10px 14px; font-size: 13.5px; font-weight: 600; color: var(--navy); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .obj-answer { padding: 12px 14px; font-size: 13.5px; line-height: 1.65; color: #333; display: none; }
+    .obj-answer.open { display: block; }
+    .obj-toggle { color: var(--blue); font-size: 18px; }
+
+    .calc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .calc-group { display: flex; flex-direction: column; gap: 4px; }
+    .calc-group label { font-size: 12px; font-weight: 600; color: var(--gray-text); }
+    .calc-group input, .calc-group select { padding: 9px 10px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; }
+    .calc-group input:focus, .calc-group select:focus { border-color: var(--blue); }
+    .audit-result { background: var(--light-blue); border: 1px solid var(--mid-blue); border-radius: 10px; padding: 1.25rem; margin-top: 1rem; }
+    .audit-big { font-size: 36px; font-weight: 800; color: var(--blue); }
+
+    .plan-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center; }
+    .plan-input { padding: 8px 10px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 14px; text-align: center; width: 100%; font-family: inherit; outline: none; }
+    .plan-input:focus { border-color: var(--blue); }
+    .plan-earn { font-size: 14px; font-weight: 700; color: var(--green); text-align: right; }
+    .comm-total { background: var(--navy); color: var(--white); border-radius: 10px; padding: 1.25rem; text-align: center; margin-top: 1rem; }
+    .comm-big { font-size: 40px; font-weight: 800; color: #4ade80; }
+    .col-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-text); text-align: center; }
+
+    .pipeline { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+    .pipeline-col { min-width: 175px; flex: 1; }
+    .pipeline-header { padding: 8px 10px; border-radius: 8px 8px 0 0; font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+    .pipeline-body { background: var(--gray-bg); border: 1px solid var(--gray-border); border-top: none; border-radius: 0 0 8px 8px; min-height: 100px; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+    .pipeline-card { background: var(--white); border: 1px solid var(--gray-border); border-radius: 8px; padding: 8px 10px; font-size: 12px; cursor: pointer; }
+    .pipeline-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .pipeline-card .pc-biz { font-weight: 600; color: var(--navy); }
+    .pipeline-card .pc-meta { color: var(--gray-text); font-size: 11px; margin-top: 1px; }
+    .p-new .pipeline-header { background: var(--light-blue); color: var(--blue); }
+    .p-contacted .pipeline-header { background: var(--yellow); color: #7a6000; }
+    .p-audit .pipeline-header { background: #e8f5e9; color: var(--green); }
+    .p-followup .pipeline-header { background: var(--orange-bg); color: var(--orange); }
+    .p-closed .pipeline-header { background: var(--green-bg); color: var(--green); }
+    .p-dead .pipeline-header { background: var(--red-bg); color: var(--red); }
+
+    .crm-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .crm-group { display: flex; flex-direction: column; gap: 3px; }
+    .crm-group label { font-size: 12px; font-weight: 600; color: var(--gray-text); }
+    .crm-group input, .crm-group select, .crm-group textarea { padding: 8px 10px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; }
+    .crm-group input:focus, .crm-group select:focus, .crm-group textarea:focus { border-color: var(--blue); }
+    .crm-group textarea { min-height: 60px; resize: vertical; }
+    .add-btn { background: var(--blue); color: var(--white); border: none; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .add-btn:hover { opacity: 0.88; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--white); border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-text); }
+    .notes-log { background: var(--gray-bg); border-radius: 8px; padding: 10px; max-height: 140px; overflow-y: auto; font-size: 13px; margin-top: 6px; }
+    .note-entry { padding: 5px 0; border-bottom: 1px solid var(--gray-border); }
+    .note-entry:last-child { border-bottom: none; }
+    .note-date { font-size: 11px; color: var(--gray-text); margin-bottom: 1px; }
+    .save-btn { background: var(--green); color: var(--white); border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; }
+    .del-btn-m { background: none; border: 1px solid var(--red); color: var(--red); border-radius: 8px; padding: 7px; font-size: 12px; cursor: pointer; margin-top: 6px; width: 100%; }
+
+    .tracker-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    .t-stat { background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px; padding: 12px; text-align: center; }
+    .t-stat .n { font-size: 22px; font-weight: 700; color: var(--blue); }
+    .t-stat .l { font-size: 11px; color: var(--gray-text); margin-top: 2px; }
+
+    .admin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .admin-stat { background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px; padding: 1rem; text-align: center; }
+    .admin-stat .n { font-size: 28px; font-weight: 800; color: var(--orange); }
+    .admin-stat .l { font-size: 12px; color: var(--gray-text); margin-top: 4px; }
+    .data-row { display: grid; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--gray-border); font-size: 13px; align-items: center; }
+    .data-row.hdr { background: var(--navy); color: var(--white); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 8px 8px 0 0; border-bottom: none; }
+    .data-row:last-child { border-bottom: none; }
+    .section-div { font-size: 13px; font-weight: 700; color: var(--navy); margin: 1.5rem 0 0.75rem; padding-bottom: 6px; border-bottom: 2px solid var(--light-blue); }
+    .refresh-btn { background: var(--orange); color: var(--white); border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+
+    .step-item { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: var(--white); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-title { font-weight: 600; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
+    .step-desc { font-size: 13.5px; color: var(--gray-text); line-height: 1.6; }
+
+    @media (max-width: 560px) {
+      .calc-row, .crm-form { grid-template-columns: 1fr; }
+      .tracker-stats, .admin-stats { grid-template-columns: 1fr 1fr; }
+      .plan-row { grid-template-columns: 1fr 1fr; }
+      .pipeline { flex-direction: column; }
+      .pipeline-col { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">My Smart Slots</div>
+    <div class="login-sub">Rep Portal — Sign in to continue</div>
+    <input type="text" id="username" placeholder="Username" autocomplete="off" />
+    <input type="password" id="password" placeholder="Password" />
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <p class="login-error" id="login-error">Incorrect username or password.</p>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">My Smart Slots — Rep Portal</div>
+    <div class="topbar-right">
+      <span class="rep-badge" id="rep-name-display"></span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="personalizer">
+    <label>Your name:</label>
+    <input type="text" id="p-rep" placeholder="e.g. Alex" oninput="updateScripts()" />
+    <label>Prospect name:</label>
+    <input type="text" id="p-pros" placeholder="e.g. Rick" oninput="updateScripts()" />
+    <label>Business name:</label>
+    <input type="text" id="p-biz" placeholder="e.g. Diamond Plumbing" oninput="updateScripts()" />
+    <div class="p-hint">Fill these in before a call — all scripts update automatically.</div>
+  </div>
+
+  <div class="nav-tabs" id="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('scripts',this)">📞 Scripts</div>
+    <div class="nav-tab" onclick="switchTab('objections',this)">💬 Objections</div>
+    <div class="nav-tab" onclick="switchTab('audit',this)">📊 Audit Calc</div>
+    <div class="nav-tab" onclick="switchTab('commission',this)">💰 My Commission</div>
+    <div class="nav-tab" onclick="switchTab('tracker',this)">📋 My Pipeline</div>
+    <div class="nav-tab" onclick="switchTab('onboarding',this)">✅ Onboarding</div>
+  </div>
+
+  <div class="content">
+
+    <!-- SCRIPTS -->
+    <div class="tab-panel active" id="tab-scripts">
+      <div class="card">
+        <div class="card-title">Cold Call Script</div>
+        <div class="script-block"><div class="script-label">Opening</div><div class="script-text" id="s-open"></div></div>
+        <div class="script-block"><div class="script-label tip">Pause here</div><div class="script-text tip">Let them say okay. Don't rush. Silence is fine.</div></div>
+        <div class="script-block"><div class="script-label">The question</div><div class="script-text" id="s-q"></div></div>
+        <div class="script-block"><div class="script-label tip">Listen carefully</div><div class="script-text tip">Most say voicemail or nothing. Let them finish before responding.</div></div>
+        <div class="script-block"><div class="script-label">If voicemail / nothing</div><div class="script-text" id="s-vm"></div></div>
+        <div class="script-block"><div class="script-label">If they have something</div><div class="script-text" id="s-has"></div></div>
+        <div class="script-block"><div class="script-label">Closing the audit</div><div class="script-text" id="s-cls"></div></div>
+        <div class="script-block"><div class="script-label note">If not interested</div><div class="script-text note" id="s-ni"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cold Text Templates</div>
+        <div class="script-block"><div class="script-label">First text</div><div class="script-text" id="s-t1"></div></div>
+        <div class="script-block"><div class="script-label">Follow-up Day 3</div><div class="script-text" id="s-t2"></div></div>
+        <div class="script-block"><div class="script-label">Final follow-up Day 7</div><div class="script-text" id="s-t3"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cold Email Templates</div>
+        <div class="script-block"><div class="script-label">Subject line</div><div class="script-text" id="s-subj"></div></div>
+        <div class="script-block"><div class="script-label">Email body</div><div class="script-text" id="s-email"></div></div>
+        <div class="script-block"><div class="script-label">Follow-up email Day 3</div><div class="script-text" id="s-efu"></div></div>
+      </div>
+    </div>
+
+    <!-- OBJECTIONS -->
+    <div class="tab-panel" id="tab-objections">
+      <div class="card">
+        <div class="card-title">Objection Responses — tap to expand</div>
+        <div id="obj-list"></div>
+      </div>
+    </div>
+
+    <!-- AUDIT -->
+    <div class="tab-panel" id="tab-audit">
+      <div class="card">
+        <div class="card-title">Live Audit Calculator</div>
+        <div class="calc-row">
+          <div class="calc-group"><label>Jobs per week</label><input type="number" id="a-jobs" value="15" min="1" oninput="calcAudit()" /></div>
+          <div class="calc-group"><label>Average job value ($)</label><input type="number" id="a-val" value="350" min="1" oninput="calcAudit()" /></div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-group"><label>Missed calls per week</label><input type="number" id="a-miss" value="5" min="0" oninput="calcAudit()" /></div>
+          <div class="calc-group"><label>No-shows per month</label><input type="number" id="a-ns" value="3" min="0" oninput="calcAudit()" /></div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-group"><label>Google reviews count</label><input type="number" id="a-rev" value="12" min="0" oninput="calcAudit()" /></div>
+          <div class="calc-group"><label>Fleet size</label>
+            <select id="a-fleet" oninput="calcAudit()">
+              <option value="1">Solo / 1 truck</option>
+              <option value="2" selected>2–3 trucks</option>
+              <option value="3">4–6 trucks</option>
+              <option value="4">7+ trucks</option>
+            </select>
+          </div>
+        </div>
+        <div class="audit-result" id="audit-result"></div>
+      </div>
+    </div>
+
+    <!-- COMMISSION -->
+    <div class="tab-panel" id="tab-commission">
+      <div class="card">
+        <div class="card-title">My Commission Calculator</div>
+        <div class="plan-row" style="margin-bottom:4px;">
+          <div></div><div class="col-header">Clients</div><div class="col-header">Rate</div><div class="col-header">I earn</div>
+        </div>
+        <div class="plan-row">
+          <div style="font-size:14px;font-weight:500;">Starter — $125/mo</div>
+          <input class="plan-input" type="number" id="c-s" value="0" min="0" oninput="calcComm()" />
+          <div style="text-align:center;font-size:13px;color:var(--gray-text);">$125</div>
+          <div class="plan-earn" id="e-s">$0.00</div>
+        </div>
+        <div class="plan-row">
+          <div style="font-size:14px;font-weight:500;">Pro — $225/mo</div>
+          <input class="plan-input" type="number" id="c-p" value="0" min="0" oninput="calcComm()" />
+          <div style="text-align:center;font-size:13px;color:var(--gray-text);">$225</div>
+          <div class="plan-earn" id="e-p">$0.00</div>
+        </div>
+        <div class="plan-row">
+          <div style="font-size:14px;font-weight:500;">Elite — $375/mo</div>
+          <input class="plan-input" type="number" id="c-e" value="0" min="0" oninput="calcComm()" />
+          <div style="text-align:center;font-size:13px;color:var(--gray-text);">$375</div>
+          <div class="plan-earn" id="e-e">$0.00</div>
+        </div>
+        <div class="comm-total">
+          <div style="font-size:12px;opacity:0.7;margin-bottom:4px;">Monthly recurring commission</div>
+          <div class="comm-big" id="c-total">$0.00</div>
+          <div style="font-size:12px;opacity:0.6;margin-top:4px;" id="c-sub">0 active clients</div>
+          <div style="font-size:11px;opacity:0.5;margin-top:10px;">Paid every last Friday of the month · CashApp or cashier's check</div>
+        </div>
+        <div style="margin-top:1rem;padding:12px;background:var(--light-blue);border-radius:8px;font-size:13px;color:var(--gray-text);">
+          <strong style="color:var(--blue);">Setup bonus:</strong> $50 per new client closed, paid within 7 business days of their setup payment.
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="tab-panel" id="tab-tracker">
+      <div class="tracker-stats" id="t-stats"></div>
+      <div class="card">
+        <div class="card-title">Add New Contact</div>
+        <div class="crm-form">
+          <div class="crm-group"><label>Business name *</label><input type="text" id="t-biz" placeholder="Diamond Plumbing Co." /></div>
+          <div class="crm-group"><label>Owner name</label><input type="text" id="t-owner" placeholder="Rick" /></div>
+          <div class="crm-group"><label>Phone / email</label><input type="text" id="t-phone" placeholder="(816) 555-0192" /></div>
+          <div class="crm-group"><label>Trade</label>
+            <select id="t-trade">
+              <option value="">Select...</option>
+              <option>Plumbing</option><option>HVAC</option><option>Electrical</option>
+              <option>Roofing</option><option>General Contracting</option>
+              <option>Pest Control</option><option>Lawn & Landscaping</option><option>Auto Service</option>
+            </select>
+          </div>
+          <div class="crm-group"><label>Outreach method</label>
+            <select id="t-method">
+              <option value="">Select...</option>
+              <option>Cold call</option><option>Cold text</option><option>Cold email</option>
+            </select>
+          </div>
+          <div class="crm-group"><label>Status</label>
+            <select id="t-status">
+              <option value="new">New — not contacted</option>
+              <option value="contacted">Contacted — awaiting response</option>
+              <option value="audit">Audit scheduled</option>
+              <option value="followup">Follow-up needed</option>
+              <option value="closed">Closed — paying client</option>
+              <option value="dead">Not interested</option>
+            </select>
+          </div>
+          <div class="crm-group"><label>Follow-up date</label><input type="date" id="t-fu" /></div>
+          <div class="crm-group"><label>Notes</label><input type="text" id="t-notes" placeholder="Any details..." /></div>
+        </div>
+        <button class="add-btn" onclick="addContact()">+ Add Contact</button>
+        <span id="add-msg" style="font-size:12px;color:var(--green);margin-left:10px;"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">Pipeline</div>
+        <div class="pipeline" id="pipeline"></div>
+      </div>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div class="tab-panel" id="tab-onboarding">
+      <div class="card">
+        <div class="card-title">What happens after they say yes</div>
+        <div id="ob-steps"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="tab-panel" id="tab-admin">
+      <div class="card">
+        <div class="card-title" style="color:var(--orange);">Admin Dashboard</div>
+        <button class="refresh-btn" onclick="loadAdmin()">↻ Refresh</button>
+        <div class="admin-stats" id="a-stats">
+          <div class="admin-stat"><div class="n">—</div><div class="l">Total logins</div></div>
+          <div class="admin-stat"><div class="n">—</div><div class="l">Total contacts</div></div>
+          <div class="admin-stat"><div class="n">—</div><div class="l">Clients closed</div></div>
+        </div>
+        <div class="section-div">Rep Performance</div>
+        <div id="rep-tbl"></div>
+        <div class="section-div">Login History (last 50)</div>
+        <div id="login-tbl"></div>
+        <div class="section-div">All Contacts</div>
+        <div id="all-tbl"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="m-biz">Contact</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="crm-form">
+      <div class="crm-group"><label>Status</label>
+        <select id="m-status">
+          <option value="new">New</option><option value="contacted">Contacted</option>
+          <option value="audit">Audit scheduled</option><option value="followup">Follow-up needed</option>
+          <option value="closed">Closed</option><option value="dead">Not interested</option>
+        </select>
+      </div>
+      <div class="crm-group"><label>Follow-up date</label><input type="date" id="m-fu" /></div>
+    </div>
+    <div class="crm-group" style="margin-bottom:8px;">
+      <label>Add a note</label>
+      <textarea id="m-note" placeholder="What happened on this contact? Next steps?"></textarea>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Notes history</div>
+    <div class="notes-log" id="m-log"></div>
+    <button class="save-btn" onclick="saveModal()">Save Changes</button>
+    <button class="del-btn-m" onclick="deleteModal()">Delete Contact</button>
+  </div>
+</div>
+
+<script>
+const API = "https://mysmartslots-portal.onrender.com";
+let currentUser = null, currentU = null, currentP = null;
+let contacts = [], editId = null;
+
+async function doLogin() {
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  try {
+    const r = await fetch(`${API}/portal/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:u, password:p})
+    });
+    const d = await r.json();
+    if (!r.ok) { document.getElementById('login-error').style.display='block'; return; }
+    currentUser=d; currentU=u.toLowerCase(); currentP=p;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('rep-name-display').textContent=d.name;
+    document.getElementById('p-rep').value=d.name;
+    updateScripts();
+    if (d.isAdmin) {
+      const t=document.createElement('div');
+      t.className='nav-tab admin-tab';
+      t.textContent='🔐 Admin';
+      t.onclick=function(){switchTab('admin',this);loadAdmin();};
+      document.getElementById('nav-tabs').appendChild(t);
+    }
+    await loadContacts();
+    calcAudit(); calcComm();
+  } catch(e) { document.getElementById('login-error').style.display='block'; }
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  currentUser=null; currentU=null; currentP=null; contacts=[];
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('password').value='';
+  document.getElementById('login-error').style.display='none';
+  document.querySelectorAll('.admin-tab').forEach(t=>t.remove());
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+function updateScripts() {
+  const rep  = document.getElementById('p-rep').value.trim()  || '[Your Name]';
+  const pros = document.getElementById('p-pros').value.trim() || '[Name]';
+  const biz  = document.getElementById('p-biz').value.trim()  || '[Business Name]';
+  const s = {
+    's-open': `"Hey, is this <b>${pros}</b>? ... Hey ${pros}, my name's <b>${rep}</b> — I run a company called My Smart Slots. We work exclusively with trade contractors in KC. I'm not going to take up much of your time — I had one quick question for you."`,
+    's-q':    `"How are you handling it when a call comes in while you or your guys are <b>on a job</b>? Like, is there a system for that or does it kind of just go to voicemail?"`,
+    's-vm':   `"Yeah that's what most guys tell me. The problem is about 80% of people who hit voicemail just call the next guy on Google. They don't leave a message — they move on.<br><br>What we do is automatically text them back within seconds with a booking link — before they even think about calling someone else. Most of our clients recover 3 to 5 jobs a month just from that one thing alone.<br><br>I'm not trying to sell you anything today — I just do a free 10-minute audit where I show you exactly how many calls you're likely losing and what it's costing you. Would that be worth 10 minutes?"`,
+    's-has':  `"That's great — what are you using? ... [listen] ... Got it. Does it text people back automatically when a call gets missed, or is it more of a scheduling tool?"`,
+    's-cls':  `"Perfect. I can do the audit over the phone — takes about 10 minutes. I just need a few numbers from you and I'll run the math live. What's a good time this week or next?"`,
+    's-ni':   `"Totally fair. Can I just send you a quick link so you can see what it looks like? Takes 30 seconds and if it's not for you, no worries at all."<br><br>Send: <b>mysmartslots.com/subdomain</b>`,
+    's-t1':   `Hey <b>${pros}</b>, my name's <b>${rep}</b> — I work with trade contractors in KC helping them recover missed calls and fill their schedule automatically. Noticed <b>${biz}</b> doesn't have a follow-up system on your site.<br><br>Quick question — how are you handling calls that come in while you're on a job?<br><br>Not a sales pitch, just a 10-minute conversation if it's useful.`,
+    's-t2':   `Hey ${pros} — did this reach you? Happy to send the short version if easier.`,
+    's-t3':   `Last reach out ${pros} — here's what we built for contractors like you: <b>mysmartslots.com/subdomain</b><br><br>If the timing's ever right, just reply and I'll set up a free audit.`,
+    's-subj': `<b>${biz}</b> — how many calls went to voicemail this week?`,
+    's-email':`Hey <b>${pros}</b>,<br><br>I came across <b>${biz}</b> while looking at trade contractors in the KC area. Quick observation — you don't have any automated follow-up on your site, which means every call that goes unanswered while you're on a job is probably going to a competitor.<br><br>I run My Smart Slots — we set up automated booking systems for trade contractors. Missed call texts, AI chat booking, appointment reminders, review requests. 24 hours to set up, runs on its own after that.<br><br>Here's what a client page looks like: <b>mysmartslots.com/subdomain</b><br><br>Free 10-minute audit — no pitch, just the math. Worth a quick call?<br><br>${rep}<br>My Smart Slots · 785-329-0202`,
+    's-efu':  `Hey ${pros} — did this land in the right place? Happy to send the short version if easier.`,
+  };
+  Object.entries(s).forEach(([id,html])=>{ const el=document.getElementById(id); if(el) el.innerHTML=html; });
+}
+
+const objections = [
+  ["I don't have time for this.", "\"Totally get it — that's actually why this exists. It runs itself, you don't touch it. Can I send you the demo link so you can see it when you have 2 minutes?\" → mysmartslots.com/subdomain"],
+  ["I already have someone doing my marketing.", "\"This isn't marketing — it's follow-up automation. It works alongside whatever you have. The missed call text back alone recovers jobs your current setup is probably missing.\""],
+  ["How much does it cost?", "\"Starts at $125 a month. Most clients recover that in the first job. Let me do the free audit first — I want to show you the math before you make any decision.\""],
+  ["I'm not tech savvy.", "\"You don't have to be — we set everything up in 24 hours. You just work the jobs, appointments land in your calendar. Nothing for you to learn.\""],
+  ["Send me some info.", "Send mysmartslots.com + mysmartslots.com/subdomain. Follow up in 2 days: \"Hey, had a chance to look at that? Happy to walk you through it on a quick call.\""],
+  ["I already have voicemail.", "\"Totally — the problem is 80% of people who hit voicemail just call the next guy. They don't leave a message. We text them back in seconds before that happens.\""],
+  ["I'm too busy right now.", "\"Makes sense — busy season is exactly when this pays off most. Can I reach back out in a couple weeks? The audit takes 10 minutes.\""],
+  ["I need to think about it.", "\"Of course — what's the main thing you're unsure about? I want to make sure you have everything you need to decide.\" → Find the real objection behind this one."],
+];
+
+const ol = document.getElementById('obj-list');
+objections.forEach(([q,a])=>{
+  const d=document.createElement('div'); d.className='obj-card';
+  d.innerHTML=`<div class="obj-question" onclick="toggleObj(this)"><span>${q}</span><span class="obj-toggle">+</span></div><div class="obj-answer">${a}</div>`;
+  ol.appendChild(d);
+});
+
+function toggleObj(el) {
+  const a=el.nextElementSibling; a.classList.toggle('open');
+  el.querySelector('.obj-toggle').textContent=a.classList.contains('open')?'−':'+';
+}
+
+function calcAudit() {
+  const j=parseFloat(document.getElementById('a-jobs').value)||0;
+  const v=parseFloat(document.getElementById('a-val').value)||0;
+  const m=parseFloat(document.getElementById('a-miss').value)||0;
+  const n=parseFloat(document.getElementById('a-ns').value)||0;
+  const f=parseInt(document.getElementById('a-fleet').value)||1;
+  const leak=Math.round(m*0.8*v*4+n*v);
+  let plan='Starter — $125/mo', pc='#1455a4', fee=125;
+  if(f>=3){plan='Elite — $375/mo';pc='#1e7a3a';fee=375;}
+  else if(f>=2){plan='Pro — $225/mo';pc='#c45c00';fee=225;}
+  const roi=fee>0?Math.round(leak/fee):0;
+  document.getElementById('audit-result').innerHTML=`
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:6px;">Estimated monthly revenue leak</div>
+    <div class="audit-big">$${leak.toLocaleString()}</div>
+    <div style="font-size:13px;color:#555;margin-top:4px;">Annual: <strong>$${(leak*12).toLocaleString()}</strong></div>
+    <div style="margin-top:10px;display:inline-block;background:${pc}22;color:${pc};padding:5px 14px;border-radius:20px;font-size:13px;font-weight:700;">Recommended: ${plan}</div>
+    <div style="margin-top:8px;font-size:13px;color:#555;">Pays for itself in roughly <strong>${roi>0?'1/'+roi+' of a job':'—'}</strong></div>`;
+}
+
+function calcComm() {
+  const s=parseInt(document.getElementById('c-s').value)||0;
+  const p=parseInt(document.getElementById('c-p').value)||0;
+  const e=parseInt(document.getElementById('c-e').value)||0;
+  const es=s*125*0.30, ep=p*225*0.30, ee=e*375*0.30, tot=es+ep+ee;
+  document.getElementById('e-s').textContent='$'+es.toFixed(2);
+  document.getElementById('e-p').textContent='$'+ep.toFixed(2);
+  document.getElementById('e-e').textContent='$'+ee.toFixed(2);
+  document.getElementById('c-total').textContent='$'+tot.toFixed(2);
+  document.getElementById('c-sub').textContent=`${s+p+e} active client${(s+p+e)!==1?'s':''}`;
+}
+
+async function api(endpoint, body={}) {
+  const r=await fetch(`${API}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,...body})});
+  return r.json();
+}
+
+async function loadContacts() {
+  const d=await api('/portal/contacts/get');
+  if(d.success){contacts=d.contacts;renderPipeline();renderStats();}
+}
+
+async function addContact() {
+  const biz=document.getElementById('t-biz').value.trim();
+  if(!biz) return;
+  const d=await api('/portal/contacts',{
+    biz_name:biz, contact_name:document.getElementById('t-owner').value.trim(),
+    phone:document.getElementById('t-phone').value.trim(), trade:document.getElementById('t-trade').value,
+    method:document.getElementById('t-method').value, status:document.getElementById('t-status').value,
+    notes:JSON.stringify(document.getElementById('t-notes').value.trim()?[{date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:document.getElementById('t-notes').value.trim()}]:[]),
+    follow_up_date:document.getElementById('t-fu').value||null,
+  });
+  if(d.success){
+    contacts.unshift(d.contact); renderPipeline(); renderStats();
+    ['t-biz','t-owner','t-phone','t-notes','t-fu'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('t-status').value='new';
+    const m=document.getElementById('add-msg'); m.textContent='✓ Added'; setTimeout(()=>m.textContent='',2000);
+  }
+}
+
+const scfg = {
+  new:{label:'New',cls:'p-new'}, contacted:{label:'Contacted',cls:'p-contacted'},
+  audit:{label:'Audit Set',cls:'p-audit'}, followup:{label:'Follow-up',cls:'p-followup'},
+  closed:{label:'Closed',cls:'p-closed'}, dead:{label:'Not Interested',cls:'p-dead'},
+};
+
+function renderPipeline() {
+  const pl=document.getElementById('pipeline'); pl.innerHTML='';
+  Object.entries(scfg).forEach(([status,cfg])=>{
+    const col=document.createElement('div'); col.className=`pipeline-col ${cfg.cls}`;
+    const items=contacts.filter(c=>c.status===status);
+    col.innerHTML=`<div class="pipeline-header">${cfg.label} (${items.length})</div>
+      <div class="pipeline-body">${items.map(c=>`
+        <div class="pipeline-card" onclick='openModal(${JSON.stringify(c).replace(/'/g,"&#39;")})'>
+          <div class="pc-biz">${c.biz_name}</div>
+          <div class="pc-meta">${c.contact_name||'—'} · ${c.trade||'—'}</div>
+          ${c.follow_up_date?`<div class="pc-meta" style="color:var(--orange);">📅 ${c.follow_up_date}</div>`:''}
+        </div>`).join('')||'<div style="font-size:11px;color:#aaa;padding:4px;">Empty</div>'}
+      </div>`;
+    pl.appendChild(col);
+  });
+}
+
+function renderStats() {
+  const tot=contacts.length, aud=contacts.filter(c=>c.status==='audit').length;
+  const cls=contacts.filter(c=>c.status==='closed').length;
+  const rate=tot>0?Math.round((cls/tot)*100):0;
+  document.getElementById('t-stats').innerHTML=`
+    <div class="t-stat"><div class="n">${tot}</div><div class="l">Total contacts</div></div>
+    <div class="t-stat"><div class="n">${aud}</div><div class="l">Audits set</div></div>
+    <div class="t-stat"><div class="n">${cls}</div><div class="l">Closed</div></div>
+    <div class="t-stat"><div class="n">${rate}%</div><div class="l">Close rate</div></div>`;
+}
+
+function openModal(c) {
+  editId=c.id;
+  document.getElementById('m-biz').textContent=c.biz_name;
+  document.getElementById('m-status').value=c.status||'new';
+  document.getElementById('m-fu').value=c.follow_up_date||'';
+  document.getElementById('m-note').value='';
+  let notes=[];
+  try{notes=c.notes?JSON.parse(c.notes):[];}catch(e){notes=c.notes?[{date:'',text:c.notes}]:[]; }
+  const log=document.getElementById('m-log');
+  log.innerHTML=notes.length===0?'<div style="color:#aaa;font-size:12px;">No notes yet.</div>'
+    :notes.slice().reverse().map(n=>`<div class="note-entry"><div class="note-date">${n.date||''}</div>${n.text}</div>`).join('');
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open');editId=null;}
+
+async function saveModal() {
+  if(!editId) return;
+  const c=contacts.find(x=>x.id===editId);
+  let notes=[]; try{notes=c.notes?JSON.parse(c.notes):[];}catch(e){notes=[];}
+  const nn=document.getElementById('m-note').value.trim();
+  if(nn) notes.push({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:nn});
+  const d=await api('/portal/contacts/update',{
+    id:editId, status:document.getElementById('m-status').value,
+    follow_up_date:document.getElementById('m-fu').value||null, notes:JSON.stringify(notes),
+  });
+  if(d.success){const i=contacts.findIndex(x=>x.id===editId);if(i>-1)contacts[i]=d.contact;renderPipeline();renderStats();closeModal();}
+}
+
+async function deleteModal() {
+  if(!editId||!confirm('Delete this contact?')) return;
+  const d=await api('/portal/contacts/delete',{id:editId});
+  if(d.success){contacts=contacts.filter(x=>x.id!==editId);renderPipeline();renderStats();closeModal();}
+}
+
+async function loadAdmin() {
+  const [sr,lr,cr]=await Promise.all([api('/portal/admin/stats'),api('/portal/admin/logins'),api('/portal/admin/contacts')]);
+  if(sr.success){
+    document.getElementById('a-stats').innerHTML=`
+      <div class="admin-stat"><div class="n">${sr.totalLogins}</div><div class="l">Total logins</div></div>
+      <div class="admin-stat"><div class="n">${sr.totalContacts}</div><div class="l">Total contacts</div></div>
+      <div class="admin-stat"><div class="n">${sr.totalClosed}</div><div class="l">Clients closed</div></div>`;
+    const reps=Object.keys(sr.loginCounts||{});
+    document.getElementById('rep-tbl').innerHTML=`
+      <div class="data-row hdr" style="grid-template-columns:1fr 1fr 1.5fr 1fr 1fr;"><div>Rep</div><div>Logins</div><div>Last Login</div><div>Contacts</div><div>Closed</div></div>
+      ${reps.map(r=>`<div class="data-row" style="grid-template-columns:1fr 1fr 1.5fr 1fr 1fr;">
+        <div><strong>${r}</strong></div><div>${sr.loginCounts[r]||0}</div>
+        <div style="font-size:11px;">${sr.lastLogin[r]?new Date(sr.lastLogin[r]).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}</div>
+        <div>${sr.contactCounts[r.toLowerCase()]||0}</div>
+        <div style="color:var(--green);font-weight:700;">${sr.closedCounts[r.toLowerCase()]||0}</div>
+      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:#aaa;">No data yet.</div>'}`;
+  }
+  if(lr.success){
+    document.getElementById('login-tbl').innerHTML=`
+      <div class="data-row hdr" style="grid-template-columns:1fr 1fr 1.5fr;"><div>Rep</div><div>Username</div><div>Time</div></div>
+      ${lr.logins.slice(0,50).map(l=>`<div class="data-row" style="grid-template-columns:1fr 1fr 1.5fr;">
+        <div><strong>${l.rep_name}</strong></div><div style="color:#888;">${l.username}</div>
+        <div style="font-size:11px;color:#888;">${new Date(l.logged_in_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:#aaa;">No logins yet.</div>'}`;
+  }
+  if(cr.success){
+    document.getElementById('all-tbl').innerHTML=`
+      <div class="data-row hdr" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr;"><div>Business</div><div>Rep</div><div>Trade</div><div>Status</div><div>Added</div></div>
+      ${cr.contacts.map(c=>`<div class="data-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr;">
+        <div><strong>${c.biz_name}</strong>${c.contact_name?`<br><span style="font-size:11px;color:#888;">${c.contact_name}</span>`:''}</div>
+        <div style="font-size:12px;">${c.rep_username}</div>
+        <div style="font-size:12px;">${c.trade||'—'}</div>
+        <div style="font-size:12px;font-weight:600;color:${c.status==='closed'?'var(--green)':c.status==='dead'?'var(--red)':'var(--blue)'};">${scfg[c.status]?.label||c.status}</div>
+        <div style="font-size:11px;color:#888;">${new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:#aaa;">No contacts yet.</div>'}`;
+  }
+}
+
+const steps=[
+  ["Step 1 — Audit call","Run the audit calculator live. Show them their monthly leak. Recommend a plan."],
+  ["Step 2 — They say yes","Send the Stripe payment link immediately. Collect $199 setup fee first."],
+  ["Step 3 — Payment confirmed","Text: 'Got your payment — everything live within 24 hours.'"],
+  ["Step 4 — Intake","Collect: business name, trade, phone, hours, services, calendar type, booking link."],
+  ["Step 5 — Owner sets up","Owner uses setup tool to generate system prompt and subdomain page."],
+  ["Step 6 — Test","Owner tests booking flow end-to-end. Confirms email hits inbox."],
+  ["Step 7 — Client goes live","Send client their page link. 'You're live! Here's your booking page: [link]'"],
+  ["Step 8 — Day 14 check-in","Text: 'Hey [Name], just checking in — how's everything running?'"],
+  ["Step 9 — Monthly report","Owner sends monthly recap. This is what justifies the recurring fee."],
+];
+const os=document.getElementById('ob-steps');
+steps.forEach(([t,d],i)=>{
+  const el=document.createElement('div'); el.className='step-item';
+  el.innerHTML=`<div class="step-num">${i+1}</div><div><div class="step-title">${t}</div><div class="step-desc">${d}</div></div>`;
+  os.appendChild(el);
+});
+
+updateScripts(); calcAudit(); calcComm();
+</script>
+</body>
+</html>
