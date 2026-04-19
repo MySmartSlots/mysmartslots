@@ -3,396 +3,439 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subdomain Generator — My Smart Slots</title>
+  <title>Diamond Plumbing Co. — Book Online</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f8fc; color: #1a1a2e; padding: 2rem 1rem; }
-    .setup-wrap { max-width: 640px; margin: 0 auto; padding: 1rem 0 2rem; }
-    h2 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #666; margin-bottom: 1rem; }
-    .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 1.5rem 0 0.5rem; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .field-row.full { grid-template-columns: 1fr; }
-    .field-group { display: flex; flex-direction: column; gap: 4px; }
-    .field-group label { font-size: 13px; color: #555; }
-    .field-group input,
-    .field-group select,
-    .field-group textarea {
-      width: 100%;
-      font-size: 13.5px;
-      font-family: inherit;
-      padding: 8px 10px;
-      border: 1.5px solid #dde;
-      border-radius: 8px;
-      background: #fff;
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f4f6fb;
       color: #1a1a2e;
-      outline: none;
-      transition: border-color 0.15s;
     }
-    .field-group input:focus,
-    .field-group select:focus,
-    .field-group textarea:focus { border-color: #1a1a2e; }
-    .field-group textarea { min-height: 70px; resize: vertical; }
-    .color-row { display: flex; align-items: center; gap: 10px; }
-    .color-row input[type=color] {
-      width: 44px; height: 36px; padding: 2px;
-      border-radius: 8px; border: 1.5px solid #dde;
-      cursor: pointer; background: #fff; flex-shrink: 0;
+
+    /* HEADER */
+    .header {
+      background: #1455a4;
+      color: #fff;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
     }
-    .color-row input[type=text] { flex: 1; }
-    .slug-hint { font-size: 11px; color: #aaa; margin-top: 2px; }
-    .gen-btn {
-      margin-top: 1.5rem; width: 100%; padding: 12px;
-      font-size: 14px; font-weight: 600; background: #1a1a2e;
-      color: #fff; border: none; border-radius: 8px;
-      cursor: pointer; transition: opacity 0.15s;
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .gen-btn:hover { opacity: 0.88; }
-    .output-box {
-      margin-top: 1.5rem; background: #fff;
-      border: 1px solid #e0e4f0; border-radius: 12px;
-      padding: 1rem 1.25rem; display: none;
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
     }
-    .output-box.visible { display: block; }
-    .output-label {
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.08em; color: #888; margin-bottom: 8px;
-      display: flex; justify-content: space-between; align-items: center;
+    .logo-name {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
     }
-    .copy-btn {
-      font-size: 12px; font-weight: 500; background: none;
-      border: 1px solid #dde; border-radius: 6px;
-      padding: 3px 10px; cursor: pointer; color: #555; flex-shrink: 0;
+    .header-phone {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      text-decoration: none;
+      opacity: 0.92;
     }
-    .copy-btn:hover { background: #f7f8fc; }
-    .code-block {
-      font-family: 'Courier New', monospace; font-size: 12px;
-      color: #1a1a2e; white-space: pre-wrap; line-height: 1.6;
-      max-height: 280px; overflow-y: auto; background: #f7f8fc;
-      border-radius: 8px; padding: 0.75rem; word-break: break-all;
+    .header-phone:hover { opacity: 1; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1455a4 0%, #0d3d7a 100%);
+      color: #fff;
+      text-align: center;
+      padding: 4rem 1.5rem 3.5rem;
     }
-    .divider { height: 1px; background: #e0e4f0; margin: 1.25rem 0 0; }
-    .checklist { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 8px; }
-    .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #1a1a2e; }
-    .check-item input[type=checkbox] { margin-top: 2px; flex-shrink: 0; width: 15px; height: 15px; cursor: pointer; }
-    @media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.5px;
+    }
+    .hero p {
+      font-size: 16px;
+      opacity: 0.85;
+      max-width: 420px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: #fff;
+      color: #1455a4;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.22); }
+
+    /* TRUST BAR */
+    .trust-bar {
+      background: #fff;
+      border-bottom: 1px solid #e8ecf4;
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      padding: 1rem 1.5rem;
+      flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #444;
+    }
+    .trust-icon {
+      width: 20px;
+      height: 20px;
+      background: #e8f0fb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    /* MAIN CONTENT */
+    .main {
+      max-width: 960px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* CARDS */
+    .card {
+      background: #fff;
+      border: 1px solid #e8ecf4;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #1455a4;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title-icon {
+      width: 22px;
+      height: 22px;
+      background: #e8f0fb;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* SERVICES */
+    .service-list { display: flex; flex-direction: column; gap: 10px; }
+    .service-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: #f4f6fb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .service-name { font-weight: 500; color: #1a1a2e; }
+    .service-price { font-weight: 600; color: #1455a4; font-size: 13px; }
+
+    /* HOURS */
+    .hours-grid { display: flex; flex-direction: column; gap: 6px; }
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f2f8;
+    }
+    .hours-row:last-child { border-bottom: none; }
+    .hours-day { color: #555; }
+    .hours-time { font-weight: 500; color: #1a1a2e; }
+    .hours-closed { font-weight: 500; color: #bbb; }
+
+    /* CONTACT */
+    .contact-list { display: flex; flex-direction: column; gap: 12px; }
+    .contact-item { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+    .contact-icon {
+      width: 34px; height: 34px;
+      background: #e8f0fb;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+    .contact-label { font-size: 11px; color: #999; margin-bottom: 1px; }
+    .contact-value { font-weight: 500; color: #1a1a2e; }
+    .contact-value a { color: #1455a4; text-decoration: none; }
+
+    /* SIDEBAR CHAT CARD */
+    .chat-card {
+      background: #fff;
+      border: 1px solid #e8ecf4;
+      border-radius: 14px;
+      overflow: hidden;
+      position: sticky;
+      top: 20px;
+    }
+    .chat-card-header {
+      background: #1455a4;
+      color: #fff;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chat-avatar {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .chat-header-name { font-size: 14px; font-weight: 600; }
+    .chat-header-status { font-size: 11px; opacity: 0.75; margin-top: 1px; display: flex; align-items: center; gap: 5px; }
+    .status-dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; }
+    .chat-card-body { padding: 1.25rem; }
+    .chat-intro { font-size: 13.5px; color: #555; line-height: 1.6; margin-bottom: 1rem; }
+    .chat-open-btn {
+      display: block; width: 100%;
+      background: #1455a4; color: #fff;
+      font-weight: 600; font-size: 14px;
+      padding: 11px; border-radius: 8px;
+      text-align: center; text-decoration: none;
+      border: none; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .chat-open-btn:hover { opacity: 0.88; }
+    .chat-features { margin-top: 1rem; display: flex; flex-direction: column; gap: 7px; }
+    .chat-feature { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666; }
+    .chat-feature-dot { width: 6px; height: 6px; background: #1455a4; border-radius: 50%; flex-shrink: 0; }
+
+    /* REVIEWS */
+    .review-list { display: flex; flex-direction: column; gap: 14px; }
+    .review-item { padding: 14px; background: #f4f6fb; border-radius: 10px; }
+    .review-stars { color: #f59e0b; font-size: 13px; margin-bottom: 5px; }
+    .review-text { font-size: 13.5px; color: #333; line-height: 1.55; margin-bottom: 8px; }
+    .review-author { font-size: 12px; font-weight: 600; color: #666; }
+
+    /* FOOTER */
+    .footer {
+      background: #fff;
+      border-top: 1px solid #e8ecf4;
+      text-align: center;
+      padding: 1.5rem 1rem;
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 2rem;
+    }
+    .footer a { color: #1455a4; text-decoration: none; }
+
+    @media (max-width: 720px) {
+      .main { grid-template-columns: 1fr; }
+      .chat-card { position: static; }
+      .hero h1 { font-size: 26px; }
+      .trust-bar { gap: 1rem; }
+    }
   </style>
 </head>
 <body>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const pwd = prompt("Enter password:");
-    if (pwd !== "slots2025") {
-      document.body.innerHTML = "<p style='font-family:sans-serif;padding:2rem;color:#1a1a2e;'>Access denied.</p>";
-    }
-  });
-</script>
-
-<div class="setup-wrap">
-  <h2>Subdomain page generator</h2>
-  <p class="subtitle">Fill in the client's info to generate their branded subdomain page, system prompt, and widget tag.</p>
-
-  <div class="section-label">Business info</div>
-  <div class="field-row">
-    <div class="field-group"><label>Business name</label><input type="text" id="bizName" placeholder="e.g. Diamond Plumbing Co." /></div>
-    <div class="field-group"><label>Owner name</label><input type="text" id="ownerName" placeholder="e.g. Rick" /></div>
-  </div>
-  <div class="field-row">
-    <div class="field-group">
-      <label>Trade type</label>
-      <select id="trade">
-        <option value="">Select trade...</option>
-        <option>Plumbing</option>
-        <option>HVAC / Heating & Cooling</option>
-        <option>Electrical</option>
-        <option>Roofing</option>
-        <option>General Contracting</option>
-        <option>Pest Control</option>
-        <option>Lawn & Landscaping</option>
-        <option>Auto Service</option>
-        <option>Other</option>
-      </select>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">
+      <div class="logo-icon">🔧</div>
+      <span class="logo-name">Diamond Plumbing Co.</span>
     </div>
-    <div class="field-group"><label>Phone number</label><input type="text" id="phone" placeholder="e.g. (816) 555-0192" /></div>
-  </div>
-  <div class="field-row">
-    <div class="field-group"><label>Email</label><input type="text" id="email" placeholder="e.g. rick@diamondplumbing.com" /></div>
-    <div class="field-group"><label>Service area</label><input type="text" id="area" placeholder="e.g. Kansas City Metro" /></div>
-  </div>
-  <div class="field-row">
-    <div class="field-group">
-      <label>Brand color (pick from their website)</label>
-      <div class="color-row">
-        <input type="color" id="colorPicker" value="#1a6fc4" oninput="document.getElementById('colorHex').value=this.value" />
-        <input type="text" id="colorHex" value="#1a6fc4" placeholder="#1a6fc4" oninput="syncColor(this.value)" />
-      </div>
-    </div>
-    <div class="field-group">
-      <label>Subdomain slug</label>
-      <input type="text" id="slug" placeholder="e.g. diamond" oninput="document.getElementById('slugPreview').textContent=this.value||'slug'" />
-      <span class="slug-hint">Will live at: <span id="slugPreview">slug</span>.mysmartslots.com</span>
-    </div>
+    <a href="tel:8165550192" class="header-phone">(816) 555-0192</a>
   </div>
 
-  <div class="section-label">Services & pricing</div>
-  <div class="field-row full">
-    <div class="field-group">
-      <label>Services offered (one per line)</label>
-      <textarea id="services" placeholder="e.g.&#10;Drain cleaning — $150-$300&#10;Water heater install — $800-$1,200&#10;Emergency leak repair — $200+"></textarea>
-    </div>
-  </div>
-  <div class="field-row">
-    <div class="field-group"><label>Business hours</label><input type="text" id="hours" placeholder="e.g. Mon–Fri 7am–6pm, Sat 8am–2pm" /></div>
-    <div class="field-group">
-      <label>Emergency / after-hours?</label>
-      <select id="emergency">
-        <option value="no">No after-hours service</option>
-        <option value="yes">Yes, 24/7 emergency</option>
-        <option value="limited">Limited emergency calls</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="section-label">Plan & calendar</div>
-  <div class="field-row">
-    <div class="field-group">
-      <label>Plan</label>
-      <select id="plan">
-        <option>Starter — $125/mo</option>
-        <option>Pro — $225/mo</option>
-        <option>Elite — $375/mo</option>
-      </select>
-    </div>
-    <div class="field-group">
-      <label>Calendar type</label>
-      <select id="calendar">
-        <option>Google Calendar</option>
-        <option>Outlook</option>
-        <option>Calendly</option>
-        <option>None yet</option>
-      </select>
-    </div>
-  </div>
-  <div class="field-row full">
-    <div class="field-group"><label>Booking link (Calendly or booking page URL)</label><input type="text" id="bookingUrl" placeholder="e.g. https://calendly.com/diamondplumbing" /></div>
-  </div>
-  <div class="field-row full">
-    <div class="field-group">
-      <label>Anything special to know (optional)</label>
-      <textarea id="notes" placeholder="e.g. Residential only. Owner prefers texts." style="min-height:50px;"></textarea>
-    </div>
-  </div>
-
-  <button class="gen-btn" onclick="generate()">Generate everything</button>
-
-  <div class="output-box" id="outputBox">
-
-    <div class="output-label">
-      System prompt
-      <button class="copy-btn" onclick="copyEl('promptOut', this)">Copy</button>
-    </div>
-    <div class="code-block" id="promptOut"></div>
-
-    <div class="divider"></div>
-    <div class="output-label" style="margin-top:1rem;">
-      Widget script tag
-      <button class="copy-btn" onclick="copyEl('tagOut', this)">Copy</button>
-    </div>
-    <div class="code-block" id="tagOut"></div>
-
-    <div class="divider"></div>
-    <div class="output-label" style="margin-top:1rem;">
-      Subdomain page — save as <span id="filenameOut" style="color:#1a1a2e;font-weight:700;text-transform:none;letter-spacing:0;font-size:12px;"></span>
-      <button class="copy-btn" onclick="copyEl('pageOut', this)">Copy</button>
-    </div>
-    <div class="code-block" id="pageOut"></div>
-
-    <div class="divider"></div>
-    <div class="output-label" style="margin-top:1rem;">Onboarding checklist</div>
-    <div class="checklist" id="checklistOut"></div>
-
-  </div>
-</div>
-
-<script>
-function syncColor(val) {
-  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-    document.getElementById('colorPicker').value = val;
-  }
-}
-
-function darken(hex, amt) {
-  let r = Math.max(0, parseInt(hex.slice(1,3),16) - amt);
-  let g = Math.max(0, parseInt(hex.slice(3,5),16) - amt);
-  let b = Math.max(0, parseInt(hex.slice(5,7),16) - amt);
-  return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
-}
-
-function generate() {
-  const biz        = document.getElementById('bizName').value.trim() || 'This Business';
-  const owner      = document.getElementById('ownerName').value.trim() || 'the owner';
-  const trade      = document.getElementById('trade').value || 'trade service';
-  const phone      = document.getElementById('phone').value.trim() || '[phone TBD]';
-  const email      = document.getElementById('email').value.trim() || '[email TBD]';
-  const area       = document.getElementById('area').value.trim() || 'the local area';
-  const services   = document.getElementById('services').value.trim() || '[services TBD]';
-  const hours      = document.getElementById('hours').value.trim() || '[hours TBD]';
-  const emergency  = document.getElementById('emergency').value;
-  const calendar   = document.getElementById('calendar').value;
-  const bookingUrl = document.getElementById('bookingUrl').value.trim();
-  const notes      = document.getElementById('notes').value.trim();
-  const color      = document.getElementById('colorHex').value.trim() || '#1a6fc4';
-  const slug       = (document.getElementById('slug').value.trim().toLowerCase().replace(/\s+/g,'-') || 'client');
-  const renderUrl  = 'https://mysmartslots-chat.onrender.com';
-
-  const emergencyText = emergency === 'yes'
-    ? 'Yes, they offer 24/7 emergency service.'
-    : emergency === 'limited'
-    ? 'They handle limited emergency calls — ask the customer to call the main number for emergencies.'
-    : 'No after-hours or emergency service. Direct after-hours inquiries to leave a message and they will follow up next business day.';
-
-  const bookingText = bookingUrl
-    ? `Direct customers to book here: ${bookingUrl}`
-    : `Ask the customer for their name, phone number, and preferred appointment time, then let them know the team will confirm shortly.`;
-
-  const prompt =
-`You are a friendly, professional booking assistant for ${biz} — a ${trade} company serving ${area}.
-
-BUSINESS INFO:
-- Business: ${biz}
-- Owner: ${owner}
-- Trade: ${trade}
-- Phone: ${phone}
-- Email: ${email}
-- Service area: ${area}
-- Hours: ${hours}
-- Emergency service: ${emergencyText}
-
-SERVICES & PRICING:
-${services}
-
-YOUR JOB:
-You help customers of ${biz} get answers and book appointments. You are NOT a salesperson — you are a helpful assistant representing ${biz} directly.
-
-BOOKING:
-${bookingText}
-
-CONVERSATION RULES:
-- Always be friendly, clear, and concise
-- Answer service and pricing questions directly using the info above
-- If asked something you don't know, say "Great question — let me have ${owner} follow up with you directly. Can I get your name and number?"
-- Never make up prices or services not listed above
-- Always end with a question that moves toward booking or capturing their contact info
-- Keep replies to 2-4 sentences
-
-COLLECT WHEN BOOKING:
-- Customer name
-- Phone number or email
-- Service needed
-- Preferred date/time
-
-When you have all four, end your message with:
-[BOOKING_READY: name=<n>, contact=<contact>, service=<service>, datetime=<datetime>]${notes ? '\n\nADDITIONAL NOTES:\n' + notes : ''}`;
-
-  const tag = `<script src="${renderUrl}/widget.js" data-business="${biz}" data-api="${renderUrl}"><\/script>`;
-
-  const serviceItems = services
-    ? services.split('\n').filter(s => s.trim()).map(s => `          <li>${s.trim()}</li>`).join('\n')
-    : '          <li>Contact us for services and pricing</li>';
-
-  const colorDark = darken(color, 25);
-
-  const subPage =
-`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${biz} — Book Online</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f8fc; color: #1a1a2e; }
-    .hero { background: ${color}; color: #fff; padding: 3rem 1.5rem 2.5rem; text-align: center; }
-    .hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
-    .hero p { font-size: 15px; opacity: 0.88; margin-bottom: 1.5rem; }
-    .book-btn { display: inline-block; background: #fff; color: ${color}; font-weight: 700; font-size: 15px; padding: 12px 32px; border-radius: 8px; text-decoration: none; }
-    .book-btn:hover { background: #f0f0f0; }
-    .cards { max-width: 560px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .card { background: #fff; border: 1px solid #e0e4f0; border-radius: 12px; padding: 1.25rem; }
-    .card h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: ${color}; margin-bottom: 10px; }
-    .card p, .card li { font-size: 13.5px; color: #444; line-height: 1.6; }
-    .card ul { padding-left: 1rem; }
-    .card a { color: ${color}; text-decoration: none; }
-    .card.full { grid-column: 1 / -1; }
-    .footer { text-align: center; padding: 2rem 1rem; font-size: 12px; color: #aaa; }
-    .footer a { color: ${color}; text-decoration: none; }
-    @media (max-width: 480px) { .cards { grid-template-columns: 1fr; } .card.full { grid-column: 1; } }
-  </style>
-</head>
-<body>
+  <!-- HERO -->
   <div class="hero">
-    <h1>${biz}</h1>
-    <p>${trade} serving ${area}</p>
-    <a href="${bookingUrl || '#'}" class="book-btn">Book an Appointment</a>
-  </div>
-  <div class="cards">
-    <div class="card">
-      <h3>Contact</h3>
-      <p><a href="tel:${phone}">${phone}</a></p>
-      <p><a href="mailto:${email}">${email}</a></p>
-    </div>
-    <div class="card">
-      <h3>Hours</h3>
-      <p>${hours}</p>
-    </div>
-    <div class="card full">
-      <h3>Services</h3>
-      <ul>
-${serviceItems}
-      </ul>
+    <div class="hero-badge">Kansas City's Trusted Plumber</div>
+    <h1>Fast, Reliable Plumbing<br>When You Need It Most</h1>
+    <p>Serving the KC Metro for over 15 years. Licensed, insured, and available for emergencies 24/7.</p>
+    <div class="hero-btns">
+      <a href="#book" class="btn-primary">Book an Appointment</a>
+      <a href="tel:8165550192" class="btn-secondary">Call (816) 555-0192</a>
     </div>
   </div>
-  <div class="footer">Powered by <a href="https://mysmartslots.com" target="_blank">My Smart Slots</a></div>
-  <script src="${renderUrl}/widget.js" data-business="${biz}" data-api="${renderUrl}"><\/script>
-</body>
-</html>`;
 
-  const filename = `${slug}.html`;
+  <!-- TRUST BAR -->
+  <div class="trust-bar">
+    <div class="trust-item"><div class="trust-icon">⭐</div> 4.9 Google Rating</div>
+    <div class="trust-item"><div class="trust-icon">✓</div> Licensed & Insured</div>
+    <div class="trust-item"><div class="trust-icon">⚡</div> 24/7 Emergency Service</div>
+    <div class="trust-item"><div class="trust-icon">📅</div> Same-Day Appointments</div>
+  </div>
 
-  const checks = [
-    `Payment received from ${owner}`,
-    `Create new Render service for ${biz} — swap SYSTEM_PROMPT with generated prompt`,
-    `Update widget data-api in ${filename} with new ${biz} Render URL`,
-    `Save subdomain page as ${filename} and push to main Netlify repo`,
-    `Add subdomain ${slug}.mysmartslots.com in Netlify DNS settings`,
-    calendar !== 'None yet'
-      ? `Connect ${calendar} — get access from ${owner}`
-      : `Set up Calendly for ${owner} and update booking URL in ${filename}`,
-    `Test chatbot end-to-end — confirm booking email hits your inbox`,
-    `Send ${owner} their link: https://${slug}.mysmartslots.com`,
-    `Schedule Day 14 check-in with ${owner}`
-  ];
+  <!-- MAIN -->
+  <div class="main">
 
-  document.getElementById('promptOut').textContent = prompt;
-  document.getElementById('tagOut').textContent = tag;
-  document.getElementById('pageOut').textContent = subPage;
-  document.getElementById('filenameOut').textContent = filename;
+    <!-- LEFT COLUMN -->
+    <div>
 
-  const cl = document.getElementById('checklistOut');
-  cl.innerHTML = checks.map(c => `<label class="check-item"><input type="checkbox"> <span>${c}</span></label>`).join('');
+      <!-- SERVICES -->
+      <div class="card">
+        <div class="card-title"><div class="card-title-icon">🔧</div> Services & Pricing</div>
+        <div class="service-list">
+          <div class="service-item"><span class="service-name">Drain Cleaning</span><span class="service-price">$150 – $300</span></div>
+          <div class="service-item"><span class="service-name">Water Heater Installation</span><span class="service-price">$800 – $1,200</span></div>
+          <div class="service-item"><span class="service-name">Leak Detection & Repair</span><span class="service-price">$200 – $500</span></div>
+          <div class="service-item"><span class="service-name">Toilet Repair or Replacement</span><span class="service-price">$150 – $400</span></div>
+          <div class="service-item"><span class="service-name">Sump Pump Install</span><span class="service-price">$600 – $1,000</span></div>
+          <div class="service-item"><span class="service-name">Emergency Service Call</span><span class="service-price">From $200</span></div>
+        </div>
+      </div>
 
-  const box = document.getElementById('outputBox');
-  box.classList.add('visible');
-  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+      <!-- REVIEWS -->
+      <div class="card">
+        <div class="card-title"><div class="card-title-icon">⭐</div> What Customers Say</div>
+        <div class="review-list">
+          <div class="review-item">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">Called at 9pm with a burst pipe and they were at my house within the hour. Fixed it fast and didn't gouge me on the price. These guys are the real deal.</div>
+            <div class="review-author">— Mike T., Overland Park</div>
+          </div>
+          <div class="review-item">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">Booked online at midnight, had a confirmation by morning. Technician showed up on time and was super professional. Will use again for sure.</div>
+            <div class="review-author">— Sarah K., Lee's Summit</div>
+          </div>
+          <div class="review-item">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">Best plumber in KC. Fair pricing, no surprises on the bill, and they actually clean up after themselves. Five stars all day.</div>
+            <div class="review-author">— James R., Gladstone</div>
+          </div>
+        </div>
+      </div>
 
-function copyEl(id, btn) {
-  navigator.clipboard.writeText(document.getElementById(id).textContent);
-  btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy', 1500);
-}
-</script>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div>
+
+      <!-- CHAT CARD -->
+      <div class="chat-card" id="book">
+        <div class="chat-card-header">
+          <div class="chat-avatar">💬</div>
+          <div>
+            <div class="chat-header-name">Book Online — 24/7</div>
+            <div class="chat-header-status"><span class="status-dot"></span> AI Assistant Online</div>
+          </div>
+        </div>
+        <div class="chat-card-body">
+          <p class="chat-intro">Chat with our booking assistant to schedule service, get a price estimate, or ask a question — any time of day.</p>
+          <button class="chat-open-btn" onclick="document.querySelector('#sms-chat-bubble')?.click()">Start Booking Now</button>
+          <div class="chat-features">
+            <div class="chat-feature"><span class="chat-feature-dot"></span> Get answers instantly</div>
+            <div class="chat-feature"><span class="chat-feature-dot"></span> Book any time — nights & weekends</div>
+            <div class="chat-feature"><span class="chat-feature-dot"></span> Confirmation sent to your phone</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOURS -->
+      <div class="card" style="margin-top: 20px;">
+        <div class="card-title"><div class="card-title-icon">🕐</div> Business Hours</div>
+        <div class="hours-grid">
+          <div class="hours-row"><span class="hours-day">Monday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
+          <div class="hours-row"><span class="hours-day">Tuesday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
+          <div class="hours-row"><span class="hours-day">Wednesday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
+          <div class="hours-row"><span class="hours-day">Thursday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
+          <div class="hours-row"><span class="hours-day">Friday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
+          <div class="hours-row"><span class="hours-day">Saturday</span><span class="hours-time">8:00 AM – 2:00 PM</span></div>
+          <div class="hours-row"><span class="hours-day">Sunday</span><span class="hours-closed">Emergency Only</span></div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="card" style="margin-top: 20px;">
+        <div class="card-title"><div class="card-title-icon">📞</div> Contact</div>
+        <div class="contact-list">
+          <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <div><div class="contact-label">Phone</div><div class="contact-value"><a href="tel:8165550192">(816) 555-0192</a></div></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">✉️</div>
+            <div><div class="contact-label">Email</div><div class="contact-value"><a href="mailto:info@diamondplumbing.com">info@diamondplumbing.com</a></div></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">📍</div>
+            <div><div class="contact-label">Service Area</div><div class="contact-value">Kansas City Metro</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    © 2026 Diamond Plumbing Co. · Powered by <a href="https://mysmartslots.com" target="_blank">My Smart Slots</a>
+  </div>
+
+  <!-- CHATBOT WIDGET -->
+  <script src="https://mysmartslots-chat.onrender.com/widget.js" data-business="Diamond Plumbing Co." data-api="https://mysmartslots-chat.onrender.com"></script>
 
 </body>
 </html>
