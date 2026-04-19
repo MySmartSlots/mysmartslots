@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Setup — My Smart Slots</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f8fc; color: #1a1a2e; padding: 2rem 1rem; }
+    .setup-wrap { max-width: 640px; margin: 0 auto; padding: 1rem 0 2rem; }
+    h2 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 1rem; }
+    .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 1.5rem 0 0.5rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .field-row.full { grid-template-columns: 1fr; }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-group label { font-size: 13px; color: #555; }
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+      width: 100%;
+      font-size: 13.5px;
+      font-family: inherit;
+      padding: 8px 10px;
+      border: 1.5px solid #dde;
+      border-radius: 8px;
+      background: #fff;
+      color: #1a1a2e;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus { border-color: #1a1a2e; }
+    .field-group textarea { min-height: 70px; resize: vertical; }
+    .gen-btn {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .gen-btn:hover { opacity: 0.88; }
+    .output-box {
+      margin-top: 1.5rem;
+      background: #fff;
+      border: 1px solid #e0e4f0;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: none;
+    }
+    .output-box.visible { display: block; }
+    .output-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .copy-btn {
+      font-size: 12px;
+      font-weight: 500;
+      background: none;
+      border: 1px solid #dde;
+      border-radius: 6px;
+      padding: 3px 10px;
+      cursor: pointer;
+      color: #555;
+    }
+    .copy-btn:hover { background: #f7f8fc; }
+    .prompt-text {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #1a1a2e;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      max-height: 320px;
+      overflow-y: auto;
+      background: #f7f8fc;
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+    .widget-tag {
+      margin-top: 1rem;
+      background: #f7f8fc;
+      border: 1px solid #e0e4f0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #1a1a2e;
+      word-break: break-all;
+    }
+    .divider { height: 1px; background: #e0e4f0; margin: 1.25rem 0 0; }
+    .checklist { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 8px; }
+    .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #1a1a2e; }
+    .check-item input[type=checkbox] { margin-top: 2px; flex-shrink: 0; width: 15px; height: 15px; cursor: pointer; }
+    @media (max-width: 520px) {
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  const pwd = prompt("Enter password:");
+  if (pwd !== "slots2025") {
+    document.body.innerHTML = "<p style='font-family:sans-serif;padding:2rem;'>Access denied.</p>";
+  }
+</script>
+
+<div class="setup-wrap">
+  <h2>Client setup tool</h2>
+  <p class="subtitle">Fill in the client's info from the audit worksheet. Generate their system prompt and widget tag.</p>
+
+  <div class="section-label">Business info</div>
+  <div class="field-row">
+    <div class="field-group"><label>Business name</label><input type="text" id="bizName" placeholder="e.g. Diamond Plumbing Co." /></div>
+    <div class="field-group"><label>Owner name</label><input type="text" id="ownerName" placeholder="e.g. Rick D." /></div>
+  </div>
+  <div class="field-row">
+    <div class="field-group">
+      <label>Trade type</label>
+      <select id="trade">
+        <option value="">Select trade...</option>
+        <option>Plumbing</option>
+        <option>HVAC / Heating & Cooling</option>
+        <option>Electrical</option>
+        <option>Roofing</option>
+        <option>General Contracting</option>
+        <option>Pest Control</option>
+        <option>Lawn & Landscaping</option>
+        <option>Auto Service</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field-group"><label>Phone number</label><input type="text" id="phone" placeholder="e.g. (816) 555-0192" /></div>
+  </div>
+  <div class="field-row">
+    <div class="field-group"><label>Email</label><input type="text" id="email" placeholder="e.g. rick@diamondplumbing.com" /></div>
+    <div class="field-group"><label>Service area</label><input type="text" id="area" placeholder="e.g. Kansas City Metro" /></div>
+  </div>
+
+  <div class="section-label">Services & pricing</div>
+  <div class="field-row full">
+    <div class="field-group">
+      <label>Services offered (one per line)</label>
+      <textarea id="services" placeholder="e.g.&#10;Drain cleaning — $150-$300&#10;Water heater install — $800-$1,200&#10;Emergency leak repair — $200+"></textarea>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-group"><label>Business hours</label><input type="text" id="hours" placeholder="e.g. Mon–Fri 7am–6pm, Sat 8am–2pm" /></div>
+    <div class="field-group">
+      <label>Emergency / after-hours?</label>
+      <select id="emergency">
+        <option value="no">No after-hours service</option>
+        <option value="yes">Yes, 24/7 emergency</option>
+        <option value="limited">Limited emergency calls</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section-label">Plan & calendar</div>
+  <div class="field-row">
+    <div class="field-group">
+      <label>Plan</label>
+      <select id="plan">
+        <option>Starter — $125/mo</option>
+        <option>Pro — $225/mo</option>
+        <option>Elite — $375/mo</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Calendar type</label>
+      <select id="calendar">
+        <option>Google Calendar</option>
+        <option>Outlook</option>
+        <option>Calendly</option>
+        <option>None yet</option>
+      </select>
+    </div>
+  </div>
+  <div class="field-row full">
+    <div class="field-group"><label>Booking link (Calendly or booking page URL)</label><input type="text" id="bookingUrl" placeholder="e.g. https://calendly.com/diamondplumbing" /></div>
+  </div>
+  <div class="field-row full">
+    <div class="field-group">
+      <label>Anything special to know (optional)</label>
+      <textarea id="notes" placeholder="e.g. They only serve residential, not commercial. Owner prefers texts over calls." style="min-height:50px;"></textarea>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">Generate system prompt + widget tag</button>
+
+  <div class="output-box" id="outputBox">
+    <div class="output-label">
+      System prompt
+      <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+    </div>
+    <div class="prompt-text" id="promptOut"></div>
+
+    <div class="divider"></div>
+
+    <div class="output-label" style="margin-top:1rem;">
+      Widget script tag
+      <button class="copy-btn" onclick="copyTag()">Copy</button>
+    </div>
+    <div class="widget-tag" id="tagOut"></div>
+
+    <div class="divider"></div>
+
+    <div class="output-label" style="margin-top:1rem;">Onboarding checklist</div>
+    <div class="checklist" id="checklistOut"></div>
+  </div>
+</div>
+
+<script>
+function generate() {
+  const biz = document.getElementById('bizName').value.trim() || 'this business';
+  const owner = document.getElementById('ownerName').value.trim() || 'the owner';
+  const trade = document.getElementById('trade').value || 'trade service';
+  const phone = document.getElementById('phone').value.trim() || '[phone TBD]';
+  const email = document.getElementById('email').value.trim() || '[email TBD]';
+  const area = document.getElementById('area').value.trim() || 'the local area';
+  const services = document.getElementById('services').value.trim() || '[services TBD]';
+  const hours = document.getElementById('hours').value.trim() || '[hours TBD]';
+  const emergency = document.getElementById('emergency').value;
+  const calendar = document.getElementById('calendar').value;
+  const bookingUrl = document.getElementById('bookingUrl').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+  const plan = document.getElementById('plan').value;
+
+  const emergencyText = emergency === 'yes'
+    ? 'Yes, they offer 24/7 emergency service.'
+    : emergency === 'limited'
+    ? 'They handle limited emergency calls — ask the customer to call the main number for emergencies.'
+    : 'No after-hours or emergency service. Direct after-hours inquiries to leave a message and they will follow up next business day.';
+
+  const bookingText = bookingUrl
+    ? `Direct customers to book here: ${bookingUrl}`
+    : `Ask the customer for their name, phone number, and preferred appointment time, then let them know the team will confirm shortly.`;
+
+  const prompt = `You are a friendly, professional booking assistant for ${biz} — a ${trade} company serving ${area}.
+
+BUSINESS INFO:
+- Business: ${biz}
+- Owner: ${owner}
+- Trade: ${trade}
+- Phone: ${phone}
+- Email: ${email}
+- Service area: ${area}
+- Hours: ${hours}
+- Emergency service: ${emergencyText}
+
+SERVICES & PRICING:
+${services}
+
+YOUR JOB:
+You help customers of ${biz} get answers and book appointments. You are NOT a salesperson — you are a helpful assistant representing ${biz} directly.
+
+BOOKING:
+${bookingText}
+
+CONVERSATION RULES:
+- Always be friendly, clear, and concise
+- Answer service and pricing questions directly using the info above
+- If asked something you don't know, say "Great question — let me have ${owner} follow up with you directly. Can I get your name and number?"
+- Never make up prices or services not listed above
+- Always end with a question that moves toward booking or capturing their contact info
+- Keep replies to 2-4 sentences
+
+COLLECT WHEN BOOKING:
+- Customer name
+- Phone number or email
+- Service needed
+- Preferred date/time
+
+When you have all four, end your message with:
+[BOOKING_READY: name=<name>, contact=<contact>, service=<service>, datetime=<datetime>]
+${notes ? '\nADDITIONAL NOTES:\n' + notes : ''}`;
+
+  const renderUrl = 'https://YOUR-RENDER-URL';
+  const tag = `<script src="${renderUrl}/widget.js" data-business="${biz}" data-api="${renderUrl}"><\/script>`;
+
+  const checks = [
+    `Payment received from ${owner}`,
+    `Swap SYSTEM_PROMPT in server.js with the generated prompt above`,
+    `Add widget script tag to ${biz}'s website (above closing </body> tag)`,
+    calendar !== 'None yet'
+      ? `Connect ${calendar} — get access from ${owner}`
+      : `Set up Calendly for ${owner} and update booking URL`,
+    `Test booking flow end-to-end — confirm email hits your inbox`,
+    `Send ${owner} a "you're live" message with screenshot`,
+    `Schedule Day 14 check-in with ${owner}`
+  ];
+
+  document.getElementById('promptOut').textContent = prompt;
+  document.getElementById('tagOut').textContent = tag;
+
+  const cl = document.getElementById('checklistOut');
+  cl.innerHTML = checks.map(c => `<label class="check-item"><input type="checkbox"> <span>${c}</span></label>`).join('');
+
+  const box = document.getElementById('outputBox');
+  box.classList.add('visible');
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyPrompt() {
+  navigator.clipboard.writeText(document.getElementById('promptOut').textContent);
+  event.target.textContent = 'Copied!';
+  setTimeout(() => event.target.textContent = 'Copy', 1500);
+}
+
+function copyTag() {
+  navigator.clipboard.writeText(document.getElementById('tagOut').textContent);
+  event.target.textContent = 'Copied!';
+  setTimeout(() => event.target.textContent = 'Copy', 1500);
+}
+</script>
+
+</body>
+</html>
