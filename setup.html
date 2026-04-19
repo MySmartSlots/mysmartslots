@@ -113,10 +113,12 @@
 <body>
 
 <script>
-  const pwd = prompt("Enter password:");
-  if (pwd !== "slots2025") {
-    document.body.innerHTML = "<p style='font-family:sans-serif;padding:2rem;'>Access denied.</p>";
-  }
+  document.addEventListener("DOMContentLoaded", function() {
+    const pwd = prompt("Enter password:");
+    if (pwd !== "slots2025") {
+      document.body.innerHTML = "<p style='font-family:sans-serif;padding:2rem;color:#1a1a2e;'>Access denied.</p>";
+    }
+  });
 </script>
 
 <div class="setup-wrap">
@@ -289,7 +291,7 @@ When you have all four, end your message with:
 [BOOKING_READY: name=<name>, contact=<contact>, service=<service>, datetime=<datetime>]
 ${notes ? '\nADDITIONAL NOTES:\n' + notes : ''}`;
 
-  const renderUrl = 'https://YOUR-RENDER-URL';
+  const renderUrl = 'https://mysmartslots-chat.onrender.com';
   const tag = `<script src="${renderUrl}/widget.js" data-business="${biz}" data-api="${renderUrl}"><\/script>`;
 
   const checks = [
