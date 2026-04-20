@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Smart Slots — Automated Scheduling for Trade Businesses</title>
+<title>My Smart Slots — Automated Booking & Follow-Up for Local Service Businesses</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -452,8 +452,17 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
   .testi-grid{grid-template-columns:1fr;}
   .nav-links{display:none;}
 }
+.pricing-toggle{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:2.5rem;}
+.toggle-label{font-size:14px;color:var(--muted);font-weight:500;}
+.toggle-label.active{color:var(--text);font-weight:600;}
+.toggle-switch{width:48px;height:26px;background:var(--border2);border-radius:13px;position:relative;cursor:pointer;border:1px solid var(--border);transition:background .2s;}
+.toggle-switch.on{background:var(--accent);}
+.toggle-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--text);transition:transform .2s;}
+.toggle-switch.on .toggle-knob{transform:translateX(22px);background:#040f09;}
+.annual-badge{display:inline-block;background:rgba(0,200,150,.15);border:1px solid var(--border);color:var(--accent);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px;}
+.pc-annual{display:none;font-size:13px;color:var(--accent);font-weight:600;margin-bottom:.35rem;}
+.pc-savings{display:none;font-size:11px;color:var(--muted);margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border2);}
 @media(max-width:600px){
-  .svc-grid,.steps,.ind-grid{grid-template-columns:1fr;}
   .frow{grid-template-columns:1fr;}
   #sms-chat-window{width:calc(100vw - 32px); right:16px;}
 }
@@ -474,6 +483,7 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
     </ul>
     <div class="nav-right">
       <a href="tel:7853290202" class="nav-phone">785-329-0202</a>
+      <a href="/subdomain" target="_blank" class="btn btn-ghost" style="font-size:13px;padding:9px 18px;">See Live Demo →</a>
       <a href="#contact" class="btn btn-primary">Free Audit</a>
     </div>
   </div>
@@ -484,9 +494,9 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
   <div class="container">
     <div class="hero-grid">
       <div>
-        <div class="eyebrow">Stop Losing Jobs to Missed Calls</div>
+        <div class="eyebrow">Stop Losing Business to Missed Calls</div>
         <h1>Every Call.<br/>Every Slot.<br/><span class="accent">Every Job.</span></h1>
-        <p class="hero-sub">My Smart Slots automates your entire customer follow-up pipeline — missed call texts, AI chat booking, SMS confirmations, reminders, and review requests — so your schedule stays full without lifting a finger.</p>
+        <p class="hero-sub">My Smart Slots automates your entire customer follow-up pipeline — missed call texts, AI chat booking, SMS confirmations, reminders, and review requests — so your schedule stays full without lifting a finger. Built for any local service business that lives and dies by the phone.</p>
         <div class="hero-btns">
           <a href="#contact" class="btn btn-primary">Get My Free Audit</a>
           <a href="#pricing" class="btn btn-ghost">See Pricing</a>
@@ -539,11 +549,11 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
       <div class="prob-text fade-up">
         <div class="eyebrow">The Problem</div>
         <h2>Your Phone Rings. Nobody Follows Up. Job Goes to a Competitor.</h2>
-        <p>You're good at your trade. But running the phone, confirming appointments, chasing no-shows, and asking for reviews? That's a full-time job on top of your actual job — and most contractors can't keep up.</p>
+        <p>You're good at what you do. But running the phone, confirming appointments, chasing no-shows, and asking for reviews? That's a full-time job on top of your actual job — and most service businesses can't keep up.</p>
         <p>The result is a slow leak of revenue you never see. Calls that go to voicemail and never get called back. Customers who booked but didn't confirm. Jobs that ghosted. Reviews that never got asked for.</p>
         <ul class="prob-list">
-          <li><span class="pi">▲</span>Missed calls during a job — customer doesn't leave a voicemail, calls your competitor instead</li>
-          <li><span class="pi">▲</span>Bookings that never got confirmed — crew shows up to an empty house</li>
+          <li><span class="pi">▲</span>Missed calls while you're with a customer — they don't leave a voicemail, they call someone else</li>
+          <li><span class="pi">▲</span>Bookings that never got confirmed — you show up, they don't</li>
           <li><span class="pi">▲</span>Happy customers who would've left a 5-star review — nobody ever asked</li>
           <li><span class="pi">▲</span>Cold leads sitting in your phone — no system to bring them back</li>
         </ul>
@@ -551,7 +561,7 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
       <div class="fade-up">
         <div class="loss-box">
           <div class="loss-num">$6,400</div>
-          <p class="loss-label">Average monthly revenue lost by a 3-truck trade company from unrecovered leads and empty schedule gaps.</p>
+          <p class="loss-label">Average monthly revenue lost by a local service business from unrecovered leads and empty schedule gaps.</p>
           <p class="loss-sub">My Smart Slots automates every single one of these touchpoints — so the leak stops without you hiring anyone new.</p>
         </div>
       </div>
@@ -637,13 +647,20 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
       <h2>Three Plans. Pick What Fits Your Business.</h2>
       <p>Every plan includes a one-time $199 setup fee and a 30-day results guarantee. No long-term contracts — ever.</p>
     </div>
+    <div class="pricing-toggle fade-up">
+      <span class="toggle-label active" id="lbl-monthly">Monthly</span>
+      <div class="toggle-switch" id="billing-toggle" onclick="toggleBilling()"><div class="toggle-knob"></div></div>
+      <span class="toggle-label" id="lbl-annual">Annual <span class="annual-badge">2 months free</span></span>
+    </div>
     <div class="pricing-grid">
       <div class="pc fade-up">
         <div class="pc-tier">Starter</div>
         <div class="pc-name">Core Automation</div>
-        <div class="pc-desc">The essentials to stop no-shows and keep every booked job on the calendar.</div>
-        <div class="pc-price"><span class="pc-dollar">$125</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-desc">The essentials to stop no-shows and keep every booked appointment on the calendar.</div>
+        <div class="pc-price"><span class="pc-dollar" id="price-starter">$125</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-annual" id="annual-starter">$1,250/yr — billed annually</div>
         <div class="pc-setup">+ <span>$199 one-time setup fee</span></div>
+        <div class="pc-savings" id="savings-starter">Save $250 vs monthly · 2 months free</div>
         <ul class="feat-list">
           <li><span class="fc">✓</span><span><strong>AI Chat Booking</strong> — 24/7 booking on your site</span></li>
           <li><span class="fc">✓</span><span><strong>SMS Confirmations</strong> — auto-confirms every booking</span></li>
@@ -664,8 +681,10 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
         <div class="pc-tier">Pro</div>
         <div class="pc-name">Full Automation</div>
         <div class="pc-desc">Every real-time touchpoint covered — calls, texts, chats, confirmations, reminders, and reviews.</div>
-        <div class="pc-price"><span class="pc-dollar">$225</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-price"><span class="pc-dollar" id="price-pro">$225</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-annual" id="annual-pro">$2,250/yr — billed annually</div>
         <div class="pc-setup">+ <span>$199 one-time setup fee</span></div>
+        <div class="pc-savings" id="savings-pro">Save $450 vs monthly · 2 months free</div>
         <ul class="feat-list">
           <li><span class="fc">✓</span><span>Everything in Starter</span></li>
           <li><span class="fc">✓</span><span><strong>Missed Call Text Back</strong> — booking link sent instantly</span></li>
@@ -682,8 +701,10 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
         <div class="pc-tier">Elite</div>
         <div class="pc-name">Total Pipeline</div>
         <div class="pc-desc">The complete system — every automation plus re-engagement and email replies to bring back every lead.</div>
-        <div class="pc-price"><span class="pc-dollar">$375</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-price"><span class="pc-dollar" id="price-elite">$375</span><span class="pc-mo">/mo</span></div>
+        <div class="pc-annual" id="annual-elite">$3,750/yr — billed annually</div>
         <div class="pc-setup">+ <span>$199 one-time setup fee</span></div>
+        <div class="pc-savings" id="savings-elite">Save $750 vs monthly · 2 months free</div>
         <ul class="feat-list">
           <li><span class="fc">✓</span><span>Everything in Pro</span></li>
           <li><span class="fc">✓</span><span><strong>Lead Re-Engagement</strong> — brings cold leads back automatically</span></li>
@@ -732,19 +753,24 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
   <div class="container">
     <div class="sec-hdr fade-up">
       <div class="eyebrow" style="justify-content:center;">Who We Serve</div>
-      <h2>Built Exclusively for the Trades</h2>
-      <p>We only work with blue collar service businesses. We know your seasons, your schedules, and exactly what your customers expect.</p>
+      <h2>Built for Any Business That Runs on Appointments</h2>
+      <p>If your customers call to book, and missed calls cost you money, My Smart Slots was built for you. We serve trades, salons, med spas, auto shops, and every service business in between.</p>
     </div>
-    <div class="ind-grid">
+    <div class="ind-grid" style="grid-template-columns:repeat(4,1fr);">
       <div class="ind-card fade-up"><span class="ind-emoji">🔧</span><h4>Plumbing</h4><p>Emergency calls, installs &amp; drain service</p></div>
       <div class="ind-card fade-up"><span class="ind-emoji">❄️</span><h4>HVAC</h4><p>Seasonal installs, repairs &amp; maintenance</p></div>
       <div class="ind-card fade-up"><span class="ind-emoji">⚡</span><h4>Electrical</h4><p>Residential &amp; commercial service</p></div>
       <div class="ind-card fade-up"><span class="ind-emoji">🏠</span><h4>Roofing</h4><p>Storm work, installs &amp; inspections</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">💅</span><h4>Nail &amp; Beauty Salons</h4><p>Appointments, no-shows &amp; reviews</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">💆</span><h4>Med Spas &amp; Wellness</h4><p>Bookings, reminders &amp; follow-ups</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">✂️</span><h4>Hair Salons &amp; Barbers</h4><p>Repeat clients &amp; review generation</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">🚗</span><h4>Auto Service</h4><p>Appointment shops &amp; mobile techs</p></div>
       <div class="ind-card fade-up"><span class="ind-emoji">🔨</span><h4>General Contracting</h4><p>Remodels, repairs &amp; project work</p></div>
       <div class="ind-card fade-up"><span class="ind-emoji">🐛</span><h4>Pest Control</h4><p>Recurring plans &amp; emergency calls</p></div>
       <div class="ind-card fade-up"><span class="ind-emoji">🌿</span><h4>Lawn &amp; Landscaping</h4><p>Seasonal &amp; recurring maintenance</p></div>
-      <div class="ind-card fade-up"><span class="ind-emoji">🚗</span><h4>Auto Service</h4><p>Appointment shops &amp; mobile techs</p></div>
+      <div class="ind-card fade-up"><span class="ind-emoji">🏥</span><h4>Dental &amp; Medical</h4><p>Appointments, reminders &amp; recalls</p></div>
     </div>
+    <p class="fade-up" style="text-align:center;margin-top:1.75rem;font-size:13px;color:var(--muted);">Don't see your industry? If you book appointments and answer phones, we work for you. <a href="#contact" style="color:var(--accent);">Ask us →</a></p>
   </div>
 </section>
 
@@ -755,10 +781,10 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
         <div class="eyebrow">Our Mission</div>
         <h2>We Built This for the People Who Keep Everything Running</h2>
         <p>My Smart Slots was created for one reason — to make sure every customer who reaches out to your business gets a response, every booked slot stays on the calendar, and every completed job has a chance to turn into a review.</p>
-        <p>We work exclusively with trade contractors because we believe the people who keep homes warm, pipes flowing, and power on deserve a business partner who actually understands their world — the chaos of busy season, the dispatcher with three calls at once, the crew member who can't answer the phone mid-job.</p>
-        <div class="qblock"><p>"A great contractor shouldn't have to be a great marketer. We handle the follow-up so you can stay focused on the work."</p></div>
+        <p>We work with service businesses of all kinds because we believe the people who keep homes warm, pipes flowing, nails done, cars running, and clients looking their best deserve a business partner who actually understands their world — the chaos of a busy day, the appointment that ghosted, the call that went to voicemail while you were with someone else.</p>
+        <div class="qblock"><p>"A great business owner shouldn't have to be a great marketer. We handle the follow-up so you can stay focused on the work."</p></div>
         <ul class="vals">
-          <li><span class="vi">◉</span><span><strong style="color:var(--text)">Trade-only.</strong> We don't work with retail, restaurants, or anyone else. Just contractors.</span></li>
+          <li><span class="vi">◉</span><span><strong style="color:var(--text)">Service-business focused.</strong> Every automation we build is designed around appointment-based businesses specifically.</span></li>
           <li><span class="vi">◉</span><span><strong style="color:var(--text)">Zero disruption.</strong> We plug into what you have — no rebuilding, no new tools for your team.</span></li>
           <li><span class="vi">◉</span><span><strong style="color:var(--text)">Full transparency.</strong> Monthly reports show exactly what we did and what it was worth.</span></li>
           <li><span class="vi">◉</span><span><strong style="color:var(--text)">Results guaranteed.</strong> 30 days — measurable improvement or month two is free.</span></li>
@@ -778,19 +804,7 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
   </div>
 </section>
 
-<section class="testi-sec" id="testimonials">
-  <div class="container">
-    <div class="sec-hdr fade-up">
-      <div class="eyebrow" style="justify-content:center;">Results</div>
-      <h2>What Contractors Are Saying</h2>
-    </div>
-    <div class="testi-grid">
-      <div class="tc fade-up"><div class="stars">★★★★★</div><p class="tc-text">"The missed call text back alone is worth every penny. A customer I would have lost called me back within an hour because they got a text with a booking link. That job paid for three months of the service."</p><div class="tc-author"><div class="tc-av">R</div><div><div class="tc-name">Rick D.</div><div class="tc-co">Owner — Diamond Plumbing Co.</div></div></div></div>
-      <div class="tc fade-up"><div class="stars">★★★★★</div><p class="tc-text">"I used to lose a job every week to a no-show. Since the reminders went live I've had maybe two in two months. The chatbot also books jobs while I'm on a service call. It's wild how much it handles."</p><div class="tc-author"><div class="tc-av">T</div><div><div class="tc-name">Tanya M.</div><div class="tc-co">Owner — Arctic HVAC Solutions</div></div></div></div>
-      <div class="tc fade-up"><div class="stars">★★★★★</div><p class="tc-text">"The post-job follow-up is something I always meant to do but never had time for. Now it happens automatically and my Google reviews have gone from 12 to 41 in 90 days. That alone brought in new customers."</p><div class="tc-author"><div class="tc-av">J</div><div><div class="tc-name">James W.</div><div class="tc-co">Owner — ProForce Electric</div></div></div></div>
-    </div>
-  </div>
-</section>
+
 
 <section class="cta-sec">
   <div class="cta-glow"></div>
@@ -800,6 +814,7 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
     <p class="fade-up">We'll run a free audit — no pitch, no obligation. You'll see exactly how many calls went unanswered, how many bookings went unconfirmed, and what it's costing you.</p>
     <div class="cta-btns fade-up">
       <a href="#contact" class="btn btn-primary">Claim My Free Audit</a>
+      <a href="/subdomain" target="_blank" class="btn btn-ghost">See Live Demo →</a>
       <a href="tel:7853290202" class="btn btn-ghost">Call 785-329-0202</a>
     </div>
     <p class="cta-note fade-up">No contracts. $199 setup. 30-day guarantee on every plan.</p>
@@ -815,7 +830,7 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
         <p>Fill out the form and we'll get back to you within one business day to schedule your free audit. No pitch — just a straight conversation about where your revenue is going and how we stop it.</p>
         <div class="cdet"><span class="cdet-icon">📞</span><a href="tel:7853290202" style="color:var(--muted)">785-329-0202</a></div>
         <div class="cdet"><span class="cdet-icon">✉️</span><a href="mailto:hello@mysmartslots.com" style="color:var(--muted)">hello@mysmartslots.com</a></div>
-        <div class="cdet"><span class="cdet-icon">📍</span><span>Serving trade contractors nationwide</span></div>
+        <div class="cdet"><span class="cdet-icon">📍</span><span>Serving service businesses nationwide</span></div>
         <div class="cdet"><span class="cdet-icon">🕐</span><span>Mon–Fri, 8:00 AM – 6:00 PM CT</span></div>
         <div style="margin-top:1.75rem;padding:1.25rem;border:1px solid var(--border2);border-radius:8px;">
           <p style="font-size:13px;color:var(--muted);line-height:1.7;">⚡ <strong style="color:var(--text)">Response within 4 hours</strong> on business days. Need to talk now? Call us directly.</p>
@@ -833,23 +848,26 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
             <div class="fg"><label>Email Address</label><input type="email" name="email" placeholder="mike@company.com" required/></div>
           </div>
           <div class="fg">
-            <label>Your Trade</label>
+            <label>Your Industry</label>
             <select name="trade">
-              <option value="">Select your trade...</option>
+              <option value="">Select your industry...</option>
               <option>Plumbing</option><option>HVAC / Heating &amp; Cooling</option>
               <option>Electrical</option><option>Roofing</option>
               <option>General Contracting</option><option>Pest Control</option>
               <option>Lawn &amp; Landscaping</option><option>Auto Service</option>
-              <option>Other</option>
+              <option>Hair Salon / Barber</option><option>Nail Salon / Nail Tech</option>
+              <option>Med Spa / Aesthetics</option><option>Massage / Wellness</option>
+              <option>Dental / Medical</option><option>Real Estate</option>
+              <option>Other Service Business</option>
             </select>
           </div>
           <div class="frow">
             <div class="fg">
-              <label>Fleet Size</label>
+              <label>Business Size</label>
               <select name="fleet_size">
                 <option value="">Select...</option>
-                <option>Solo / 1 truck</option><option>2–3 trucks</option>
-                <option>4–6 trucks</option><option>7+ trucks</option>
+                <option>Solo / just me</option><option>2–3 employees</option>
+                <option>4–6 employees</option><option>7+ employees</option>
               </select>
             </div>
             <div class="fg">
@@ -882,7 +900,7 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
     <div class="footer-inner">
       <div class="footer-brand">
         <div class="logo">My<span>Smart</span>Slots</div>
-        <p>Automated scheduling &amp; follow-up for trade contractors nationwide.</p>
+        <p>Automated booking &amp; follow-up for local service businesses nationwide.</p>
       </div>
       <div class="fc-col">
         <h5>Services</h5>
@@ -923,8 +941,8 @@ footer { border-top:1px solid var(--border2); padding:3rem 0 2rem; }
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 My Smart Slots. All rights reserved. &nbsp;·&nbsp; <a href="/privacy" style="color:var(--muted2);font-size:11px;">Privacy Policy</a> &nbsp;·&nbsp; <a href="/terms" style="color:var(--muted2);font-size:11px;">Terms & Conditions</a></p>
-      <p>Built for the trades.</p>
+      <p>© 2026 My Smart Slots. All rights reserved. &nbsp;·&nbsp; <a href="/privacy" style="color:var(--muted2);font-size:11px;">Privacy Policy</a> &nbsp;·&nbsp; <a href="/terms" style="color:var(--muted2);font-size:11px;">Terms & Conditions</a></p>
+      <p>Built for local service businesses.</p>
     </div>
   </div>
 </footer>
@@ -975,7 +993,38 @@ document.getElementById('audit-form').addEventListener('submit', async function(
   } catch { btn.textContent='Error — email hello@mysmartslots.com'; btn.style.background='#7a1a1a'; btn.disabled=false; }
 });
 
-// ── Hero demo chat (calls your Render server) ──
+// ── Annual / Monthly billing toggle ──
+let isAnnual = false;
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const toggle = document.getElementById('billing-toggle');
+  const lblM = document.getElementById('lbl-monthly');
+  const lblA = document.getElementById('lbl-annual');
+  toggle.classList.toggle('on', isAnnual);
+  lblM.classList.toggle('active', !isAnnual);
+  lblA.classList.toggle('active', isAnnual);
+
+  const plans = [
+    { key: 'starter', monthly: 125, annual: 1250, save: 250 },
+    { key: 'pro',     monthly: 225, annual: 2250, save: 450 },
+    { key: 'elite',   monthly: 375, annual: 3750, save: 750 },
+  ];
+
+  plans.forEach(p => {
+    const priceEl = document.getElementById('price-' + p.key);
+    const annualEl = document.getElementById('annual-' + p.key);
+    const savingsEl = document.getElementById('savings-' + p.key);
+    if (isAnnual) {
+      priceEl.textContent = '$' + Math.round(p.annual / 12);
+      annualEl.style.display = 'block';
+      savingsEl.style.display = 'block';
+    } else {
+      priceEl.textContent = '$' + p.monthly;
+      annualEl.style.display = 'none';
+      savingsEl.style.display = 'none';
+    }
+  });
+}
 (function() {
   const msgsEl = document.getElementById('demo-messages');
   const inputEl = document.getElementById('demo-input');
