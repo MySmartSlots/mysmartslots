@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Admin</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a1a2e;--navy2:#222840;--navy3:#2a3350;
+  --blue:#1455a4;--blue2:#1a6fd4;--accent:#4ade80;
+  --orange:#f39c12;--red:#e74c3c;--green:#4ade80;
+  --purple:#a78bfa;
+  --white:#fff;--gray:#8892a4;--border:#2a3348;
+  --card:#1e2640;--card2:#242c44;--text:#e2e8f0;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 20%,rgba(20,85,164,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 85% 70%,rgba(74,222,128,.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:340px;text-align:center;}
+.login-logo{font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+.login-box input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;color:var(--white);}
+.login-box input:focus{border-color:var(--blue2);}
+.login-btn{width:100%;padding:11px;background:var(--orange);color:var(--white);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+.login-btn:hover{opacity:.88;}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+.login-note{font-size:11px;color:var(--gray);margin-top:10px;}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+.topbar{background:rgba(26,26,46,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:15px;font-weight:800;color:var(--white);}
+.topbar-logo span{color:var(--orange);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.admin-badge{background:rgba(243,156,18,.15);border:1px solid rgba(243,156,18,.3);color:var(--orange);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.logout-btn:hover{color:var(--white);}
+.refresh-btn{background:var(--orange);color:var(--white);border:none;border-radius:6px;font-size:12px;padding:5px 14px;cursor:pointer;font-family:inherit;font-weight:600;}
+.refresh-btn:hover{opacity:.88;}
+
+/* NAV */
+.nav-tabs{background:var(--card);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 1rem;position:sticky;top:56px;z-index:99;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab{padding:13px 14px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--gray);border-bottom:2.5px solid transparent;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.nav-tab:hover{color:var(--white);}
+.nav-tab.active{color:var(--orange);border-bottom-color:var(--orange);font-weight:600;}
+
+/* CONTENT */
+.content{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 5rem;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.section-head{margin-bottom:1.25rem;}
+.section-head h2{font-size:18px;font-weight:700;color:var(--white);margin-bottom:3px;}
+.section-head p{font-size:13px;color:var(--gray);}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:16px;}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:1rem;}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;}
+.stat-card .label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:6px;}
+.stat-card .value{font-size:30px;font-weight:800;line-height:1;}
+.stat-card .sub{font-size:12px;color:var(--gray);margin-top:4px;}
+.mrr-card .value{color:var(--accent);}
+.clients-card .value{color:var(--orange);}
+.pipeline-card .value{color:var(--blue2);}
+.close-card .value{color:var(--purple);}
+
+/* PIPELINE BAR */
+.pipeline-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;}
+.pipe-col{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem;text-align:center;}
+.pipe-col .n{font-size:22px;font-weight:800;}
+.pipe-col .l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-top:2px;}
+.pipe-new .n{color:#6ab0f5;}
+.pipe-contacted .n{color:var(--orange);}
+.pipe-audit .n{color:var(--accent);}
+.pipe-followup .n{color:var(--orange);}
+.pipe-closed .n{color:var(--green);}
+.pipe-dead .n{color:var(--red);}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--navy2);}
+.data-table td{padding:10px 12px;border-bottom:1px solid rgba(42,51,72,.4);color:var(--text);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,.02);}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;border:1px solid;}
+.badge-pending{background:rgba(243,156,18,.12);border-color:var(--orange);color:var(--orange);}
+.badge-active{background:rgba(74,222,128,.12);border-color:var(--green);color:var(--green);}
+.badge-setup{background:rgba(26,111,212,.15);border-color:var(--blue2);color:var(--blue2);}
+.badge-paused{background:rgba(139,148,158,.1);border-color:var(--gray);color:var(--gray);}
+.badge-new{background:rgba(106,176,245,.1);border-color:#6ab0f5;color:#6ab0f5;}
+.badge-contacted{background:rgba(243,156,18,.1);border-color:var(--orange);color:var(--orange);}
+.badge-audit{background:rgba(74,222,128,.1);border-color:var(--green);color:var(--green);}
+.badge-closed{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green);}
+.badge-dead{background:rgba(231,76,60,.1);border-color:var(--red);color:var(--red);}
+
+/* INPUTS */
+.inp{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-family:inherit;font-size:13px;outline:none;width:100%;transition:border-color .2s;}
+.inp:focus{border-color:var(--blue2);}
+.inp option{background:var(--navy2);}
+textarea.inp{resize:vertical;min-height:60px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+
+/* BUTTONS */
+.btn{font-size:13px;font-weight:600;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-primary{background:var(--accent);color:var(--navy);}
+.btn-primary:hover{opacity:.88;}
+.btn-orange{background:var(--orange);color:var(--white);}
+.btn-orange:hover{opacity:.88;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--gray);}
+.btn-ghost:hover{border-color:var(--orange);color:var(--orange);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+
+/* REP CARDS */
+.rep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.rep-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;}
+.rep-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:.5rem;}
+.rep-stat-row{display:flex;justify-content:space-between;margin-top:6px;}
+.rep-stat{text-align:center;}
+.rep-stat .n{font-size:18px;font-weight:800;color:var(--accent);}
+.rep-stat .l{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;}
+.rep-bar{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden;}
+.rep-fill{height:100%;background:var(--orange);border-radius:2px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:600px;margin:auto;}
+.modal-title{font-size:16px;font-weight:700;color:var(--white);margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);}
+.modal-close:hover{color:var(--white);}
+
+/* REPORT BUILDER */
+.report-stat{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;}
+.report-stat .n{font-size:32px;font-weight:800;color:var(--accent);}
+.report-stat .l{font-size:12px;color:var(--gray);margin-top:3px;}
+
+/* SEARCH */
+.search-bar{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;}
+.search-bar input{flex:1;min-width:180px;}
+.search-bar select{min-width:140px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:3rem;color:var(--gray);font-size:14px;}
+.empty .icon{font-size:36px;margin-bottom:.75rem;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@media(max-width:700px){
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .pipeline-bar{grid-template-columns:repeat(3,1fr);}
+  .rep-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:460px){
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .rep-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="toast-el" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">My Smart<span>Slots</span></div>
+    <div class="login-sub">Admin Dashboard — Owner Access Only</div>
+    <input type="text" id="username" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="password" placeholder="Password"/>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <p class="login-error" id="login-error">Incorrect credentials or not an admin account.</p>
+    <p class="login-note">This page is restricted to admin accounts only.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">My Smart<span>Slots</span> — Admin</div>
+    <div class="topbar-right">
+      <span class="admin-badge">🔐 Owner</span>
+      <button class="refresh-btn" onclick="loadDashboard()">↻ Refresh</button>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('overview',this)">📊 Overview</div>
+    <div class="nav-tab" onclick="switchTab('clients',this)">👥 Clients</div>
+    <div class="nav-tab" onclick="switchTab('reps',this)">🏆 Rep Performance</div>
+    <div class="nav-tab" onclick="switchTab('pipeline',this)">📋 Pipeline</div>
+    <div class="nav-tab" onclick="switchTab('reports',this)">📈 Monthly Reports</div>
+    <div class="nav-tab" onclick="switchTab('logins',this)">🔑 Login History</div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card mrr-card"><div class="label">Monthly Recurring Revenue</div><div class="value" id="s-mrr">—</div><div class="sub" id="s-mrr-sub">loading...</div></div>
+        <div class="stat-card clients-card"><div class="label">Active Clients</div><div class="value" id="s-clients">—</div><div class="sub" id="s-clients-sub">loading...</div></div>
+        <div class="stat-card pipeline-card"><div class="label">Pipeline Contacts</div><div class="value" id="s-contacts">—</div><div class="sub" id="s-contacts-sub">loading...</div></div>
+        <div class="stat-card close-card"><div class="label">Close Rate</div><div class="value" id="s-rate">—</div><div class="sub" id="s-rate-sub">loading...</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pipeline by Stage</div>
+        <div class="pipeline-bar" id="pipeline-bar">
+          <div class="pipe-col pipe-new"><div class="n" id="p-new">—</div><div class="l">New</div></div>
+          <div class="pipe-col pipe-contacted"><div class="n" id="p-contacted">—</div><div class="l">Contacted</div></div>
+          <div class="pipe-col pipe-audit"><div class="n" id="p-audit">—</div><div class="l">Audit Set</div></div>
+          <div class="pipe-col pipe-followup"><div class="n" id="p-followup">—</div><div class="l">Follow-Up</div></div>
+          <div class="pipe-col pipe-closed"><div class="n" id="p-closed">—</div><div class="l">Closed</div></div>
+          <div class="pipe-col pipe-dead"><div class="n" id="p-dead">—</div><div class="l">Not Int.</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Rep Summary</div>
+        <div class="rep-grid" id="rep-overview-grid">
+          <div class="empty"><div class="icon">⏳</div>Loading...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pending Onboards — Need Attention</div>
+        <div id="pending-onboards">
+          <div class="empty"><div class="icon">⏳</div>Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="tab-panel" id="tab-clients">
+      <div class="section-head">
+        <h2>Client Onboard Submissions</h2>
+        <p>All businesses that have submitted their onboard form. Update their status as you set them up.</p>
+      </div>
+      <div class="search-bar">
+        <input class="inp" type="text" id="client-search" placeholder="Search business name or email..." oninput="renderClients()"/>
+        <select class="inp" id="client-status-filter" onchange="renderClients()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="setup">In Setup</option>
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+        </select>
+      </div>
+      <div class="card" id="clients-table-wrap">
+        <div class="empty"><div class="icon">⏳</div>Loading...</div>
+      </div>
+    </div>
+
+    <!-- REP PERFORMANCE -->
+    <div class="tab-panel" id="tab-reps">
+      <div class="section-head">
+        <h2>Rep Performance</h2>
+        <p>Contact counts, close rates, and login activity per rep.</p>
+      </div>
+      <div id="rep-detail-grid">
+        <div class="empty"><div class="icon">⏳</div>Loading...</div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="tab-panel" id="tab-pipeline">
+      <div class="section-head">
+        <h2>Full Pipeline</h2>
+        <p>Every contact across all reps.</p>
+      </div>
+      <div class="search-bar">
+        <input class="inp" type="text" id="pipe-search" placeholder="Search business name..." oninput="renderPipeline()"/>
+        <select class="inp" id="pipe-status-filter" onchange="renderPipeline()">
+          <option value="">All Stages</option>
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="audit">Audit Set</option>
+          <option value="followup">Follow-Up</option>
+          <option value="closed">Closed</option>
+          <option value="dead">Not Interested</option>
+        </select>
+        <select class="inp" id="pipe-rep-filter" onchange="renderPipeline()">
+          <option value="">All Reps</option>
+        </select>
+      </div>
+      <div class="card" id="pipeline-table-wrap">
+        <div class="empty"><div class="icon">⏳</div>Loading...</div>
+      </div>
+    </div>
+
+    <!-- MONTHLY REPORTS -->
+    <div class="tab-panel" id="tab-reports">
+      <div class="section-head">
+        <h2>Monthly Report Builder</h2>
+        <p>Build and save monthly reports for each active client. Clients can view these in their portal.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Create / Update Report</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Client Email</label>
+            <select class="inp" id="report-client">
+              <option value="">Select client...</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Report Month</label>
+            <input class="inp" type="month" id="report-month"/>
+          </div>
+          <div class="form-group"><label>Calls Recovered</label>
+            <input class="inp" type="number" id="report-calls" placeholder="e.g. 12" min="0"/>
+          </div>
+          <div class="form-group"><label>Bookings Confirmed</label>
+            <input class="inp" type="number" id="report-bookings" placeholder="e.g. 8" min="0"/>
+          </div>
+          <div class="form-group"><label>Reviews Requested</label>
+            <input class="inp" type="number" id="report-reviews" placeholder="e.g. 6" min="0"/>
+          </div>
+          <div class="form-group"><label>Est. Revenue Impact ($)</label>
+            <input class="inp" type="number" id="report-revenue" placeholder="e.g. 2400" min="0"/>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label>Notes for Client</label>
+          <textarea class="inp" id="report-notes" placeholder="Highlights, upcoming changes, recommendations..."></textarea>
+        </div>
+        <button class="btn btn-orange" onclick="saveReport()">Save Report</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Saved Reports</div>
+        <div id="reports-list">
+          <div class="empty"><div class="icon">📈</div>No reports saved yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN HISTORY -->
+    <div class="tab-panel" id="tab-logins">
+      <div class="section-head">
+        <h2>Login History</h2>
+        <p>All rep, admin, setup tool, and client portal logins.</p>
+      </div>
+      <div class="card">
+        <div id="logins-table-wrap">
+          <div class="empty"><div class="icon">⏳</div>Loading...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CLIENT DETAIL MODAL -->
+<div class="modal-overlay" id="client-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="cm-title">Client Details</span>
+      <button class="modal-close" onclick="closeClientModal()">×</button>
+    </div>
+    <div id="cm-body"></div>
+    <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap;">
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);display:block;margin-bottom:4px;">Status</label>
+        <select class="inp" id="cm-status">
+          <option value="pending">Pending</option>
+          <option value="setup">In Setup</option>
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:2;min-width:200px;">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);display:block;margin-bottom:4px;">Admin Notes</label>
+        <input class="inp" type="text" id="cm-notes" placeholder="Internal notes..."/>
+      </div>
+    </div>
+    <button class="btn btn-orange" style="width:100%;margin-top:10px;" onclick="saveClientStatus()">Save Changes</button>
+  </div>
+</div>
+
+<script>
+const API="https://mysmartslots-portal.onrender.com";
+let currentU=null,currentP=null;
+let dashData=null,selectedClientId=null;
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogin(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  try{
+    const r=await fetch(`${API}/portal/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok||!d.isAdmin){
+      document.getElementById('login-error').style.display='block';return;
+    }
+    currentU=u.toLowerCase();currentP=p;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    await loadDashboard();
+  }catch(e){document.getElementById('login-error').style.display='block';}
+}
+
+function doLogout(){
+  currentU=null;currentP=null;dashData=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('password').value='';
+}
+
+function toast(msg,err=false){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;t.style.borderColor=err?'var(--red)':'var(--border)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function switchTab(name,el){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+async function api(endpoint,body={}){
+  const r=await fetch(`${API}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,...body})});
+  return r.json();
+}
+
+async function loadDashboard(){
+  try{
+    const [dash,onboards,logins]=await Promise.all([
+      api('/portal/admin/dashboard'),
+      api('/portal/onboard/list'),
+      api('/portal/admin/logins'),
+    ]);
+    dashData={dash,onboards,logins};
+    renderOverview();
+    renderClients();
+    renderReps();
+    renderPipeline();
+    renderLogins();
+    populateReportClients();
+  }catch(e){toast('Failed to load dashboard — check connection.',true);}
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+function renderOverview(){
+  const d=dashData.dash;
+  if(!d.success)return;
+  const mrr=d.mrr||0;
+  document.getElementById('s-mrr').textContent='$'+mrr.toLocaleString();
+  document.getElementById('s-mrr-sub').textContent=`$${(mrr*12).toLocaleString()} projected annual`;
+  document.getElementById('s-clients').textContent=d.activeClients||0;
+  document.getElementById('s-clients-sub').textContent=`${d.pendingOnboards||0} pending setup`;
+  document.getElementById('s-contacts').textContent=d.totalContacts||0;
+  document.getElementById('s-contacts-sub').textContent='across all reps';
+  const cl=d.pipeline?.closed||0;
+  const tot=d.totalContacts||1;
+  const rate=Math.round((cl/tot)*100);
+  document.getElementById('s-rate').textContent=rate+'%';
+  document.getElementById('s-rate-sub').textContent=`${cl} closed of ${tot} contacts`;
+
+  // Pipeline bar
+  ['new','contacted','audit','followup','closed','dead'].forEach(s=>{
+    const el=document.getElementById('p-'+s);
+    if(el)el.textContent=d.pipeline?.[s]||0;
+  });
+
+  // Rep overview
+  const repStats=d.repStats||{};
+  const reps=Object.keys(repStats);
+  const loginStats=d.loginStats||{};
+  if(!reps.length){document.getElementById('rep-overview-grid').innerHTML='<div class="empty"><div class="icon">👥</div>No reps yet.</div>';return;}
+  document.getElementById('rep-overview-grid').innerHTML=reps.map(rep=>{
+    const s=repStats[rep];
+    const rate=s.contacts>0?Math.round((s.closed/s.contacts)*100):0;
+    const lastLogin=d.recentLogins?.find(l=>l.username===rep)?.logged_in_at;
+    const lastStr=lastLogin?new Date(lastLogin).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Never';
+    return `<div class="rep-card">
+      <div class="rep-name">${rep}</div>
+      <div style="font-size:11px;color:var(--gray);">Last login: ${lastStr}</div>
+      <div class="rep-stat-row">
+        <div class="rep-stat"><div class="n">${s.contacts}</div><div class="l">Contacts</div></div>
+        <div class="rep-stat"><div class="n" style="color:var(--accent);">${s.audits}</div><div class="l">Audits</div></div>
+        <div class="rep-stat"><div class="n" style="color:var(--orange);">${s.closed}</div><div class="l">Closed</div></div>
+        <div class="rep-stat"><div class="n" style="color:var(--purple);">${rate}%</div><div class="l">Rate</div></div>
+      </div>
+      <div class="rep-bar"><div class="rep-fill" style="width:${Math.min(100,rate*3)}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Pending onboards
+  const submissions=dashData.onboards?.submissions||[];
+  const pending=submissions.filter(s=>s.onboard_status==='pending'||!s.onboard_status);
+  if(!pending.length){
+    document.getElementById('pending-onboards').innerHTML='<div style="font-size:13px;color:var(--accent);padding:.5rem 0;">✓ No pending onboards — all caught up.</div>';
+    return;
+  }
+  document.getElementById('pending-onboards').innerHTML=`<table class="data-table" style="width:100%;">
+    <thead><tr><th>Business</th><th>Plan</th><th>Submitted</th><th>Action</th></tr></thead>
+    <tbody>${pending.map(s=>`<tr>
+      <td><strong>${s.biz_name}</strong><br/><span style="font-size:11px;color:var(--gray);">${s.contact_email}</span></td>
+      <td><span class="badge badge-pending">${s.plan_label||s.plan||'—'}</span></td>
+      <td style="font-size:12px;color:var(--gray);">${s.submitted_at?new Date(s.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick='openClientModal(${JSON.stringify(s).replace(/'/g,"&#39;")})'>View →</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ── CLIENTS ───────────────────────────────────────────────────────────────────
+function renderClients(){
+  const submissions=dashData?.onboards?.submissions||[];
+  const search=(document.getElementById('client-search')?.value||'').toLowerCase();
+  const statusFilter=document.getElementById('client-status-filter')?.value||'';
+  let list=submissions.filter(s=>{
+    if(search&&!s.biz_name?.toLowerCase().includes(search)&&!s.contact_email?.toLowerCase().includes(search))return false;
+    if(statusFilter&&(s.onboard_status||'pending')!==statusFilter)return false;
+    return true;
+  });
+  if(!list.length){
+    document.getElementById('clients-table-wrap').innerHTML='<div class="empty"><div class="icon">👥</div>No clients found.</div>';
+    return;
+  }
+  const PLAN_MRR={starter:125,pro:225,elite:375};
+  document.getElementById('clients-table-wrap').innerHTML=`<table class="data-table">
+    <thead><tr><th>Business</th><th>Owner</th><th>Plan</th><th>Trade</th><th>Location</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+    <tbody>${list.map(s=>{
+      const st=s.onboard_status||'pending';
+      const badgeCls=st==='active'?'badge-active':st==='setup'?'badge-setup':st==='paused'?'badge-paused':'badge-pending';
+      const planKey=(s.plan||'pro').toLowerCase();
+      const mrr=PLAN_MRR[planKey]||225;
+      return `<tr>
+        <td><strong>${s.biz_name||'—'}</strong><br/><span style="font-size:11px;color:var(--gray);">${s.contact_email||'—'}</span></td>
+        <td>${s.contact_name||'—'}</td>
+        <td><span style="font-size:12px;font-weight:600;color:var(--accent);">$${mrr}/mo</span><br/><span style="font-size:10px;color:var(--gray);">${s.plan_label||s.plan||'—'}</span></td>
+        <td style="font-size:12px;">${s.trade||'—'}</td>
+        <td style="font-size:12px;">${s.location||'—'}</td>
+        <td><span class="badge ${badgeCls}">${st.charAt(0).toUpperCase()+st.slice(1)}</span></td>
+        <td style="font-size:11px;color:var(--gray);">${s.submitted_at?new Date(s.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—'}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick='openClientModal(${JSON.stringify(s).replace(/'/g,"&#39;")})'>View</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+// ── REPS ──────────────────────────────────────────────────────────────────────
+function renderReps(){
+  const d=dashData?.dash;
+  if(!d?.success)return;
+  const repStats=d.repStats||{};
+  const reps=Object.keys(repStats);
+  const contacts=d.contacts||[];
+  if(!reps.length){document.getElementById('rep-detail-grid').innerHTML='<div class="empty"><div class="icon">👥</div>No reps yet.</div>';return;}
+  document.getElementById('rep-detail-grid').innerHTML=reps.map(rep=>{
+    const s=repStats[rep];
+    const rate=s.contacts>0?Math.round((s.closed/s.contacts)*100):0;
+    const lastLogin=d.recentLogins?.find(l=>l.username===rep)?.logged_in_at;
+    const repContacts=contacts.filter(c=>c.rep_username===rep).slice(0,5);
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--white);">${rep}</div>
+          <div style="font-size:12px;color:var(--gray);">Last login: ${lastLogin?new Date(lastLogin).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Never'}</div>
+        </div>
+        <div style="font-size:22px;font-weight:800;color:var(--purple);">${rate}%<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);">close rate</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;">
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:var(--text);">${s.contacts}</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Contacts</div>
+        </div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:var(--accent);">${s.audits}</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Audits</div>
+        </div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:var(--orange);">${s.closed}</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Closed</div>
+        </div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:var(--blue2);">${s.contacts-s.closed-s.audits>0?s.contacts-s.closed-s.audits:0}</div>
+          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Active</div>
+        </div>
+      </div>
+      ${repContacts.length?`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;">Recent Contacts</div>
+      ${repContacts.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
+        <span style="color:var(--white);">${c.biz_name}</span>
+        <span class="badge badge-${c.status}">${c.status}</span>
+      </div>`).join('')}`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── PIPELINE ──────────────────────────────────────────────────────────────────
+function renderPipeline(){
+  const contacts=dashData?.dash?.contacts||[];
+  const search=(document.getElementById('pipe-search')?.value||'').toLowerCase();
+  const statusFilter=document.getElementById('pipe-status-filter')?.value||'';
+  const repFilter=document.getElementById('pipe-rep-filter')?.value||'';
+
+  // Populate rep filter
+  const repSelect=document.getElementById('pipe-rep-filter');
+  if(repSelect&&repSelect.options.length<=1){
+    const reps=[...new Set(contacts.map(c=>c.rep_username))];
+    reps.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;repSelect.appendChild(o);});
+  }
+
+  let list=contacts.filter(c=>{
+    if(search&&!c.biz_name?.toLowerCase().includes(search))return false;
+    if(statusFilter&&c.status!==statusFilter)return false;
+    if(repFilter&&c.rep_username!==repFilter)return false;
+    return true;
+  });
+
+  if(!list.length){
+    document.getElementById('pipeline-table-wrap').innerHTML='<div class="empty"><div class="icon">📋</div>No contacts found.</div>';
+    return;
+  }
+
+  document.getElementById('pipeline-table-wrap').innerHTML=`<table class="data-table">
+    <thead><tr><th>Business</th><th>Rep</th><th>Trade</th><th>Method</th><th>Status</th><th>Follow-up</th><th>Added</th></tr></thead>
+    <tbody>${list.map(c=>`<tr>
+      <td><strong>${c.biz_name}</strong>${c.contact_name?`<br/><span style="font-size:11px;color:var(--gray);">${c.contact_name}</span>`:''}</td>
+      <td style="font-size:12px;">${c.rep_username}</td>
+      <td style="font-size:12px;">${c.trade||'—'}</td>
+      <td style="font-size:12px;">${c.method||'—'}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td style="font-size:12px;color:${c.follow_up_date?'var(--orange)':'var(--gray)'};">${c.follow_up_date||'—'}</td>
+      <td style="font-size:11px;color:var(--gray);">${new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ── LOGINS ────────────────────────────────────────────────────────────────────
+function renderLogins(){
+  const logins=dashData?.logins?.logins||[];
+  if(!logins.length){document.getElementById('logins-table-wrap').innerHTML='<div class="empty"><div class="icon">🔑</div>No logins yet.</div>';return;}
+  document.getElementById('logins-table-wrap').innerHTML=`<table class="data-table">
+    <thead><tr><th>Name / Account</th><th>Username</th><th>Type</th><th>Time</th></tr></thead>
+    <tbody>${logins.map(l=>{
+      const type=l.rep_name.includes('[client]')?'Client':l.rep_name.includes('[setup]')?'Setup Tool':'Rep/Admin';
+      const name=l.rep_name.replace(' [client]','').replace(' [setup]','');
+      const typeColor=type==='Client'?'var(--blue2)':type==='Setup Tool'?'var(--purple)':'var(--accent)';
+      return `<tr>
+        <td><strong>${name}</strong></td>
+        <td style="font-size:12px;color:var(--gray);">${l.username}</td>
+        <td><span style="font-size:11px;font-weight:600;color:${typeColor};">${type}</span></td>
+        <td style="font-size:12px;color:var(--gray);">${new Date(l.logged_in_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+// ── CLIENT MODAL ──────────────────────────────────────────────────────────────
+function openClientModal(s){
+  selectedClientId=s.id;
+  document.getElementById('cm-title').textContent=s.biz_name||'Client Details';
+  document.getElementById('cm-status').value=s.onboard_status||'pending';
+  document.getElementById('cm-notes').value=s.admin_notes||'';
+  const hours=typeof s.hours==='string'?JSON.parse(s.hours||'{}'):s.hours||{};
+  const services=Array.isArray(s.services)?s.services.join(', '):s.services||'—';
+  document.getElementById('cm-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:1rem;">
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Contact</div>
+        <div>${s.contact_name||'—'}</div>
+        <div style="color:var(--accent);">${s.contact_email||'—'}</div>
+        <div>${s.biz_phone||'—'}</div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Plan & Trade</div>
+        <div style="color:var(--orange);font-weight:700;">${s.plan_label||s.plan||'—'}</div>
+        <div>${s.trade||'—'} · ${s.location||'—'}</div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Calendar</div>
+        <div>${s.cal_type||'—'}</div>
+        ${s.cal_link?`<div style="font-size:11px;color:var(--blue2);">${s.cal_link}</div>`:''}
+        ${s.cal_email?`<div style="font-size:11px;color:var(--blue2);">${s.cal_email}</div>`:''}
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Branding</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:16px;height:16px;border-radius:50%;background:${s.brand_color||'#00C896'};border:1px solid rgba(255,255,255,.2);flex-shrink:0;"></div>
+          <span>${s.brand_color||'—'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px;">${s.tone||'—'} · ${s.tagline||'No tagline'}</div>
+      </div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;margin-bottom:8px;font-size:13px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Services</div>
+      <div>${services}</div>
+      ${s.services_other?`<div style="color:var(--gray);font-size:12px;margin-top:3px;">+ ${s.services_other}</div>`:''}
+    </div>
+    ${s.extra_notes?`<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;font-size:13px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Client Notes</div>
+      <div style="color:var(--gray);">${s.extra_notes}</div>
+    </div>`:''}`;
+  document.getElementById('client-modal').classList.add('open');
+}
+
+function closeClientModal(){document.getElementById('client-modal').classList.remove('open');selectedClientId=null;}
+
+async function saveClientStatus(){
+  if(!selectedClientId)return;
+  const status=document.getElementById('cm-status').value;
+  const notes=document.getElementById('cm-notes').value.trim();
+  const d=await api('/portal/onboard/update',{id:selectedClientId,onboard_status:status,admin_notes:notes});
+  if(d.success){
+    toast('✓ Status updated');
+    await loadDashboard();
+    closeClientModal();
+  } else {
+    toast('Failed to update: '+(d.error||'unknown error'),true);
+  }
+}
+
+// ── REPORT BUILDER ────────────────────────────────────────────────────────────
+function populateReportClients(){
+  const submissions=dashData?.onboards?.submissions||[];
+  const active=submissions.filter(s=>s.onboard_status==='active'||s.contact_email);
+  const sel=document.getElementById('report-client');
+  sel.innerHTML='<option value="">Select client...</option>';
+  active.forEach(s=>{
+    const o=document.createElement('option');
+    o.value=s.contact_email;
+    o.textContent=`${s.biz_name} (${s.contact_email})`;
+    sel.appendChild(o);
+  });
+  // Set default month to current
+  const now=new Date();
+  document.getElementById('report-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  loadSavedReports();
+}
+
+async function loadSavedReports(){
+  // Show reports for all clients - pull from each active client
+  const submissions=dashData?.onboards?.submissions||[];
+  const emails=submissions.map(s=>s.contact_email).filter(Boolean);
+  if(!emails.length){document.getElementById('reports-list').innerHTML='<div class="empty"><div class="icon">📈</div>No active clients yet.</div>';return;}
+
+  // For now show a message to select client - full report list requires per-client fetch
+  document.getElementById('reports-list').innerHTML=`<div style="font-size:13px;color:var(--gray);padding:.5rem 0;">Select a client above to view their report history. Reports are sent to clients via their portal at <strong style="color:var(--text);">mysmartslots.com/client</strong></div>`;
+}
+
+async function saveReport(){
+  const email=document.getElementById('report-client').value;
+  const month=document.getElementById('report-month').value;
+  if(!email||!month){toast('Select a client and month first.',true);return;}
+  const d=await api('/portal/admin/report/save',{
+    client_email:email,
+    report_month:month,
+    calls_recovered:parseInt(document.getElementById('report-calls').value)||0,
+    bookings_confirmed:parseInt(document.getElementById('report-bookings').value)||0,
+    reviews_requested:parseInt(document.getElementById('report-reviews').value)||0,
+    revenue_impact:parseInt(document.getElementById('report-revenue').value)||0,
+    notes:document.getElementById('report-notes').value.trim(),
+  });
+  if(d.success){
+    toast('✓ Report saved — client can view it in their portal');
+    document.getElementById('report-calls').value='';
+    document.getElementById('report-bookings').value='';
+    document.getElementById('report-reviews').value='';
+    document.getElementById('report-revenue').value='';
+    document.getElementById('report-notes').value='';
+  } else {
+    toast('Failed: '+(d.error||'unknown error'),true);
+  }
+}
+</script>
+</body>
+</html>

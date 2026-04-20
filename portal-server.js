@@ -17,9 +17,9 @@ const supabase = createClient(
 // Same users as rep.html — keep these in sync when you add new reps
 const USERS = {
   "admin": { password: process.env.ADMIN_PASSWORD || "slots2025", name: "Owner",  isAdmin: true },
-  "orion1":  { password: process.env.REP1_PASSWORD  || "Orion2026$",  name: "Orion",  isAdmin: false },
+  "orion1":  { password: process.env.REP1_PASSWORD  || "Orion2026$v ",  name: "Orion",  isAdmin: false },
   "rep2":  { password: process.env.REP2_PASSWORD  || "rep2pass",  name: "Rep 2",  isAdmin: false },
-  "braden1":  { password: process.env.Braden_PASSWORD  || "Braden2026$",  name: "Braden",   isAdmin: false },
+  "braden1":  { password: process.env.ALEX_PASSWORD  || "Braden2026$",  name: "Braden",   isAdmin: false },
 };
 
 // ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
@@ -105,6 +105,18 @@ app.post("/portal/contacts/get", requireAuth, async (req, res) => {
   const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true, contacts: data });
+});
+
+// ── CONTACTS — Cross-rep duplicate check ─────────────────────────────────────
+app.post("/portal/contacts/check", requireAuth, async (req, res) => {
+  const { biz_name } = req.body;
+  if (!biz_name) return res.status(400).json({ error: "biz_name required" });
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("biz_name, rep_username, status")
+    .ilike("biz_name", biz_name.trim());
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, matches: data || [] });
 });
 
 // ── CONTACTS — Update ─────────────────────────────────────────────────────────
@@ -219,6 +231,144 @@ app.post("/portal/admin/stats", requireAuth, requireAdmin, async (req, res) => {
     contactCounts,
     closedCounts,
   });
+});
+
+// ── SETUP — Log access ────────────────────────────────────────────────────────
+app.post("/portal/setup/log", requireAuth, async (req, res) => {
+  const { action, client_name } = req.body;
+  await supabase.from("logins").insert({
+    username: req.user.username,
+    rep_name: req.user.name + " [setup]" + (client_name ? ": " + client_name : ""),
+    logged_in_at: new Date().toISOString(),
+  });
+  res.json({ success: true });
+});
+
+// ── ONBOARD — Submit client intake form (public, no auth) ─────────────────────
+app.post("/portal/onboard/submit", async (req, res) => {
+  const data = req.body;
+  if (!data.biz_name || !data.contact_email) {
+    return res.status(400).json({ error: "Business name and email are required." });
+  }
+  // Flatten hours/services for storage
+  const payload = {
+    ...data,
+    hours: typeof data.hours === "object" ? JSON.stringify(data.hours) : data.hours,
+    services: Array.isArray(data.services) ? JSON.stringify(data.services) : data.services,
+    submitted_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    onboard_status: "pending",
+  };
+  // Check for existing submission by email
+  const { data: existing } = await supabase
+    .from("onboard_submissions").select("id").eq("contact_email", data.contact_email.toLowerCase()).single();
+  if (existing) {
+    const { error } = await supabase.from("onboard_submissions")
+      .update({ ...payload, updated_at: new Date().toISOString() }).eq("contact_email", data.contact_email.toLowerCase());
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ success: true, updated: true });
+  }
+  const { error } = await supabase.from("onboard_submissions").insert(payload);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// ── ONBOARD — List all submissions (admin only) ───────────────────────────────
+app.post("/portal/onboard/list", requireAuth, requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from("onboard_submissions").select("*").order("submitted_at", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, submissions: data });
+});
+
+// ── ONBOARD — Update status (admin only) ─────────────────────────────────────
+app.post("/portal/onboard/update", requireAuth, requireAdmin, async (req, res) => {
+  const { id, onboard_status, admin_notes } = req.body;
+  if (!id) return res.status(400).json({ error: "ID required." });
+  const { error } = await supabase.from("onboard_submissions")
+    .update({ onboard_status, admin_notes, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// ── CLIENT — Login by email ───────────────────────────────────────────────────
+app.post("/portal/client/login", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email required." });
+  const { data, error } = await supabase
+    .from("onboard_submissions").select("*").eq("contact_email", email.toLowerCase().trim()).single();
+  if (error || !data) return res.status(404).json({ error: "No account found with that email." });
+  await supabase.from("logins").insert({
+    username: email.toLowerCase(),
+    rep_name: data.biz_name + " [client]",
+    logged_in_at: new Date().toISOString(),
+  });
+  res.json({ success: true, client: data });
+});
+
+// ── CLIENT — Get monthly reports ──────────────────────────────────────────────
+app.post("/portal/client/reports", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email required." });
+  const { data, error } = await supabase
+    .from("monthly_reports").select("*").eq("client_email", email.toLowerCase().trim())
+    .order("report_month", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, reports: data || [] });
+});
+
+// ── ADMIN — Full dashboard ────────────────────────────────────────────────────
+app.post("/portal/admin/dashboard", requireAuth, requireAdmin, async (req, res) => {
+  const [contactsRes, onboardRes, loginsRes] = await Promise.all([
+    supabase.from("contacts").select("*").order("created_at", { ascending: false }),
+    supabase.from("onboard_submissions").select("*").order("submitted_at", { ascending: false }),
+    supabase.from("logins").select("*").order("logged_in_at", { ascending: false }).limit(500),
+  ]);
+  const contacts = contactsRes.data || [];
+  const submissions = onboardRes.data || [];
+  const logins = loginsRes.data || [];
+  const PLAN_MRR = { starter: 125, pro: 225, elite: 375 };
+  let mrr = 0;
+  submissions.filter(s => s.onboard_status === "active").forEach(s => {
+    mrr += PLAN_MRR[(s.plan || "pro").toLowerCase()] || 225;
+  });
+  const pipeline = {};
+  ["new","contacted","audit","followup","closed","dead"].forEach(s => {
+    pipeline[s] = contacts.filter(c => c.status === s).length;
+  });
+  const repStats = {};
+  contacts.filter(c => c.status !== "prospect").forEach(c => {
+    if (!repStats[c.rep_username]) repStats[c.rep_username] = { contacts: 0, closed: 0, audits: 0 };
+    repStats[c.rep_username].contacts++;
+    if (c.status === "closed") repStats[c.rep_username].closed++;
+    if (c.status === "audit") repStats[c.rep_username].audits++;
+  });
+  res.json({
+    success: true, mrr,
+    activeClients: submissions.filter(s => s.onboard_status === "active").length,
+    pendingOnboards: submissions.filter(s => !s.onboard_status || s.onboard_status === "pending").length,
+    totalContacts: contacts.filter(c => c.status !== "prospect").length,
+    pipeline, repStats,
+    recentLogins: logins.slice(0, 50),
+    contacts: contacts.filter(c => c.status !== "prospect"),
+  });
+});
+
+// ── ADMIN — Save monthly report ───────────────────────────────────────────────
+app.post("/portal/admin/report/save", requireAuth, requireAdmin, async (req, res) => {
+  const { client_email, report_month, calls_recovered, bookings_confirmed, reviews_requested, revenue_impact, notes } = req.body;
+  if (!client_email || !report_month) return res.status(400).json({ error: "Email and month required." });
+  const { error } = await supabase.from("monthly_reports").upsert({
+    client_email: client_email.toLowerCase(),
+    report_month, calls_recovered: calls_recovered || 0,
+    bookings_confirmed: bookings_confirmed || 0,
+    reviews_requested: reviews_requested || 0,
+    revenue_impact: revenue_impact || 0,
+    notes: notes || "",
+    created_at: new Date().toISOString(),
+  }, { onConflict: "client_email,report_month" });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3001;

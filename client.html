@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Client Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#00C896;--accent-dark:#009e78;--accent-light:#e6faf5;
+  --navy:#1a1a2e;--blue:#1455a4;
+  --white:#ffffff;--gray-bg:#f5f7fb;--gray-border:#e4e8f0;
+  --gray-text:#6b7280;--dark-text:#111827;
+  --orange:#f39c12;--red:#e74c3c;--green:#16a34a;
+  --card:#ffffff;--shadow:0 1px 3px rgba(0,0,0,.08);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--gray-bg);color:var(--dark-text);min-height:100vh;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);position:relative;}
+#login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 30%,rgba(0,200,150,.12) 0%,transparent 60%);pointer-events:none;}
+.login-wrap{background:var(--white);border-radius:20px;padding:2.5rem 2rem;width:380px;text-align:center;position:relative;z-index:1;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.login-logo{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:14px;color:var(--gray-text);margin-bottom:1.75rem;line-height:1.6;}
+.login-wrap input{width:100%;padding:12px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;margin-bottom:12px;font-family:inherit;outline:none;color:var(--dark-text);transition:border-color .2s;}
+.login-wrap input:focus{border-color:var(--accent);background:var(--white);}
+.login-btn{width:100%;padding:13px;background:var(--accent);color:var(--white);border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;}
+.login-btn:hover{background:var(--accent-dark);}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;line-height:1.5;}
+.login-help{font-size:12px;color:var(--gray-text);margin-top:14px;line-height:1.6;}
+.login-help a{color:var(--accent);text-decoration:none;}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh;}
+header{background:var(--white);border-bottom:1px solid var(--gray-border);padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.header-logo{font-size:16px;font-weight:700;color:var(--navy);}
+.header-logo span{color:var(--accent);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.biz-badge{background:var(--accent-light);color:var(--accent-dark);padding:5px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid rgba(0,200,150,.2);}
+.logout-link{font-size:13px;color:var(--gray-text);cursor:pointer;background:none;border:none;font-family:inherit;}
+.logout-link:hover{color:var(--red);}
+
+/* NAV */
+.nav-bar{background:var(--white);border-bottom:1px solid var(--gray-border);display:flex;overflow-x:auto;padding:0 1.5rem;}
+.nav-bar::-webkit-scrollbar{display:none;}
+.nav-item{padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--gray-text);border-bottom:2.5px solid transparent;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.nav-item:hover{color:var(--dark-text);}
+.nav-item.active{color:var(--accent-dark);border-bottom-color:var(--accent);font-weight:600;}
+
+/* CONTENT */
+.content{max-width:900px;margin:0 auto;padding:1.75rem 1rem 5rem;}
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* WELCOME BANNER */
+.welcome-banner{background:linear-gradient(135deg,var(--navy) 0%,#1e3a6e 100%);border-radius:16px;padding:1.75rem 2rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.welcome-text h2{font-size:20px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.welcome-text p{font-size:13px;color:rgba(255,255,255,.65);line-height:1.6;}
+.live-badge{background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);color:var(--accent);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
+.stat-card{background:var(--white);border:1px solid var(--gray-border);border-radius:12px;padding:1.1rem 1.25rem;box-shadow:var(--shadow);}
+.stat-card .label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-text);margin-bottom:6px;}
+.stat-card .value{font-size:28px;font-weight:800;color:var(--dark-text);line-height:1;}
+.stat-card .sub{font-size:11px;color:var(--gray-text);margin-top:4px;}
+.stat-card.accent-card .value{color:var(--accent-dark);}
+.stat-card.blue-card .value{color:var(--blue);}
+.stat-card.orange-card .value{color:var(--orange);}
+
+/* REPORT CARDS */
+.report-card{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.5rem;margin-bottom:14px;box-shadow:var(--shadow);}
+.report-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px;}
+.report-month{font-size:17px;font-weight:700;color:var(--dark-text);}
+.report-badge{background:var(--accent-light);color:var(--accent-dark);border:1px solid rgba(0,200,150,.2);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+.report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;}
+.rs{background:var(--gray-bg);border-radius:10px;padding:.85rem;text-align:center;}
+.rs .n{font-size:26px;font-weight:800;color:var(--dark-text);}
+.rs .l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);margin-top:3px;}
+.rs.green-rs .n{color:var(--green);}
+.rs.blue-rs .n{color:var(--blue);}
+.rs.orange-rs .n{color:var(--orange);}
+.rs.accent-rs .n{color:var(--accent-dark);}
+.report-notes{background:var(--gray-bg);border-radius:10px;padding:.85rem 1rem;font-size:13px;color:var(--gray-text);line-height:1.7;border-left:3px solid var(--accent);}
+
+/* INFO CARD */
+.info-card{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.5rem;margin-bottom:14px;box-shadow:var(--shadow);}
+.info-card h3{font-size:15px;font-weight:700;color:var(--dark-text);margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--gray-border);}
+.info-row{display:flex;padding:8px 0;border-bottom:1px solid var(--gray-border);font-size:13px;}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-weight:600;color:var(--gray-text);min-width:160px;flex-shrink:0;}
+.info-value{color:var(--dark-text);}
+
+/* SUPPORT FORM */
+.support-card{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.5rem;margin-bottom:14px;box-shadow:var(--shadow);}
+.support-card h3{font-size:15px;font-weight:700;margin-bottom:1rem;}
+.support-input{width:100%;padding:11px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--dark-text);outline:none;margin-bottom:10px;transition:border-color .2s;}
+.support-input:focus{border-color:var(--accent);background:var(--white);}
+textarea.support-input{min-height:100px;resize:vertical;}
+.support-btn{background:var(--accent);color:var(--white);border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;}
+.support-btn:hover{background:var(--accent-dark);}
+.support-success{background:var(--accent-light);border:1px solid rgba(0,200,150,.3);border-radius:10px;padding:1rem 1.25rem;font-size:14px;color:var(--accent-dark);display:none;margin-top:10px;}
+
+/* AUTOMATIONS */
+.automation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.auto-card{background:var(--white);border:1px solid var(--gray-border);border-radius:12px;padding:1rem 1.25rem;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+.auto-icon{font-size:22px;flex-shrink:0;}
+.auto-label{font-size:13px;font-weight:600;color:var(--dark-text);}
+.auto-desc{font-size:11px;color:var(--gray-text);margin-top:2px;line-height:1.4;}
+.auto-status{margin-left:auto;flex-shrink:0;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:3rem 2rem;}
+.empty-state .icon{font-size:48px;margin-bottom:1rem;}
+.empty-state h3{font-size:16px;font-weight:700;margin-bottom:.5rem;}
+.empty-state p{font-size:13px;color:var(--gray-text);line-height:1.7;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@media(max-width:640px){
+  .stat-row{grid-template-columns:1fr 1fr;}
+  .report-stats{grid-template-columns:1fr 1fr;}
+  .automation-grid{grid-template-columns:1fr;}
+  .welcome-banner{flex-direction:column;}
+}
+@media(max-width:400px){.stat-row{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div id="toast-el" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-logo">My Smart<span>Slots</span></div>
+    <p class="login-sub">Client Portal — Enter the email address you used when signing up.</p>
+    <input type="email" id="client-email" placeholder="your@email.com" autocomplete="email"/>
+    <button class="login-btn" onclick="doLogin()">Access My Portal</button>
+    <p class="login-error" id="login-error">No account found with that email address. Please contact <a href="mailto:hello@mysmartslots.com">hello@mysmartslots.com</a> for help.</p>
+    <p class="login-help">Questions? Call <a href="tel:7853290202">785-329-0202</a> or email <a href="mailto:hello@mysmartslots.com">hello@mysmartslots.com</a></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-logo">My Smart<span>Slots</span></div>
+    <div class="header-right">
+      <span class="biz-badge" id="biz-badge">Loading...</span>
+      <button class="logout-link" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="nav-bar">
+    <div class="nav-item active" onclick="switchTab('dashboard',this)">Dashboard</div>
+    <div class="nav-item" onclick="switchTab('reports',this)">Monthly Reports</div>
+    <div class="nav-item" onclick="switchTab('automations',this)">My Automations</div>
+    <div class="nav-item" onclick="switchTab('account',this)">Account Info</div>
+    <div class="nav-item" onclick="switchTab('support',this)">Support</div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="tab-dashboard">
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Welcome back, <span id="owner-name">—</span></h2>
+          <p>Your My Smart Slots automations are running. Here's a snapshot of this month.</p>
+        </div>
+        <div class="live-badge"><div class="live-dot"></div>System Active</div>
+      </div>
+
+      <div class="stat-row" id="dash-stats">
+        <div class="stat-card accent-card"><div class="label">Calls Recovered</div><div class="value" id="ds-calls">—</div><div class="sub">this month</div></div>
+        <div class="stat-card blue-card"><div class="label">Bookings Confirmed</div><div class="value" id="ds-bookings">—</div><div class="sub">this month</div></div>
+        <div class="stat-card orange-card"><div class="label">Reviews Requested</div><div class="value" id="ds-reviews">—</div><div class="sub">this month</div></div>
+        <div class="stat-card"><div class="label">Est. Revenue Recovered</div><div class="value" id="ds-revenue">—</div><div class="sub">this month</div></div>
+      </div>
+
+      <div class="info-card">
+        <h3>Your Plan</h3>
+        <div class="info-row">
+          <span class="info-label">Current Plan</span>
+          <span class="info-value" id="plan-display" style="font-weight:700;color:var(--accent-dark);">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Monthly Rate</span>
+          <span class="info-value" id="plan-rate">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status</span>
+          <span class="info-value" id="plan-status">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Live Since</span>
+          <span class="info-value" id="plan-since">—</span>
+        </div>
+      </div>
+
+      <div class="info-card" style="background:linear-gradient(135deg,#f0fdf8 0%,#e6faf5 100%);border-color:rgba(0,200,150,.2);">
+        <h3 style="color:var(--accent-dark);">Need help or have a question?</h3>
+        <p style="font-size:13px;color:var(--gray-text);margin-bottom:1rem;line-height:1.7;">Our team is here to help. Use the Support tab to send us a message, or reach us directly.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="tel:7853290202" style="background:var(--accent);color:var(--white);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">📞 785-329-0202</a>
+          <a href="mailto:hello@mysmartslots.com" style="background:var(--white);color:var(--dark-text);border:1px solid var(--gray-border);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">✉️ Email Us</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MONTHLY REPORTS -->
+    <div class="panel" id="tab-reports">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;">Monthly Reports</h2>
+        <p style="font-size:13px;color:var(--gray-text);">Your monthly performance recap from My Smart Slots. New reports are added each month.</p>
+      </div>
+      <div id="reports-container">
+        <div class="empty-state"><div class="icon">📊</div><h3>No reports yet</h3><p>Your first monthly report will appear here after your first full month live. We'll email you when it's ready.</p></div>
+      </div>
+    </div>
+
+    <!-- AUTOMATIONS -->
+    <div class="panel" id="tab-automations">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;">My Automations</h2>
+        <p style="font-size:13px;color:var(--gray-text);">Everything running on your account right now.</p>
+      </div>
+      <div class="automation-grid" id="auto-grid"></div>
+      <div class="info-card" style="background:#fffbeb;border-color:#fde68a;">
+        <h3 style="color:#92400e;">Want to upgrade your plan?</h3>
+        <p style="font-size:13px;color:#78350f;line-height:1.7;">Upgrading gives you access to more automations and higher monthly activity limits. Contact us to discuss your options.</p>
+        <a href="tel:7853290202" style="display:inline-block;margin-top:.75rem;background:#f39c12;color:var(--white);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">Call to Upgrade</a>
+      </div>
+    </div>
+
+    <!-- ACCOUNT INFO -->
+    <div class="panel" id="tab-account">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;">Account Info</h2>
+        <p style="font-size:13px;color:var(--gray-text);">Your business details on file with My Smart Slots.</p>
+      </div>
+      <div class="info-card" id="account-info">
+        <h3>Business Details</h3>
+        <div class="empty-state"><div class="icon">⏳</div><p>Loading your account info...</p></div>
+      </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div class="panel" id="tab-support">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;">Support</h2>
+        <p style="font-size:13px;color:var(--gray-text);">Something not working? Have a question? Send us a message and we'll get back to you within a few hours.</p>
+      </div>
+      <div class="support-card">
+        <h3>Send a Message</h3>
+        <select class="support-input" id="support-type">
+          <option value="">What can we help with?</option>
+          <option>Something isn't working</option>
+          <option>I want to change my business info</option>
+          <option>I want to upgrade my plan</option>
+          <option>I want to cancel</option>
+          <option>Question about my bill</option>
+          <option>Something else</option>
+        </select>
+        <textarea class="support-input" id="support-msg" placeholder="Describe what's happening or what you need..."></textarea>
+        <button class="support-btn" onclick="submitSupport()">Send Message</button>
+        <div class="support-success" id="support-success">
+          ✓ Message received! We'll follow up at your email address within a few hours. For urgent issues call 785-329-0202.
+        </div>
+      </div>
+
+      <div class="support-card">
+        <h3>Direct Contact</h3>
+        <div class="info-row"><span class="info-label">Phone</span><span class="info-value"><a href="tel:7853290202" style="color:var(--accent-dark);font-weight:600;">785-329-0202</a></span></div>
+        <div class="info-row"><span class="info-label">Email</span><span class="info-value"><a href="mailto:hello@mysmartslots.com" style="color:var(--accent-dark);">hello@mysmartslots.com</a></span></div>
+        <div class="info-row"><span class="info-label">Response time</span><span class="info-value">Within a few hours, Mon–Fri</span></div>
+        <div class="info-row" style="border-bottom:none;"><span class="info-label">Emergency</span><span class="info-value">Call or text for urgent issues</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API="https://mysmartslots-portal.onrender.com";
+let clientData=null,clientEmail=null,reports=[];
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogin(){
+  const email=document.getElementById('client-email').value.trim().toLowerCase();
+  if(!email){document.getElementById('login-error').style.display='block';return;}
+  try{
+    const r=await fetch(`${API}/portal/client/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+    const d=await r.json();
+    if(!r.ok){document.getElementById('login-error').style.display='block';return;}
+    clientData=d.client;clientEmail=email;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('biz-badge').textContent=clientData.biz_name||'My Account';
+    document.getElementById('owner-name').textContent=clientData.contact_name?.split(' ')[0]||clientData.biz_name||'there';
+    await loadReports();
+    renderDashboard();
+    renderAccount();
+    renderAutomations();
+  }catch(e){document.getElementById('login-error').style.display='block';}
+}
+
+function doLogout(){
+  clientData=null;clientEmail=null;reports=[];
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('client-email').value='';
+  document.getElementById('login-error').style.display='none';
+}
+
+function toast(msg){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function switchTab(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+async function loadReports(){
+  try{
+    const r=await fetch(`${API}/portal/client/reports`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:clientEmail})});
+    const d=await r.json();
+    if(d.success)reports=d.reports||[];
+    renderReports();
+  }catch(e){console.error('Could not load reports:',e);}
+}
+
+function renderDashboard(){
+  const PLAN_RATES={starter:'$125/mo',pro:'$225/mo',elite:'$375/mo'};
+  const planKey=(clientData.plan||'pro').toLowerCase();
+  document.getElementById('plan-display').textContent=clientData.plan_label||planKey.charAt(0).toUpperCase()+planKey.slice(1)+' Plan';
+  document.getElementById('plan-rate').textContent=PLAN_RATES[planKey]||'$225/mo';
+  const status=clientData.onboard_status||'active';
+  document.getElementById('plan-status').innerHTML=status==='active'?'<span style="color:var(--green);font-weight:600;">✓ Active</span>':status==='setup'?'<span style="color:var(--orange);font-weight:600;">⚙ In Setup</span>':'<span style="color:var(--gray-text);">'+status+'</span>';
+  document.getElementById('plan-since').textContent=clientData.submitted_at?new Date(clientData.submitted_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
+
+  // Show latest report stats on dashboard
+  if(reports.length){
+    const latest=reports[0];
+    document.getElementById('ds-calls').textContent=latest.calls_recovered||0;
+    document.getElementById('ds-bookings').textContent=latest.bookings_confirmed||0;
+    document.getElementById('ds-reviews').textContent=latest.reviews_requested||0;
+    const rev=latest.revenue_impact||0;
+    document.getElementById('ds-revenue').textContent=rev?'$'+rev.toLocaleString():'—';
+  } else {
+    ['ds-calls','ds-bookings','ds-reviews','ds-revenue'].forEach(id=>document.getElementById(id).textContent='0');
+  }
+}
+
+function renderReports(){
+  const container=document.getElementById('reports-container');
+  if(!reports.length){
+    container.innerHTML='<div class="empty-state"><div class="icon">📊</div><h3>No reports yet</h3><p>Your first monthly report will appear here after your first full month live. We\'ll email you when it\'s ready.</p></div>';
+    return;
+  }
+  container.innerHTML=reports.map(r=>{
+    const month=r.report_month?new Date(r.report_month+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'}):r.report_month||'—';
+    const rev=r.revenue_impact||0;
+    return `<div class="report-card">
+      <div class="report-header">
+        <div class="report-month">${month}</div>
+        <div class="report-badge">Monthly Report</div>
+      </div>
+      <div class="report-stats">
+        <div class="rs green-rs"><div class="n">${r.calls_recovered||0}</div><div class="l">Calls Recovered</div></div>
+        <div class="rs blue-rs"><div class="n">${r.bookings_confirmed||0}</div><div class="l">Bookings Confirmed</div></div>
+        <div class="rs orange-rs"><div class="n">${r.reviews_requested||0}</div><div class="l">Reviews Requested</div></div>
+        <div class="rs accent-rs"><div class="n">${rev?'$'+rev.toLocaleString():'—'}</div><div class="l">Revenue Impact</div></div>
+      </div>
+      ${r.notes?`<div class="report-notes">${r.notes}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderAccount(){
+  const s=clientData;
+  const hours=typeof s.hours==='string'?JSON.parse(s.hours||'{}'):s.hours||{};
+  const hoursStr=Object.entries(hours).filter(([,v])=>v!=='closed').map(([d,v])=>`${d}: ${v}`).join(', ')||'—';
+  const services=Array.isArray(s.services)?s.services.join(', '):s.services||'—';
+  document.getElementById('account-info').innerHTML=`
+    <h3>Business Details</h3>
+    <div class="info-row"><span class="info-label">Business Name</span><span class="info-value">${s.biz_name||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Owner</span><span class="info-value">${s.contact_name||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Phone</span><span class="info-value">${s.biz_phone||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Email</span><span class="info-value">${s.contact_email||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Trade</span><span class="info-value">${s.trade||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Location</span><span class="info-value">${s.location||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Service Area</span><span class="info-value">${s.service_area||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Hours</span><span class="info-value">${hoursStr}</span></div>
+    <div class="info-row"><span class="info-label">Services</span><span class="info-value">${services}</span></div>
+    <div class="info-row"><span class="info-label">Calendar Type</span><span class="info-value">${s.cal_type||'—'}</span></div>
+    <div class="info-row" style="border-bottom:none;"><span class="info-label">Forwarding Number</span><span class="info-value">${s.forward_from||s.biz_phone||'—'}</span></div>
+    <div style="margin-top:1rem;padding:.85rem 1rem;background:#fff8f0;border:1px solid #fde68a;border-radius:10px;font-size:13px;color:#78350f;">
+      Need to update any of this info? Contact us at <a href="tel:7853290202" style="color:var(--orange);font-weight:600;">785-329-0202</a> or <a href="mailto:hello@mysmartslots.com" style="color:var(--orange);">hello@mysmartslots.com</a>
+    </div>`;
+}
+
+function renderAutomations(){
+  const planKey=(clientData.plan||'pro').toLowerCase();
+  const ALL_AUTOMATIONS=[
+    {icon:'📞',label:'Missed Call Text Back',desc:'Customers who miss your line get an auto-text with your booking link within seconds.',plans:['starter','pro','elite']},
+    {icon:'🤖',label:'AI Chat Booking',desc:'Your chatbot answers questions and captures bookings 24/7 on your website.',plans:['starter','pro','elite']},
+    {icon:'✅',label:'SMS Booking Confirmations',desc:'Every new booking triggers a confirmation text to the customer automatically.',plans:['starter','pro','elite']},
+    {icon:'🔔',label:'Appointment Reminders',desc:'Customers get a reminder text the day before and morning of their appointment.',plans:['starter','pro','elite']},
+    {icon:'💬',label:'Live SMS Chat',desc:'Customers can text your business number and get real-time AI responses.',plans:['pro','elite']},
+    {icon:'⭐',label:'Post-Job Review Requests',desc:'After a job is marked complete, a review request text goes out automatically.',plans:['pro','elite']},
+    {icon:'🔄',label:'Lead Re-Engagement',desc:'Old leads that went cold get an automated follow-up message to bring them back.',plans:['pro','elite']},
+    {icon:'📧',label:'Partial Email Replies',desc:'Basic email inquiries get an auto-reply that captures their info and moves them to booking.',plans:['elite']},
+    {icon:'📅',label:'Calendar Sync',desc:'All bookings sync directly to your calendar — no manual entry needed.',plans:['starter','pro','elite']},
+    {icon:'📊',label:'Monthly Performance Report',desc:'You receive a monthly recap of calls recovered, bookings confirmed, and revenue impact.',plans:['starter','pro','elite']},
+  ];
+  const active=ALL_AUTOMATIONS.filter(a=>a.plans.includes(planKey));
+  const inactive=ALL_AUTOMATIONS.filter(a=>!a.plans.includes(planKey));
+  const grid=document.getElementById('auto-grid');
+  grid.innerHTML=active.map(a=>`
+    <div class="auto-card">
+      <div class="auto-icon">${a.icon}</div>
+      <div>
+        <div class="auto-label">${a.label}</div>
+        <div class="auto-desc">${a.desc}</div>
+      </div>
+      <div class="auto-status"><div class="status-dot"></div></div>
+    </div>`).join('');
+  if(inactive.length){
+    grid.innerHTML+=`<div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-text);margin-top:.5rem;">Not included in your plan — upgrade to unlock</div>`;
+    grid.innerHTML+=inactive.map(a=>`
+      <div class="auto-card" style="opacity:.45;filter:grayscale(1);">
+        <div class="auto-icon">${a.icon}</div>
+        <div>
+          <div class="auto-label">${a.label}</div>
+          <div class="auto-desc">${a.desc}</div>
+        </div>
+        <div class="auto-status" style="font-size:11px;color:var(--gray-text);white-space:nowrap;">Upgrade</div>
+      </div>`).join('');
+  }
+}
+
+async function submitSupport(){
+  const type=document.getElementById('support-type').value;
+  const msg=document.getElementById('support-msg').value.trim();
+  if(!type||!msg){toast('Please select a topic and write a message.');return;}
+  // Send via email link as fallback since no dedicated support endpoint yet
+  const subject=encodeURIComponent(`Client Support: ${type} — ${clientData.biz_name}`);
+  const body=encodeURIComponent(`From: ${clientData.contact_name} (${clientData.biz_name})\nEmail: ${clientEmail}\nPlan: ${clientData.plan_label||clientData.plan}\n\nIssue: ${type}\n\nMessage:\n${msg}`);
+  window.open(`mailto:hello@mysmartslots.com?subject=${subject}&body=${body}`);
+  document.getElementById('support-success').style.display='block';
+  document.getElementById('support-type').value='';
+  document.getElementById('support-msg').value='';
+}
+</script>
+</body>
+</html>

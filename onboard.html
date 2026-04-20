@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Welcome to My Smart Slots — Let's Get You Set Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:#00C896;--accent-h:#00dfa8;--accent-glow:rgba(0,200,150,.10);
+  --dark:#07100D;--dark2:#0C1610;--dark3:#122018;--dark4:#1A2E22;
+  --border:rgba(0,200,150,.14);--border2:rgba(255,255,255,.07);--border3:rgba(255,255,255,.04);
+  --text:#E6F2EC;--muted:#658C78;--muted2:#3A5448;
+  --red:#E85D5D;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);line-height:1.6;min-height:100vh;}
+
+nav{padding:1rem 0;background:rgba(7,16,13,.95);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:50;}
+.nav-in{max-width:860px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--text);}
+.logo span{color:var(--accent);}
+.nav-badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:100px;background:var(--accent-glow);border:1px solid var(--border);color:var(--accent);}
+
+.hero{padding:3.5rem 0 2rem;text-align:center;}
+.hero-inner{max-width:620px;margin:0 auto;padding:0 2rem;}
+.step-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1.25rem;}
+.step-badge::before{content:'';width:20px;height:2px;background:var(--accent);}
+h1{font-family:'Syne',sans-serif;font-size:clamp(26px,5vw,40px);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-bottom:1rem;}
+.hero-sub{font-size:15px;color:var(--muted);line-height:1.8;}
+
+.plan-pill{display:inline-flex;align-items:center;gap:10px;margin:1.5rem auto 0;padding:12px 22px;background:var(--dark3);border:1px solid var(--border);border-radius:100px;font-size:14px;font-weight:600;color:var(--text);}
+.plan-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+.plan-locked{font-size:11px;color:var(--muted);margin-left:4px;}
+
+.progress-wrap{max-width:860px;margin:2rem auto 0;padding:0 2rem;}
+.progress-steps{display:flex;align-items:center;}
+.ps{display:flex;align-items:center;flex:1;}
+.ps-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid var(--border2);color:var(--muted);background:var(--dark2);transition:all .3s;flex-shrink:0;}
+.ps-circle.active{border-color:var(--accent);color:var(--accent);background:var(--accent-glow);}
+.ps-circle.done{border-color:var(--accent);background:var(--accent);color:#040f09;}
+.ps-label{font-size:11px;color:var(--muted);margin-left:8px;font-weight:500;white-space:nowrap;}
+.ps-label.active{color:var(--text);}
+.ps-line{flex:1;height:1px;background:var(--border2);margin:0 8px;}
+.ps-line.done{background:var(--accent);}
+
+.form-wrap{max-width:860px;margin:2rem auto 4rem;padding:0 2rem;}
+.section{background:var(--dark2);border:1px solid var(--border2);border-radius:14px;margin-bottom:1.5rem;overflow:hidden;display:none;}
+.section.active-section{display:block;}
+.sec-hdr{padding:1.25rem 1.75rem;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;}
+.sec-num{width:28px;height:28px;border-radius:50%;background:var(--accent-glow);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;}
+.sec-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+.sec-desc{font-size:12px;color:var(--muted);margin-top:1px;}
+.sec-body{padding:1.75rem;}
+
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.fg{margin-bottom:1.1rem;}
+.fg:last-child{margin-bottom:0;}
+label{display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+label .req{color:var(--accent);margin-left:2px;}
+input,textarea,select{
+  width:100%;background:var(--dark);border:1px solid var(--border2);
+  border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;
+  font-size:14px;color:var(--text);transition:border-color .2s;outline:none;appearance:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);}
+input.error,select.error,textarea.error{border-color:var(--red);}
+textarea{resize:vertical;min-height:90px;}
+select option{background:var(--dark2);}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
+
+.hours-grid{display:flex;flex-direction:column;gap:8px;}
+.hour-row{display:grid;grid-template-columns:100px 1fr 1fr 80px;gap:8px;align-items:center;}
+.day-label{font-size:13px;font-weight:500;color:var(--text);}
+.closed-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;}
+.closed-toggle input[type=checkbox]{width:auto;cursor:pointer;accent-color:var(--accent);}
+.closed-toggle span{font-size:12px;color:var(--muted);}
+
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.svc-check{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;transition:all .2s;}
+.svc-check:hover{border-color:var(--accent);background:var(--accent-glow);}
+.svc-check input{width:auto;margin-top:2px;cursor:pointer;accent-color:var(--accent);}
+.svc-check-label{font-size:13px;color:var(--text);font-weight:500;line-height:1.4;}
+.svc-check-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.color-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;}
+.swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;}
+.swatch.selected{border-color:var(--text);transform:scale(1.15);}
+.color-custom{display:flex;align-items:center;gap:8px;margin-top:12px;}
+.color-custom input[type=color]{width:36px;height:36px;border:1px solid var(--border2);border-radius:50%;padding:2px;background:var(--dark);cursor:pointer;}
+
+.btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;border:none;}
+.btn-primary{background:var(--accent);color:#040f09;}
+.btn-primary:hover{background:var(--accent-h);transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.err-msg{background:rgba(232,93,93,.1);border:1px solid rgba(232,93,93,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:1rem;display:none;}
+
+.success-screen{display:none;max-width:620px;margin:4rem auto;padding:0 2rem;text-align:center;}
+.success-icon{width:72px;height:72px;border-radius:50%;background:var(--accent-glow);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:32px;}
+.success-screen h2{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;margin-bottom:1rem;}
+.success-screen p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:.75rem;}
+.next-steps{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:1.75rem;margin-top:2rem;text-align:left;}
+.next-steps h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:1.25rem;}
+.ns-item{display:flex;align-items:flex-start;gap:12px;padding:.85rem 0;border-bottom:1px solid var(--border2);font-size:14px;color:var(--muted);line-height:1.6;}
+.ns-item:last-child{border-bottom:none;padding-bottom:0;}
+.ns-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#040f09;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+
+footer{border-top:1px solid var(--border2);padding:1.5rem 0;text-align:center;}
+footer p{font-size:12px;color:var(--muted2);}
+
+@media(max-width:680px){.frow{grid-template-columns:1fr;}.svc-grid{grid-template-columns:1fr 1fr;}.hour-row{grid-template-columns:80px 1fr 1fr 70px;}}
+@media(max-width:480px){.svc-grid{grid-template-columns:1fr;}.hour-row{grid-template-columns:1fr 1fr;}.hour-row .day-label{display:none;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <div class="logo">My<span>Smart</span>Slots</div>
+    <div class="nav-badge">Client Onboarding</div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="step-badge">Welcome Aboard</div>
+    <h1>Let's Get Your Business Set Up</h1>
+    <p class="hero-sub">Fill in the details below and we'll have your automations live within 24 hours. This replaces any back-and-forth — one form and you're done.</p>
+    <div class="plan-pill">
+      <div class="plan-dot"></div>
+      <span id="plan-display">Loading your plan...</span>
+      <span class="plan-locked">· locked in</span>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="ps"><div class="ps-circle active" id="pc1">1</div><span class="ps-label active" id="pl1">Business Info</span></div>
+    <div class="ps-line" id="pl-1"></div>
+    <div class="ps"><div class="ps-circle" id="pc2">2</div><span class="ps-label" id="pl2">Hours &amp; Services</span></div>
+    <div class="ps-line" id="pl-2"></div>
+    <div class="ps"><div class="ps-circle" id="pc3">3</div><span class="ps-label" id="pl3">Booking &amp; Links</span></div>
+    <div class="ps-line" id="pl-3"></div>
+    <div class="ps"><div class="ps-circle" id="pc4">4</div><span class="ps-label" id="pl4">Branding</span></div>
+  </div>
+</div>
+
+<div class="form-wrap" id="form-wrap">
+
+  <!-- STEP 1 -->
+  <div class="section active-section" id="step1">
+    <div class="sec-hdr">
+      <div class="sec-num">1</div>
+      <div><div class="sec-title">Business Information</div><div class="sec-desc">The basics we need to set up your account and automations</div></div>
+    </div>
+    <div class="sec-body">
+      <div class="err-msg" id="err1"></div>
+      <div class="frow">
+        <div class="fg"><label>Business Name <span class="req">*</span></label><input type="text" id="biz_name" placeholder="Johnson Plumbing LLC"/></div>
+        <div class="fg"><label>Your Name <span class="req">*</span></label><input type="text" id="contact_name" placeholder="Mike Johnson"/></div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>Business Phone <span class="req">*</span></label>
+          <input type="tel" id="biz_phone" placeholder="(785) 000-0000"/>
+          <div class="hint">The number your customers call — we'll set up forwarding from this</div>
+        </div>
+        <div class="fg"><label>Your Email <span class="req">*</span></label><input type="email" id="contact_email" placeholder="mike@johnsonplumbing.com"/></div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>Trade / Industry <span class="req">*</span></label>
+          <select id="trade">
+            <option value="">Select your trade...</option>
+            <option>Plumbing</option><option>HVAC / Heating &amp; Cooling</option>
+            <option>Electrical</option><option>Roofing</option>
+            <option>General Contracting</option><option>Pest Control</option>
+            <option>Lawn &amp; Landscaping</option><option>Auto Service</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fg"><label>City &amp; State <span class="req">*</span></label><input type="text" id="location" placeholder="Wichita, KS"/></div>
+      </div>
+      <div class="fg">
+        <label>Business Website URL</label>
+        <input type="url" id="website" placeholder="https://johnsonplumbing.com"/>
+        <div class="hint">We'll install the chat widget here. Leave blank if you don't have one yet.</div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Facebook Page URL</label><input type="url" id="facebook" placeholder="https://facebook.com/yourpage"/></div>
+        <div class="fg"><label>Instagram URL</label><input type="url" id="instagram" placeholder="https://instagram.com/yourhandle"/></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Google Business Profile URL</label><input type="url" id="google_biz" placeholder="https://g.page/yourbusiness"/></div>
+        <div class="fg"><label>Yelp Page URL</label><input type="url" id="yelp" placeholder="https://yelp.com/biz/yourpage"/></div>
+      </div>
+      <div class="fg">
+        <label>Phone Number to Forward Missed Calls From <span class="req">*</span></label>
+        <input type="tel" id="forward_from" placeholder="(785) 000-0000"/>
+        <div class="hint">Usually the same as your business phone. Missed calls here get auto-texted a booking link.</div>
+      </div>
+      <div class="btn-row">
+        <div></div>
+        <button class="btn btn-primary" onclick="nextStep(1)">Hours &amp; Services →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="section" id="step2">
+    <div class="sec-hdr">
+      <div class="sec-num">2</div>
+      <div><div class="sec-title">Business Hours &amp; Services</div><div class="sec-desc">We use this to configure your chatbot responses and booking availability</div></div>
+    </div>
+    <div class="sec-body">
+      <div class="err-msg" id="err2"></div>
+      <label style="margin-bottom:12px;display:block;">Business Hours <span class="req">*</span></label>
+      <div class="hours-grid" id="hours-grid"></div>
+      <div class="fg" style="margin-top:1.75rem;">
+        <label>Services You Offer <span class="req">*</span></label>
+        <div class="hint" style="margin-bottom:10px;">Check everything that applies — we'll train the chatbot on these</div>
+        <div class="svc-grid" id="svc-grid"></div>
+        <div class="fg" style="margin-top:1rem;">
+          <label>Other / Custom Services</label>
+          <input type="text" id="services_other" placeholder="e.g. Water heater installation, gas line repair..."/>
+        </div>
+      </div>
+      <div class="frow" style="margin-top:.5rem;">
+        <div class="fg">
+          <label>Average Job Ticket ($) <span class="req">*</span></label>
+          <input type="number" id="avg_ticket" placeholder="350" min="1"/>
+          <div class="hint">Used in your monthly report to calculate recovered revenue</div>
+        </div>
+        <div class="fg">
+          <label>Service Area (cities / radius)</label>
+          <input type="text" id="service_area" placeholder="Wichita + 30 miles, Derby, Andover"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(2)">← Back</button>
+        <button class="btn btn-primary" onclick="nextStep(2)">Booking &amp; Links →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="section" id="step3">
+    <div class="sec-hdr">
+      <div class="sec-num">3</div>
+      <div><div class="sec-title">Booking &amp; Calendar Setup</div><div class="sec-desc">How should customers book jobs? We'll sync everything to this.</div></div>
+    </div>
+    <div class="sec-body">
+      <div class="err-msg" id="err3"></div>
+      <div class="fg">
+        <label>Calendar Type <span class="req">*</span></label>
+        <select id="cal_type" onchange="toggleCalFields()">
+          <option value="">Select...</option>
+          <option value="calendly">Calendly (I already have one)</option>
+          <option value="calendly_new">Calendly (please set one up for me)</option>
+          <option value="google">Google Calendar</option>
+          <option value="outlook">Outlook / Microsoft 365</option>
+          <option value="other">Other booking system</option>
+          <option value="none">I don't have one yet</option>
+        </select>
+      </div>
+      <div class="fg" id="cal_link_wrap" style="display:none;">
+        <label>Your Booking / Calendar Link <span class="req">*</span></label>
+        <input type="url" id="cal_link" placeholder="https://calendly.com/yourname"/>
+        <div class="hint">Paste your full booking link — this gets texted to customers after a missed call</div>
+      </div>
+      <div class="fg" id="cal_email_wrap" style="display:none;">
+        <label>Calendar Email Address <span class="req">*</span></label>
+        <input type="email" id="cal_email" placeholder="mike@gmail.com"/>
+        <div class="hint">The Google or Outlook account you use for your calendar — we'll request access to sync bookings</div>
+      </div>
+      <div class="fg" id="cal_other_wrap" style="display:none;">
+        <label>Describe Your Booking System</label>
+        <textarea id="cal_other_desc" placeholder="e.g. We use Jobber, ServiceTitan, Housecall Pro..."></textarea>
+      </div>
+      <div class="fg">
+        <label>Preferred SMS Number for Customers to Text</label>
+        <select id="sms_pref">
+          <option value="new">Assign me a new My Smart Slots number</option>
+          <option value="forward">Forward from my existing business number</option>
+        </select>
+        <div class="hint">We'll set this up — just let us know your preference</div>
+      </div>
+      <div class="fg">
+        <label>Anything Special About Your Scheduling</label>
+        <textarea id="scheduling_notes" placeholder="e.g. Only take emergency calls on weekends, book 2-hour windows, deposits required for certain jobs..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(3)">← Back</button>
+        <button class="btn btn-primary" onclick="nextStep(3)">Branding →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="section" id="step4">
+    <div class="sec-hdr">
+      <div class="sec-num">4</div>
+      <div><div class="sec-title">Branding</div><div class="sec-desc">We use this to match your chatbot and booking page to your business look</div></div>
+    </div>
+    <div class="sec-body">
+      <div class="err-msg" id="err4"></div>
+      <div class="fg">
+        <label>Primary Brand Color</label>
+        <div class="hint" style="margin-bottom:8px;">Pick the closest match or enter a custom hex</div>
+        <div class="color-row" id="color-swatches"></div>
+        <div class="color-custom">
+          <input type="color" id="color_custom_picker" value="#00C896" oninput="setCustomColor(this.value)"/>
+          <input type="text" id="brand_color" placeholder="#00C896" style="width:120px;" oninput="syncColorPicker(this.value)"/>
+          <span style="font-size:12px;color:var(--muted);">Custom hex</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Logo URL</label>
+        <input type="url" id="logo_url" placeholder="https://yourwebsite.com/logo.png"/>
+        <div class="hint">Direct link to your logo image. PNG or SVG preferred. Leave blank if you don't have one hosted online.</div>
+      </div>
+      <div class="fg">
+        <label>Tagline or Slogan</label>
+        <input type="text" id="tagline" placeholder="Fast, reliable plumbing — 24/7" maxlength="80"/>
+        <div class="hint">Used in your chatbot intro and booking page. Keep it short.</div>
+      </div>
+      <div class="fg">
+        <label>Tone of Voice for Customer Messages</label>
+        <select id="tone">
+          <option value="friendly_professional">Friendly &amp; Professional</option>
+          <option value="casual">Casual &amp; Conversational</option>
+          <option value="formal">Formal &amp; Direct</option>
+          <option value="energetic">Energetic &amp; Enthusiastic</option>
+        </select>
+        <div class="hint">We'll match this in your chatbot responses and auto-texts</div>
+      </div>
+      <div class="fg">
+        <label>Anything Else We Should Know</label>
+        <textarea id="extra_notes" placeholder="Special instructions, existing tools we should know about, anything important..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(4)">← Back</button>
+        <button class="btn btn-primary" id="submit-btn" onclick="submitForm()">Submit &amp; Let's Go Live ✓</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">✓</div>
+  <h2>You're All Set!</h2>
+  <p>We've received everything we need. Your automations will be live within <strong style="color:var(--accent)">24 hours</strong>.</p>
+  <p>Keep an eye on <strong id="success-email" style="color:var(--text)"></strong> — we'll send a confirmation and your setup details there.</p>
+  <div class="next-steps">
+    <h3>What Happens Next</h3>
+    <div class="ns-item"><div class="ns-num">1</div><span>We review your info and configure your chatbot, SMS flows, and calendar sync — usually within a few hours.</span></div>
+    <div class="ns-item"><div class="ns-num">2</div><span>You'll receive an email with your My Smart Slots booking page link, your new SMS number, and a quick-start guide.</span></div>
+    <div class="ns-item"><div class="ns-num">3</div><span>If you need a chat widget on your website, we'll send you a single line of code to paste — takes 2 minutes.</span></div>
+    <div class="ns-item"><div class="ns-num">4</div><span>Everything goes live. Missed calls get texted back. Bookings get confirmed. Your schedule fills itself.</span></div>
+  </div>
+  <p style="margin-top:1.5rem;font-size:13px;color:var(--muted);">Questions? Call <a href="tel:7853290202" style="color:var(--accent)">785-329-0202</a> or email <a href="mailto:hello@mysmartslots.com" style="color:var(--accent)">hello@mysmartslots.com</a></p>
+</div>
+
+<footer>
+  <p>© 2026 My Smart Slots &nbsp;·&nbsp; <a href="tel:7853290202" style="color:var(--muted)">785-329-0202</a> &nbsp;·&nbsp; <a href="mailto:hello@mysmartslots.com" style="color:var(--muted)">hello@mysmartslots.com</a></p>
+</footer>
+
+<script>
+const SERVER='https://mysmartslots-portal.onrender.com';
+
+// ── PLAN FROM URL (rep controls this, client can't change it) ─────────────────
+const PLANS={
+  starter:{label:'Starter Plan — $125/mo',monthly:125},
+  pro:    {label:'Pro Plan — $225/mo',    monthly:225},
+  elite:  {label:'Elite Plan — $375/mo',  monthly:375},
+};
+const params=new URLSearchParams(window.location.search);
+const planKey=(params.get('plan')||'pro').toLowerCase();
+const plan=PLANS[planKey]||PLANS.pro;
+document.getElementById('plan-display').textContent=plan.label;
+
+// ── HOURS GRID ────────────────────────────────────────────────────────────────
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DEFAULT_OPEN=['08:00','08:00','08:00','08:00','08:00','09:00',''];
+const DEFAULT_CLOSE=['17:00','17:00','17:00','17:00','17:00','14:00',''];
+const hg=document.getElementById('hours-grid');
+DAYS.forEach((day,i)=>{
+  const closed=DEFAULT_OPEN[i]==='';
+  hg.innerHTML+=`<div class="hour-row" id="hr-${i}">
+    <span class="day-label">${day}</span>
+    <input type="time" id="open-${i}" value="${DEFAULT_OPEN[i]}" ${closed?'disabled':''} style="${closed?'opacity:.3':''}"/>
+    <input type="time" id="close-${i}" value="${DEFAULT_CLOSE[i]}" ${closed?'disabled':''} style="${closed?'opacity:.3':''}"/>
+    <label class="closed-toggle"><input type="checkbox" id="closed-${i}" onchange="toggleDay(${i})" ${closed?'checked':''}/><span>Closed</span></label>
+  </div>`;
+});
+function toggleDay(i){
+  const cb=document.getElementById(`closed-${i}`);
+  const o=document.getElementById(`open-${i}`);
+  const c=document.getElementById(`close-${i}`);
+  o.disabled=cb.checked;c.disabled=cb.checked;
+  o.style.opacity=cb.checked?'.3':'1';c.style.opacity=cb.checked?'.3':'1';
+}
+function getHours(){
+  const h={};
+  DAYS.forEach((day,i)=>{
+    const closed=document.getElementById(`closed-${i}`).checked;
+    h[day]=closed?'closed':`${document.getElementById(`open-${i}`).value}–${document.getElementById(`close-${i}`).value}`;
+  });
+  return h;
+}
+
+// ── SERVICES GRID ─────────────────────────────────────────────────────────────
+const SERVICES=[
+  ['Emergency Repairs','Urgent same-day calls'],['Scheduled Maintenance','Routine service visits'],
+  ['Free Estimates','On-site or phone quotes'],['Commercial Work','Business/property jobs'],
+  ['Residential Work','Homes & apartments'],['New Installations','Equipment/system installs'],
+  ['Inspections','Safety & compliance checks'],['24/7 Emergency','After-hours availability'],
+  ['Seasonal Service','Spring/fall tune-ups'],
+];
+const sg=document.getElementById('svc-grid');
+SERVICES.forEach(([name,sub])=>{
+  sg.innerHTML+=`<label class="svc-check"><input type="checkbox" value="${name}"/>
+    <div><div class="svc-check-label">${name}</div><div class="svc-check-sub">${sub}</div></div></label>`;
+});
+function getServices(){return[...document.querySelectorAll('#svc-grid input:checked')].map(el=>el.value);}
+
+// ── COLOR SWATCHES ────────────────────────────────────────────────────────────
+const SWATCHES=['#E85D5D','#E87820','#E8C05D','#5DE88A','#00C896','#5DA0E8','#8A5DE8','#E85DA0','#1A1A17'];
+const sw=document.getElementById('color-swatches');
+SWATCHES.forEach(c=>{
+  const d=document.createElement('div');
+  d.className='swatch';d.style.background=c;d.title=c;
+  d.onclick=()=>{
+    document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));
+    d.classList.add('selected');
+    document.getElementById('brand_color').value=c;
+    document.getElementById('color_custom_picker').value=c;
+  };
+  sw.appendChild(d);
+});
+sw.children[4].classList.add('selected');
+document.getElementById('brand_color').value='#00C896';
+function setCustomColor(v){document.getElementById('brand_color').value=v;document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));}
+function syncColorPicker(v){if(/^#[0-9A-Fa-f]{6}$/.test(v))document.getElementById('color_custom_picker').value=v;}
+
+// ── CALENDAR TOGGLE ───────────────────────────────────────────────────────────
+function toggleCalFields(){
+  const v=document.getElementById('cal_type').value;
+  document.getElementById('cal_link_wrap').style.display=['calendly','other'].includes(v)?'block':'none';
+  document.getElementById('cal_email_wrap').style.display=['google','outlook'].includes(v)?'block':'none';
+  document.getElementById('cal_other_wrap').style.display=v==='other'?'block':'none';
+  if(v==='other')document.getElementById('cal_link_wrap').style.display='block';
+}
+
+// ── STEP NAVIGATION ───────────────────────────────────────────────────────────
+let currentStep=1;
+function validateStep(step){
+  const errs=[];
+  const req=(id,label)=>{const el=document.getElementById(id);if(!el||!el.value.trim()){if(el)el.classList.add('error');errs.push(label);}else el.classList.remove('error');};
+  if(step===1){req('biz_name','Business Name');req('contact_name','Your Name');req('biz_phone','Business Phone');req('contact_email','Email');req('trade','Trade');req('location','City & State');req('forward_from','Forwarding Number');}
+  if(step===2){if(!document.getElementById('avg_ticket').value){document.getElementById('avg_ticket').classList.add('error');errs.push('Average Ticket');}else document.getElementById('avg_ticket').classList.remove('error');if(!getServices().length)errs.push('At least one service');}
+  if(step===3){req('cal_type','Calendar Type');const v=document.getElementById('cal_type').value;if(['calendly','other'].includes(v))req('cal_link','Booking Link');if(['google','outlook'].includes(v))req('cal_email','Calendar Email');}
+  const errEl=document.getElementById(`err${step}`);
+  if(errs.length){errEl.textContent=`Please fill in: ${errs.join(', ')}`;errEl.style.display='block';return false;}
+  errEl.style.display='none';return true;
+}
+function nextStep(from){if(!validateStep(from))return;setStep(from+1);}
+function prevStep(from){setStep(from-1);}
+function setStep(n){
+  for(let i=1;i<=4;i++){
+    document.getElementById(`step${i}`).classList.remove('active-section');
+    document.getElementById(`pc${i}`).classList.remove('active','done');
+    document.getElementById(`pl${i}`).classList.remove('active');
+    if(i<4)document.getElementById(`pl-${i}`).classList.remove('done');
+  }
+  for(let i=1;i<n;i++){
+    document.getElementById(`pc${i}`).classList.add('done');
+    document.getElementById(`pc${i}`).textContent='✓';
+    if(i<4)document.getElementById(`pl-${i}`).classList.add('done');
+  }
+  document.getElementById(`step${n}`).classList.add('active-section');
+  document.getElementById(`pc${n}`).classList.add('active');
+  document.getElementById(`pl${n}`).classList.add('active');
+  currentStep=n;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── COLLECT DATA ──────────────────────────────────────────────────────────────
+function collectData(){
+  return{
+    plan:planKey,plan_label:plan.label,plan_monthly:plan.monthly,
+    biz_name:document.getElementById('biz_name').value.trim(),
+    contact_name:document.getElementById('contact_name').value.trim(),
+    biz_phone:document.getElementById('biz_phone').value.trim(),
+    contact_email:document.getElementById('contact_email').value.trim(),
+    trade:document.getElementById('trade').value,
+    location:document.getElementById('location').value.trim(),
+    website:document.getElementById('website').value.trim(),
+    facebook:document.getElementById('facebook').value.trim(),
+    instagram:document.getElementById('instagram').value.trim(),
+    google_biz:document.getElementById('google_biz').value.trim(),
+    yelp:document.getElementById('yelp').value.trim(),
+    forward_from:document.getElementById('forward_from').value.trim(),
+    hours:getHours(),
+    services:getServices(),
+    services_other:document.getElementById('services_other').value.trim(),
+    avg_ticket:document.getElementById('avg_ticket').value,
+    service_area:document.getElementById('service_area').value.trim(),
+    cal_type:document.getElementById('cal_type').value,
+    cal_link:document.getElementById('cal_link').value.trim(),
+    cal_email:document.getElementById('cal_email').value.trim(),
+    cal_other_desc:document.getElementById('cal_other_desc').value.trim(),
+    sms_pref:document.getElementById('sms_pref').value,
+    scheduling_notes:document.getElementById('scheduling_notes').value.trim(),
+    brand_color:document.getElementById('brand_color').value.trim(),
+    logo_url:document.getElementById('logo_url').value.trim(),
+    tagline:document.getElementById('tagline').value.trim(),
+    tone:document.getElementById('tone').value,
+    extra_notes:document.getElementById('extra_notes').value.trim(),
+    submitted_at:new Date().toISOString(),
+  };
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+async function submitForm(){
+  if(!validateStep(4))return;
+  const btn=document.getElementById('submit-btn');
+  btn.textContent='Submitting...';btn.disabled=true;
+  const data=collectData();
+  try{
+    const res=await fetch(`${SERVER}/portal/onboard/submit`,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),
+    });
+    if(!res.ok)console.error('Server error:',await res.text());
+  }catch(e){console.error('Server unreachable:',e);}
+  // Always show success — don't let backend errors block the client experience
+  showSuccess(data);
+}
+
+function showSuccess(data){
+  document.getElementById('form-wrap').style.display='none';
+  document.querySelector('.hero').style.display='none';
+  document.querySelector('.progress-wrap').style.display='none';
+  document.getElementById('success-screen').style.display='block';
+  document.getElementById('success-email').textContent=data.contact_email;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
