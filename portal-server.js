@@ -16,10 +16,10 @@ const supabase = createClient(
 // ── USERS ─────────────────────────────────────────────────────────────────────
 // Same users as rep.html — keep these in sync when you add new reps
 const USERS = {
-  "admin": { password: process.env.ADMIN_PASSWORD || "slots2025", name: "Owner",  isAdmin: true },
-  "Orion1":  { password: process.env.REP1_PASSWORD  || "Orion2026$",  name: "Rep 1",  isAdmin: false },
-  "rep2":  { password: process.env.REP2_PASSWORD  || "rep2pass",  name: "Rep 2",  isAdmin: false },
-  "Braden1":  { password: process.env.ALEX_PASSWORD  || "Braden2026$",  name: "Alex",   isAdmin: false },
+  "admin":   { password: process.env.ADMIN_PASSWORD || "slots2025",  name: "Owner", isAdmin: true },
+  "orion1":  { password: process.env.REP1_PASSWORD  || "Orion2026$", name: "Orion", isAdmin: false },
+  "rep2":    { password: process.env.REP2_PASSWORD  || "rep2pass",   name: "Rep 2", isAdmin: false },
+  "braden1": { password: process.env.ALEX_PASSWORD  || "Braden2026$",name: "Braden",isAdmin: false },
 };
 
 // ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
