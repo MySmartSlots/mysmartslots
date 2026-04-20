@@ -7,194 +7,217 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#1a1a2e;--blue:#1455a4;--light-blue:#e8f0fb;--mid-blue:#a8c8f0;
-  --white:#ffffff;--gray-bg:#f4f6fb;--gray-border:#e0e4f0;--gray-text:#555;
-  --green:#1e7a3a;--green-bg:#d6f0dd;--orange:#c45c00;--orange-bg:#fff0e0;
-  --yellow:#fff9c4;--red:#c0392b;--red-bg:#fdf0f0;
-  --accent:#1455a4;--accent2:#0d3d7a;
+  --navy:#1a1a2e;--navy2:#222840;--navy3:#2a3350;
+  --blue:#1455a4;--blue2:#1a6fd4;--accent:#4ade80;
+  --orange:#f39c12;--red:#e74c3c;--green:#4ade80;
+  --white:#fff;--gray:#8892a4;--border:#2a3348;
+  --card:#1e2640;--card2:#242c44;--text:#e2e8f0;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gray-bg);color:var(--navy);min-height:100vh;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 20%,rgba(20,85,164,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 85% 70%,rgba(74,222,128,.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
 
 /* LOGIN */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);}
-.login-box{background:var(--white);border-radius:16px;padding:2.5rem 2rem;width:340px;text-align:center;}
-.login-logo{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px;}
-.login-sub{font-size:13px;color:var(--gray-text);margin-bottom:1.5rem;}
-.login-box input{width:100%;padding:10px 12px;border:1.5px solid var(--gray-border);border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;}
-.login-box input:focus{border-color:var(--blue);}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);position:relative;z-index:10;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:340px;text-align:center;}
+.login-logo{font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+.login-box input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;color:var(--white);}
+.login-box input:focus{border-color:var(--blue2);}
 .login-btn{width:100%;padding:11px;background:var(--blue);color:var(--white);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
-.login-btn:hover{opacity:0.88;}
+.login-btn:hover{background:var(--blue2);}
 .login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
 
 /* APP */
-#app{display:none;flex-direction:column;min-height:100vh;}
-header{position:sticky;top:0;z-index:100;background:var(--navy);height:56px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+#app{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+header{position:sticky;top:0;z-index:100;background:rgba(26,26,46,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-size:15px;font-weight:800;color:var(--white);}
-.logo span{color:#4ade80;}
+.logo span{color:var(--accent);}
 .header-right{display:flex;align-items:center;gap:12px;}
-.rep-badge{background:rgba(255,255,255,0.12);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--white);}
-.logout-btn{background:none;border:1px solid rgba(255,255,255,0.25);color:var(--white);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;}
-.logout-btn:hover{background:rgba(255,255,255,0.1);}
+.rep-badge{background:rgba(255,255,255,.1);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--white);}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;}
+.logout-btn:hover{color:var(--white);border-color:rgba(255,255,255,.4);}
 
 /* PERSONALIZER */
-.personalizer{background:var(--yellow);border-bottom:1px solid #e0d000;padding:10px 1.5rem;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-.personalizer label{font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap;}
-.personalizer input{padding:6px 10px;border:1.5px solid #ccc;border-radius:6px;font-size:13px;font-family:inherit;outline:none;flex:1;min-width:130px;}
-.personalizer input:focus{border-color:var(--blue);}
-.p-hint{font-size:11px;color:#7a6000;width:100%;}
+.personalizer{background:rgba(255,220,0,.08);border-bottom:1px solid rgba(255,220,0,.15);padding:10px 1.5rem;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.personalizer label{font-size:12px;font-weight:700;color:#ffd700;white-space:nowrap;}
+.personalizer input,.personalizer select{padding:6px 10px;background:var(--card2);border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;color:var(--white);flex:1;min-width:130px;}
+.personalizer input:focus,.personalizer select:focus{border-color:var(--blue2);}
+.personalizer select option{background:var(--navy2);}
+.p-hint{font-size:11px;color:#ffd700;opacity:.7;width:100%;}
+
+/* CITY SELECTOR */
+.city-bar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 1.5rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.city-bar label{font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;}
+.city-select{padding:7px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;color:var(--white);min-width:180px;}
+.city-select:focus{border-color:var(--blue2);}
+.city-select option{background:var(--navy2);}
+.city-custom{padding:7px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;color:var(--white);min-width:160px;flex:1;}
+.city-custom:focus{border-color:var(--blue2);}
+.city-badge{background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:var(--accent);font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;}
 
 /* TABS */
-.tabs{background:var(--white);border-bottom:1px solid var(--gray-border);display:flex;overflow-x:auto;padding:0 1rem;position:sticky;top:56px;z-index:99;}
+.tabs{background:var(--card);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 1rem;position:sticky;top:56px;z-index:99;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{padding:13px 15px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--gray-text);border-bottom:2.5px solid transparent;cursor:pointer;transition:all .15s;flex-shrink:0;}
-.tab:hover{color:var(--blue);}
-.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600;}
-.tab-count{font-size:10px;background:var(--blue);color:var(--white);padding:1px 6px;border-radius:10px;margin-left:4px;}
+.tab{padding:13px 15px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--gray);border-bottom:2.5px solid transparent;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.tab:hover{color:var(--white);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.tab-count{font-size:10px;background:var(--accent);color:var(--navy);padding:1px 6px;border-radius:10px;margin-left:4px;font-weight:700;}
 
 /* CONTENT */
 .content{max-width:940px;margin:0 auto;padding:1.5rem 1rem 5rem;}
 .panel{display:none;}
 .panel.active{display:block;}
-
-/* SECTION HEAD */
 .section-head{margin-bottom:1.5rem;}
-.section-head h2{font-size:20px;font-weight:700;margin-bottom:4px;color:var(--navy);}
-.section-head p{font-size:13px;color:var(--gray-text);line-height:1.6;}
+.section-head h2{font-size:20px;font-weight:700;margin-bottom:4px;color:var(--white);}
+.section-head p{font-size:13px;color:var(--gray);line-height:1.6;}
 
 /* CARDS */
-.card{background:var(--white);border:1px solid var(--gray-border);border-radius:12px;padding:1.25rem;margin-bottom:16px;}
-.card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:.75rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:16px;}
+.card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:.75rem;}
+
+/* INPUTS */
+.inp{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-family:inherit;font-size:13px;outline:none;width:100%;transition:border-color .2s;}
+.inp:focus{border-color:var(--blue2);}
+.inp option{background:var(--navy2);}
+textarea.inp{resize:vertical;min-height:60px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+@media(max-width:600px){.form-grid,.form-grid.three{grid-template-columns:1fr;}}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);}
+
+/* BUTTONS */
+.btn{font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;font-family:inherit;}
+.btn-primary{background:var(--accent);color:var(--navy);}
+.btn-primary:hover{opacity:.88;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--gray);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-blue{background:var(--blue);color:var(--white);}
+.btn-blue:hover{background:var(--blue2);}
+.action-row{display:flex;gap:10px;justify-content:center;margin-top:1rem;flex-wrap:wrap;}
 
 /* FIT CHECKER */
 .fit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 @media(max-width:600px){.fit-grid{grid-template-columns:1fr;}}
-.fit-question{background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:10px;padding:1rem;transition:border-color .2s;}
-.fit-question:hover{border-color:var(--blue);}
-.fq-label{font-size:13px;font-weight:500;color:var(--navy);margin-bottom:.6rem;line-height:1.4;}
+.fit-question{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1rem;transition:border-color .2s;}
+.fit-question:hover{border-color:var(--blue2);}
+.fq-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:.6rem;line-height:1.4;}
 .fq-options{display:flex;gap:6px;flex-wrap:wrap;}
-.fq-btn{font-size:12px;padding:5px 12px;border:1px solid var(--gray-border);border-radius:20px;background:transparent;color:var(--gray-text);cursor:pointer;transition:all .15s;font-family:inherit;}
-.fq-btn:hover{border-color:var(--blue);color:var(--navy);}
-.fq-btn.selected-yes{background:var(--green-bg);border-color:var(--green);color:var(--green);}
-.fq-btn.selected-no{background:var(--red-bg);border-color:var(--red);color:var(--red);}
-.fq-btn.selected-maybe{background:var(--orange-bg);border-color:var(--orange);color:var(--orange);}
+.fq-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--gray);cursor:pointer;transition:all .15s;font-family:inherit;}
+.fq-btn:hover{border-color:var(--blue2);color:var(--white);}
+.fq-btn.selected-yes{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green);}
+.fq-btn.selected-no{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
+.fq-btn.selected-maybe{background:rgba(243,156,18,.12);border-color:var(--orange);color:var(--orange);}
 
 /* SCORE BOX */
-.score-box{border-radius:12px;padding:1.5rem;text-align:center;display:none;border:1px solid var(--gray-border);margin-top:1rem;background:var(--white);}
+.score-box{border-radius:12px;padding:1.5rem;text-align:center;display:none;border:1px solid var(--border);margin-top:1rem;background:var(--card);}
 .score-box.show{display:block;}
 .score-big{font-size:56px;font-weight:800;line-height:1;}
-.score-label{font-size:17px;font-weight:700;margin:.5rem 0 .25rem;}
-.score-sub{font-size:13px;color:var(--gray-text);line-height:1.6;max-width:480px;margin:0 auto .75rem;}
+.score-label{font-size:17px;font-weight:700;margin:.5rem 0 .25rem;color:var(--white);}
+.score-sub{font-size:13px;color:var(--gray);line-height:1.6;max-width:480px;margin:0 auto .75rem;}
 .score-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:.75rem;}
 .score-tag{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid;}
-.fit-hot{background:#f0fdf8;border-color:var(--green-bg);}
-.fit-warm{background:var(--orange-bg);border-color:#f5c6a0;}
-.fit-cold{background:var(--red-bg);border-color:#f5c0c0;}
+.fit-hot{background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.2);}
+.fit-warm{background:rgba(243,156,18,.08);border-color:rgba(243,156,18,.2);}
+.fit-cold{background:rgba(231,76,60,.08);border-color:rgba(231,76,60,.2);}
 .score-hot{color:var(--green);}
 .score-warm{color:var(--orange);}
 .score-cold{color:var(--red);}
-.tag-hot{background:var(--green-bg);border-color:var(--green);color:var(--green);}
-.tag-warm{background:var(--orange-bg);border-color:var(--orange);color:var(--orange);}
-.tag-cold{background:var(--red-bg);border-color:var(--red);color:var(--red);}
-
-/* BUTTONS */
-.btn{font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;font-family:inherit;}
-.btn-primary{background:var(--blue);color:var(--white);}
-.btn-primary:hover{background:var(--accent2);}
-.btn-ghost{background:transparent;border:1px solid var(--gray-border);color:var(--gray-text);}
-.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
-.action-row{display:flex;gap:10px;justify-content:center;margin-top:1rem;flex-wrap:wrap;}
-
-/* INPUTS */
-.filter-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px;}
-.filter-group label{font-size:11px;color:var(--gray-text);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
-.filter-select,.filter-input{background:var(--white);border:1.5px solid var(--gray-border);border-radius:8px;padding:9px 12px;color:var(--navy);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s;}
-.filter-select:focus,.filter-input:focus{border-color:var(--blue);}
-.note-input{width:100%;background:var(--white);border:1.5px solid var(--gray-border);border-radius:8px;padding:10px 12px;color:var(--navy);font-family:inherit;font-size:13px;resize:vertical;min-height:70px;outline:none;}
-.note-input:focus{border-color:var(--blue);}
+.tag-hot{background:rgba(74,222,128,.12);border-color:var(--green);color:var(--green);}
+.tag-warm{background:rgba(243,156,18,.12);border-color:var(--orange);color:var(--orange);}
+.tag-cold{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
 
 /* PROSPECT LIST */
-.prospect-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem;align-items:flex-end;}
 .stats-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.25rem;}
-.stat-chip{background:var(--white);border:1px solid var(--gray-border);border-radius:10px;padding:.6rem 1rem;flex:1;min-width:90px;text-align:center;}
-.stat-chip .n{font-size:20px;font-weight:800;color:var(--blue);}
-.stat-chip .l{font-size:11px;color:var(--gray-text);margin-top:2px;}
+.stat-chip{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.6rem 1rem;flex:1;min-width:90px;text-align:center;}
+.stat-chip .n{font-size:20px;font-weight:800;color:var(--accent);}
+.stat-chip .l{font-size:11px;color:var(--gray);margin-top:2px;}
 .prospect-list{display:flex;flex-direction:column;gap:10px;}
-.prospect-card{background:var(--white);border:1px solid var(--gray-border);border-radius:12px;padding:1rem 1.25rem;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;cursor:pointer;transition:border-color .15s,transform .15s;}
-.prospect-card:hover{border-color:var(--blue);transform:translateY(-1px);}
-.prospect-card.saved-card{border-color:var(--green);}
-.pc-name{font-size:15px;font-weight:700;margin-bottom:2px;color:var(--navy);}
-.pc-type{font-size:11px;color:var(--blue);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
-.pc-details{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px;}
-.pc-detail{font-size:11px;color:var(--gray-text);display:flex;align-items:center;gap:4px;}
+.prospect-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;cursor:pointer;transition:border-color .15s,transform .15s;animation:fadeUp .3s ease;}
+.prospect-card:hover{border-color:var(--blue2);transform:translateY(-1px);}
+.prospect-card.saved-card{border-color:rgba(74,222,128,.4);}
+.pc-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:2px;}
+.pc-type{font-size:11px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+.pc-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px;}
+.pc-detail{font-size:11px;color:var(--gray);display:flex;align-items:center;gap:4px;}
 .pc-signals{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
-.signal-tag{font-size:10px;padding:3px 8px;border-radius:20px;background:var(--light-blue);border:1px solid var(--mid-blue);color:var(--blue);}
-.signal-tag.hot-signal{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.signal-tag{font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(20,85,164,.25);border:1px solid rgba(26,111,212,.3);color:#6ab0f5;}
+.signal-tag.hot-signal{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.3);color:var(--green);}
 .pc-score-badge{font-size:13px;font-weight:800;padding:6px 12px;border-radius:8px;text-align:center;white-space:nowrap;}
-.badge-hot{background:var(--green-bg);color:var(--green);border:1px solid var(--green);}
-.badge-warm{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange);}
-.badge-cold{background:var(--red-bg);color:var(--red);border:1px solid var(--red);}
+.badge-hot{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.3);}
+.badge-warm{background:rgba(243,156,18,.15);color:var(--orange);border:1px solid rgba(243,156,18,.3);}
+.badge-cold{background:rgba(231,76,60,.12);color:var(--red);border:1px solid rgba(231,76,60,.2);}
 .pc-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.pc-action{font-size:11px;padding:4px 10px;border:1px solid var(--gray-border);border-radius:6px;background:transparent;color:var(--gray-text);cursor:pointer;transition:all .15s;font-family:inherit;}
-.pc-action:hover{border-color:var(--blue);color:var(--blue);}
+.pc-action{font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--gray);cursor:pointer;transition:all .15s;font-family:inherit;}
+.pc-action:hover{border-color:var(--accent);color:var(--accent);}
 .pc-action.saved-btn{border-color:var(--green);color:var(--green);}
+.pc-source{font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(20,85,164,.2);border:1px solid rgba(26,111,212,.2);color:#6ab0f5;display:inline-block;margin-left:6px;}
+.pc-source.rep-added{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.25);color:var(--green);}
 
 /* SAVED */
-.saved-item{background:var(--white);border:1px solid var(--green-bg);border-radius:12px;padding:1rem 1.25rem;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:10px;}
-.si-name{font-size:14px;font-weight:700;color:var(--navy);}
-.si-meta{font-size:12px;color:var(--gray-text);margin-top:2px;}
-.si-notes{font-size:12px;color:var(--gray-text);margin-top:6px;font-style:italic;}
-.si-status{font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--gray-border);font-family:inherit;cursor:pointer;background:var(--white);color:var(--gray-text);outline:none;}
+.saved-item{background:var(--card);border:1px solid rgba(74,222,128,.2);border-radius:12px;padding:1rem 1.25rem;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:10px;animation:fadeUp .3s ease;}
+.si-name{font-size:14px;font-weight:700;color:var(--white);}
+.si-meta{font-size:12px;color:var(--gray);margin-top:2px;}
+.si-notes{font-size:12px;color:var(--gray);margin-top:6px;font-style:italic;}
+.si-status{font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);font-family:inherit;cursor:pointer;background:var(--card2);color:var(--gray);outline:none;}
 
 /* PITCH BUILDER */
 .pitch-section{margin-bottom:1.5rem;}
-.pitch-section h3{font-size:14px;font-weight:700;margin-bottom:.75rem;color:var(--navy);}
+.pitch-section h3{font-size:14px;font-weight:700;margin-bottom:.75rem;color:var(--white);}
 .pitch-options{display:flex;flex-wrap:wrap;gap:8px;}
-.pitch-pill{font-size:12px;padding:6px 14px;border:1px solid var(--gray-border);border-radius:20px;background:transparent;color:var(--gray-text);cursor:pointer;transition:all .15s;font-family:inherit;}
-.pitch-pill:hover{border-color:var(--blue);color:var(--navy);}
-.pitch-pill.active{background:var(--light-blue);border-color:var(--blue);color:var(--blue);font-weight:600;}
-.pitch-output{background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:12px;padding:1.25rem;font-size:14px;line-height:1.8;color:var(--navy);white-space:pre-line;min-height:120px;margin-top:1rem;}
-.pitch-output .ph{color:var(--gray-text);font-style:italic;}
+.pitch-pill{font-size:12px;padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--gray);cursor:pointer;transition:all .15s;font-family:inherit;}
+.pitch-pill:hover{border-color:var(--blue2);color:var(--white);}
+.pitch-pill.active{background:rgba(20,85,164,.25);border-color:var(--blue2);color:var(--white);font-weight:600;}
+.pitch-output{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:1.25rem;font-size:14px;line-height:1.8;color:var(--text);white-space:pre-line;min-height:120px;margin-top:1rem;}
+.pitch-output .ph{color:var(--gray);font-style:italic;}
 
 /* ICEBREAKERS */
 .ice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:.75rem;}
 @media(max-width:580px){.ice-grid{grid-template-columns:1fr;}}
-.ice-card{background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:border-color .15s;}
-.ice-card:hover{border-color:var(--blue);}
-.ice-card.selected{background:var(--light-blue);border-color:var(--blue);}
-.ice-trigger{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:5px;}
-.ice-text{font-size:13px;line-height:1.6;color:var(--navy);}
-.ice-copy-btn{font-size:11px;padding:3px 8px;border:1px solid var(--gray-border);border-radius:5px;background:transparent;color:var(--gray-text);cursor:pointer;margin-top:6px;font-family:inherit;}
-.ice-copy-btn:hover{border-color:var(--blue);color:var(--blue);}
+.ice-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:border-color .15s;}
+.ice-card:hover{border-color:var(--blue2);}
+.ice-card.selected{background:rgba(20,85,164,.2);border-color:var(--blue2);}
+.ice-trigger{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:5px;}
+.ice-text{font-size:13px;line-height:1.6;color:var(--text);}
+.ice-copy-btn{font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--gray);cursor:pointer;margin-top:6px;font-family:inherit;}
+.ice-copy-btn:hover{border-color:var(--accent);color:var(--accent);}
 
 /* OBJECTIONS */
-.obj-card{border:1px solid var(--gray-border);border-radius:10px;margin-bottom:8px;overflow:hidden;}
-.obj-q{background:var(--light-blue);padding:10px 14px;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
-.obj-q:hover{background:var(--mid-blue);}
-.obj-q .chevron{color:var(--blue);font-size:16px;transition:transform .2s;}
+.obj-card{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;}
+.obj-q{background:var(--card2);padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s;}
+.obj-q:hover{background:var(--navy3);}
+.obj-q .chevron{color:var(--accent);font-size:16px;transition:transform .2s;}
 .obj-q.open .chevron{transform:rotate(180deg);}
-.obj-a{padding:12px 14px;font-size:13px;line-height:1.7;color:#333;display:none;background:var(--white);}
+.obj-a{padding:12px 14px;font-size:13px;line-height:1.7;color:#c5cfe0;display:none;background:var(--card);}
 .obj-a.show{display:block;}
-.obj-highlight{color:var(--blue);font-weight:500;}
+
+/* ADD PROSPECT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;color:var(--white);}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);}
+.modal-close:hover{color:var(--white);}
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
-/* DIVIDER */
-hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
-.empty{text-align:center;padding:3rem;color:var(--gray-text);font-size:14px;}
+/* MISC */
+hr.div{border:none;border-top:1px solid var(--border);margin:1.25rem 0;}
+.empty{text-align:center;padding:3rem;color:var(--gray);font-size:14px;}
 .empty .icon{font-size:36px;margin-bottom:.75rem;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
-
 <div id="toast-el" class="toast"></div>
 
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">My Smart Slots</div>
+    <div class="login-logo">My Smart<span>Slots</span></div>
     <div class="login-sub">Prospector — Sign in to continue</div>
     <input type="text" id="username" placeholder="Username" autocomplete="off"/>
     <input type="password" id="password" placeholder="Password"/>
@@ -206,19 +229,89 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
 <!-- APP -->
 <div id="app">
   <header>
-    <div class="logo">My Smart<span>Slots</span> <span style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:400;">Prospector</span></div>
+    <div class="logo">My Smart<span>Slots</span> <span style="font-size:11px;color:var(--gray);font-weight:400;">Prospector</span></div>
     <div class="header-right">
       <span class="rep-badge" id="rep-name-display"></span>
       <button class="logout-btn" onclick="doLogout()">Sign Out</button>
     </div>
   </header>
 
+  <!-- PERSONALIZER -->
   <div class="personalizer">
     <label>Your name:</label>
-    <input type="text" id="p-rep" placeholder="e.g. Alex" oninput="updateIcebreakers()"/>
-    <label>City/area targeting:</label>
-    <input type="text" id="p-city" placeholder="e.g. Kansas City" oninput="updateIcebreakers()"/>
-    <div class="p-hint">Fill these in — icebreakers and scripts update automatically.</div>
+    <input type="text" id="p-rep" placeholder="e.g. Alex" oninput="onPersonalizerChange()"/>
+    <div class="p-hint">Fill in your name — scripts and icebreakers update automatically.</div>
+  </div>
+
+  <!-- CITY BAR -->
+  <div class="city-bar">
+    <label>🗺 Target City:</label>
+    <select class="city-select" id="city-select" onchange="onCityChange()">
+      <option value="">Select a city...</option>
+      <optgroup label="Kansas / Missouri">
+        <option value="Kansas City, MO">Kansas City, MO</option>
+        <option value="Topeka, KS">Topeka, KS</option>
+        <option value="Wichita, KS">Wichita, KS</option>
+        <option value="Overland Park, KS">Overland Park, KS</option>
+        <option value="Olathe, KS">Olathe, KS</option>
+        <option value="Springfield, MO">Springfield, MO</option>
+        <option value="St. Louis, MO">St. Louis, MO</option>
+        <option value="Columbia, MO">Columbia, MO</option>
+        <option value="Gladstone, MO">Gladstone, MO</option>
+      </optgroup>
+      <optgroup label="Texas">
+        <option value="Dallas, TX">Dallas, TX</option>
+        <option value="Houston, TX">Houston, TX</option>
+        <option value="Austin, TX">Austin, TX</option>
+        <option value="San Antonio, TX">San Antonio, TX</option>
+        <option value="Fort Worth, TX">Fort Worth, TX</option>
+      </optgroup>
+      <optgroup label="Florida">
+        <option value="Orlando, FL">Orlando, FL</option>
+        <option value="Tampa, FL">Tampa, FL</option>
+        <option value="Miami, FL">Miami, FL</option>
+        <option value="Jacksonville, FL">Jacksonville, FL</option>
+      </optgroup>
+      <optgroup label="Southeast">
+        <option value="Atlanta, GA">Atlanta, GA</option>
+        <option value="Charlotte, NC">Charlotte, NC</option>
+        <option value="Nashville, TN">Nashville, TN</option>
+        <option value="Memphis, TN">Memphis, TN</option>
+        <option value="Birmingham, AL">Birmingham, AL</option>
+      </optgroup>
+      <optgroup label="Midwest">
+        <option value="Chicago, IL">Chicago, IL</option>
+        <option value="Indianapolis, IN">Indianapolis, IN</option>
+        <option value="Columbus, OH">Columbus, OH</option>
+        <option value="Cincinnati, OH">Cincinnati, OH</option>
+        <option value="Minneapolis, MN">Minneapolis, MN</option>
+        <option value="Omaha, NE">Omaha, NE</option>
+        <option value="Des Moines, IA">Des Moines, IA</option>
+        <option value="Oklahoma City, OK">Oklahoma City, OK</option>
+        <option value="Tulsa, OK">Tulsa, OK</option>
+      </optgroup>
+      <optgroup label="Southwest">
+        <option value="Phoenix, AZ">Phoenix, AZ</option>
+        <option value="Las Vegas, NV">Las Vegas, NV</option>
+        <option value="Denver, CO">Denver, CO</option>
+        <option value="Albuquerque, NM">Albuquerque, NM</option>
+      </optgroup>
+      <optgroup label="West Coast">
+        <option value="Los Angeles, CA">Los Angeles, CA</option>
+        <option value="San Diego, CA">San Diego, CA</option>
+        <option value="Portland, OR">Portland, OR</option>
+        <option value="Seattle, WA">Seattle, WA</option>
+      </optgroup>
+      <optgroup label="Northeast">
+        <option value="New York, NY">New York, NY</option>
+        <option value="Philadelphia, PA">Philadelphia, PA</option>
+        <option value="Boston, MA">Boston, MA</option>
+        <option value="Baltimore, MD">Baltimore, MD</option>
+      </optgroup>
+      <option value="custom">✏️ Enter custom city...</option>
+    </select>
+    <input type="text" class="city-custom" id="city-custom" placeholder="Type any city, state..." style="display:none;" oninput="onCityChange()"/>
+    <span class="city-badge" id="city-badge">No city selected</span>
   </div>
 
   <div class="tabs">
@@ -236,22 +329,22 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
   <div id="tab-fit" class="panel active">
     <div class="section-head">
       <h2>Customer Fit Checker</h2>
-      <p>Answer these questions about a prospect to score how good a fit they are for My Smart Slots.</p>
+      <p>Score a prospect before you call. Know exactly how hard to push before you pick up the phone.</p>
     </div>
     <div class="card">
       <div class="card-label">Business Info</div>
-      <div class="fit-grid" style="grid-template-columns:1fr 1fr 1fr;">
-        <div class="filter-group"><label>Business Name</label><input class="filter-input" id="biz-name" placeholder="e.g. Diamond Plumbing"/></div>
-        <div class="filter-group"><label>Industry</label>
-          <select class="filter-select" id="biz-type">
+      <div class="form-grid three">
+        <div class="form-group"><label>Business Name</label><input class="inp" id="biz-name" placeholder="e.g. Diamond Plumbing"/></div>
+        <div class="form-group"><label>Industry</label>
+          <select class="inp" id="biz-type">
             <option value="">Select...</option>
             <option>HVAC</option><option>Plumbing</option><option>Roofing</option>
             <option>Electrical</option><option>Landscaping</option><option>Auto Repair</option>
             <option>Hair/Beauty Salon</option><option>Construction</option><option>Other Trade</option>
           </select>
         </div>
-        <div class="filter-group"><label>Fleet / Staff Size</label>
-          <select class="filter-select" id="biz-size">
+        <div class="form-group"><label>Fleet / Staff Size</label>
+          <select class="inp" id="biz-size">
             <option value="">Select...</option>
             <option>Solo / 1 truck</option><option>2–3 trucks</option>
             <option>4–7 trucks</option><option>8+ trucks</option>
@@ -265,7 +358,7 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
     </div>
     <div class="card">
       <div class="card-label">Notes</div>
-      <textarea class="note-input" id="fit-notes" placeholder="Any extra context about this prospect..."></textarea>
+      <textarea class="inp" id="fit-notes" placeholder="What did you observe on their Google profile or website?"></textarea>
     </div>
     <div class="action-row">
       <button class="btn btn-primary" onclick="scoreFit()">Calculate Fit Score</button>
@@ -287,35 +380,40 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
   <div id="tab-prospect" class="panel">
     <div class="section-head">
       <h2>Prospect Finder</h2>
-      <p>Filter by industry and fit to surface the best leads. Save any prospect directly to your pipeline.</p>
+      <p>Browse and filter prospects for your target city. Add your own from Google Maps research.</p>
     </div>
-    <div class="card">
-      <div class="prospect-filters">
-        <div class="filter-group"><label>Industry</label>
-          <select class="filter-select" id="p-industry" onchange="filterProspects()">
-            <option value="">All Industries</option>
-            <option>HVAC</option><option>Plumbing</option><option>Roofing</option>
-            <option>Electrical</option><option>Landscaping</option><option>Auto Repair</option>
-            <option>Hair/Beauty Salon</option><option>Construction</option>
-          </select>
-        </div>
-        <div class="filter-group"><label>Fit Level</label>
-          <select class="filter-select" id="p-fit" onchange="filterProspects()">
-            <option value="">All</option>
-            <option value="hot">🔥 Hot Only</option>
-            <option value="warm">⚡ Warm + Hot</option>
-          </select>
-        </div>
-        <div class="filter-group"><label>Size</label>
-          <select class="filter-select" id="p-size" onchange="filterProspects()">
-            <option value="">Any Size</option>
-            <option>Solo</option><option>Small (2–3)</option>
-            <option>Mid (4–7)</option><option>Large (8+)</option>
-          </select>
-        </div>
-        <div class="filter-group"><label>Search</label>
-          <input class="filter-input" id="p-search" placeholder="Search name..." oninput="filterProspects()"/>
-        </div>
+    <div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div class="form-group" style="flex:1;min-width:130px;">
+        <label>Industry</label>
+        <select class="inp" id="p-industry" onchange="filterProspects()">
+          <option value="">All Industries</option>
+          <option>HVAC</option><option>Plumbing</option><option>Roofing</option>
+          <option>Electrical</option><option>Landscaping</option><option>Auto Repair</option>
+          <option>Hair/Beauty Salon</option><option>Construction</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1;min-width:110px;">
+        <label>Fit Level</label>
+        <select class="inp" id="p-fit" onchange="filterProspects()">
+          <option value="">All</option>
+          <option value="hot">🔥 Hot Only</option>
+          <option value="warm">⚡ Warm + Hot</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1;min-width:110px;">
+        <label>Source</label>
+        <select class="inp" id="p-source" onchange="filterProspects()">
+          <option value="">All</option>
+          <option value="preset">Preset List</option>
+          <option value="rep">Rep Added</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1;min-width:130px;">
+        <label>Search</label>
+        <input class="inp" id="p-search" placeholder="Search name..." oninput="filterProspects()"/>
+      </div>
+      <div style="padding-top:18px;">
+        <button class="btn btn-blue" onclick="openAddModal()">+ Add Prospect</button>
       </div>
     </div>
     <div class="stats-bar" id="prospect-stats"></div>
@@ -326,10 +424,10 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
   <div id="tab-saved" class="panel">
     <div class="section-head">
       <h2>My Pipeline</h2>
-      <p>Prospects you've saved. All contacts sync with the Rep Portal pipeline automatically.</p>
+      <p>Prospects saved to your pipeline. All contacts sync with the Rep Portal automatically.</p>
     </div>
     <div id="saved-list">
-      <div class="empty"><div class="icon">📋</div>No prospects saved yet.<br/>Use the Fit Checker or Prospector to add some.</div>
+      <div class="empty"><div class="icon">📋</div>No prospects saved yet.</div>
     </div>
   </div>
 
@@ -337,7 +435,7 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
   <div id="tab-pitch" class="panel">
     <div class="section-head">
       <h2>Pitch Script Builder</h2>
-      <p>Select industry, pain point, and contact method to generate a personalized script. Tone: peer-to-peer, direct, never pushy.</p>
+      <p>Select industry, pain point, and contact method. Every script ends with the audit appointment ask — not a product pitch.</p>
     </div>
     <div class="card">
       <div class="pitch-section">
@@ -376,7 +474,7 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
       </div>
       <hr class="div"/>
       <button class="btn btn-primary" onclick="buildPitch()" style="width:100%;">⚡ Generate Pitch Script</button>
-      <div class="pitch-output" id="pitch-output"><span class="ph">Select your options above and hit Generate to get a personalized script...</span></div>
+      <div class="pitch-output" id="pitch-output"><span class="ph">Select your options above and hit Generate...</span></div>
       <div style="display:flex;gap:8px;margin-top:.75rem;">
         <button class="btn btn-ghost" onclick="copyPitch()" style="flex:1;">📋 Copy Script</button>
         <button class="btn btn-ghost" onclick="resetPitch()" style="flex:1;">↺ Reset</button>
@@ -388,17 +486,16 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
   <div id="tab-ice" class="panel">
     <div class="section-head">
       <h2>Icebreaker Library</h2>
-      <p>Use these before your call opens. Pick the one that matches what you actually saw on their profile. Specific beats generic every time.</p>
+      <p>Pick the one that matches what you actually observed. Specific beats generic every time.</p>
     </div>
     <div class="card">
-      <div class="card-label">Set your info first</div>
-      <div style="font-size:13px;color:var(--gray-text);margin-bottom:10px;">Your name and city are pulled from the yellow bar above. Fill those in if you haven't.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="filter-group"><label>Prospect name</label><input class="filter-input" id="ice-prospect" placeholder="e.g. Rick" oninput="updateIcebreakers()"/></div>
-        <div class="filter-group"><label>Business name</label><input class="filter-input" id="ice-biz" placeholder="e.g. Diamond Plumbing" oninput="updateIcebreakers()"/></div>
-        <div class="filter-group"><label>Review count (from Google)</label><input class="filter-input" type="number" id="ice-reviews" placeholder="e.g. 14" oninput="updateIcebreakers()"/></div>
-        <div class="filter-group"><label>Industry</label>
-          <select class="filter-select" id="ice-industry" onchange="updateIcebreakers()">
+      <div class="card-label">Prospect details</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Prospect name</label><input class="inp" id="ice-prospect" placeholder="e.g. Rick" oninput="updateIcebreakers()"/></div>
+        <div class="form-group"><label>Business name</label><input class="inp" id="ice-biz" placeholder="e.g. Diamond Plumbing" oninput="updateIcebreakers()"/></div>
+        <div class="form-group"><label>Review count (from Google)</label><input class="inp" type="number" id="ice-reviews" placeholder="e.g. 14" oninput="updateIcebreakers()"/></div>
+        <div class="form-group"><label>Industry</label>
+          <select class="inp" id="ice-industry" onchange="updateIcebreakers()">
             <option value="">Select...</option>
             <option>HVAC</option><option>Plumbing</option><option>Roofing</option>
             <option>Electrical</option><option>Landscaping</option><option>Auto Repair</option>
@@ -417,18 +514,67 @@ hr.div{border:none;border-top:1px solid var(--gray-border);margin:1.25rem 0;}
   <div id="tab-objections" class="panel">
     <div class="section-head">
       <h2>Objection Handler</h2>
-      <p>Common pushbacks and how to respond. Tap any to expand.</p>
+      <p>Common pushbacks with responses that stay peer-to-peer, never defensive. Always steer back to the free audit.</p>
     </div>
     <div id="obj-list"></div>
   </div>
 
-  </div><!-- /content -->
-</div><!-- /app -->
+  </div>
+</div>
+
+<!-- ADD PROSPECT MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">
+      Add New Prospect
+      <button class="modal-close" onclick="closeAddModal()">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Business Name *</label><input class="inp" id="m-name" placeholder="e.g. Diamond Plumbing Co."/></div>
+      <div class="form-group"><label>Owner Name</label><input class="inp" id="m-owner" placeholder="e.g. Rick"/></div>
+      <div class="form-group"><label>Phone Number</label><input class="inp" id="m-phone" placeholder="(816) 555-0192"/></div>
+      <div class="form-group"><label>Industry *</label>
+        <select class="inp" id="m-type">
+          <option value="">Select...</option>
+          <option>HVAC</option><option>Plumbing</option><option>Roofing</option>
+          <option>Electrical</option><option>Landscaping</option><option>Auto Repair</option>
+          <option>Hair/Beauty Salon</option><option>Construction</option><option>Other Trade</option>
+        </select>
+      </div>
+      <div class="form-group"><label>City</label><input class="inp" id="m-city" placeholder="e.g. Kansas City"/></div>
+      <div class="form-group"><label>State</label><input class="inp" id="m-state" placeholder="e.g. MO"/></div>
+      <div class="form-group"><label>Fleet / Staff Size</label>
+        <select class="inp" id="m-size">
+          <option value="">Select...</option>
+          <option>Solo / 1 truck</option><option>2–3 trucks</option>
+          <option>4–7 trucks</option><option>8+ trucks</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Fit Level</label>
+        <select class="inp" id="m-fit">
+          <option value="warm">⚡ Warm</option>
+          <option value="hot">🔥 Hot</option>
+          <option value="cold">❄️ Cold</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label>Signals observed (comma separated)</label>
+      <input class="inp" id="m-signals" placeholder="e.g. No chatbot, 8 reviews, misses calls on jobs"/>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Notes</label>
+      <textarea class="inp" id="m-notes" placeholder="What did you notice on their profile or website?"></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="submitAddProspect()">Add to Prospector</button>
+  </div>
+</div>
 
 <script>
 const API = "https://mysmartslots-portal.onrender.com";
 let currentUser=null, currentU=null, currentP=null;
 let saved=[], fitAnswers={}, pitchState={industry:'',pain:'',method:''};
+let repProspects=[], currentCity='';
 
 // ── LOGIN ──────────────────────────────────────────────────────────────────────
 async function doLogin(){
@@ -444,25 +590,25 @@ async function doLogin(){
     document.getElementById('rep-name-display').textContent=d.name;
     document.getElementById('p-rep').value=d.name;
     await loadSaved();
+    await loadRepProspects();
     renderFitQuestions();
-    renderProspects(PROSPECTS);
     renderObjections();
     updateIcebreakers();
+    filterProspects();
   }catch(e){document.getElementById('login-error').style.display='block';}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 function doLogout(){
-  currentUser=null;currentU=null;currentP=null;saved=[];
+  currentUser=null;currentU=null;currentP=null;saved=[];repProspects=[];
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').style.display='none';
   document.getElementById('password').value='';
-  document.getElementById('login-error').style.display='none';
 }
 
 // ── TOAST ──────────────────────────────────────────────────────────────────────
 function toast(msg){
   const t=document.getElementById('toast-el');
-  t.textContent=msg; t.classList.add('show');
+  t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2200);
 }
 
@@ -475,66 +621,247 @@ function switchTab(name,el){
   if(name==='saved')renderSaved();
 }
 
+// ── CITY ───────────────────────────────────────────────────────────────────────
+function onCityChange(){
+  const sel=document.getElementById('city-select').value;
+  const custom=document.getElementById('city-custom');
+  if(sel==='custom'){
+    custom.style.display='block';
+    currentCity=custom.value.trim()||'';
+  } else {
+    custom.style.display='none';
+    currentCity=sel;
+  }
+  document.getElementById('city-badge').textContent=currentCity||'No city selected';
+  updateIcebreakers();
+  filterProspects();
+}
+
+function onPersonalizerChange(){
+  updateIcebreakers();
+}
+
 // ── API HELPER ─────────────────────────────────────────────────────────────────
 async function api(endpoint,body={}){
   const r=await fetch(`${API}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,...body})});
   return r.json();
 }
 
-// ── SAVED / PIPELINE ───────────────────────────────────────────────────────────
+// ── SAVED PIPELINE ─────────────────────────────────────────────────────────────
 async function loadSaved(){
   const d=await api('/portal/contacts/get');
   if(d.success){saved=d.contacts;updateSavedCount();}
 }
-
-function updateSavedCount(){
-  document.getElementById('saved-count').textContent=saved.length;
-}
+function updateSavedCount(){document.getElementById('saved-count').textContent=saved.length;}
 
 async function addToSavedAPI(item){
   if(saved.some(s=>s.biz_name===item.biz_name)){toast('Already in your pipeline.');return;}
   const d=await api('/portal/contacts',{
-    biz_name:item.biz_name, contact_name:item.contact_name||'',
-    trade:item.trade||'', status:item.status||'new',
+    biz_name:item.biz_name,contact_name:item.contact_name||'',
+    trade:item.trade||'',status:'new',phone:item.phone||'',
     notes:JSON.stringify([{date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:item.notes||'Added from Prospector'}]),
-    phone:item.phone||'',
   });
   if(d.success){saved.unshift(d.contact);updateSavedCount();toast('✓ Added to pipeline');}
 }
 
 function renderSaved(){
   const container=document.getElementById('saved-list');
-  if(!saved.length){
-    container.innerHTML='<div class="empty"><div class="icon">📋</div>No prospects saved yet.</div>';
-    return;
-  }
+  if(!saved.length){container.innerHTML='<div class="empty"><div class="icon">📋</div>No prospects saved yet.</div>';return;}
   const statuses=['new','contacted','audit','followup','closed','dead'];
   const statusLabels={new:'New',contacted:'Contacted',audit:'Audit Set',followup:'Follow-up',closed:'Closed',dead:'Not Interested'};
   container.innerHTML=saved.map((s,i)=>{
-    const fitColor=s.status==='closed'?'var(--green)':s.status==='dead'?'var(--red)':'var(--blue)';
-    let notes=[];
-    try{notes=s.notes?JSON.parse(s.notes):[];}catch(e){notes=[];}
+    let notes=[];try{notes=s.notes?JSON.parse(s.notes):[];}catch(e){notes=[];}
     const lastNote=notes.length?notes[notes.length-1].text:'';
     return `<div class="saved-item">
       <div>
         <div class="si-name">${s.biz_name}</div>
         <div class="si-meta">${s.trade||'—'} · ${s.contact_name||'—'} · ${s.phone||'No phone'}</div>
         ${lastNote?`<div class="si-notes">"${lastNote}"</div>`:''}
-        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div style="margin-top:8px;">
           <select class="si-status" onchange="updateSavedStatus(${i},this.value)">
             ${statuses.map(st=>`<option value="${st}" ${s.status===st?'selected':''}>${statusLabels[st]}</option>`).join('')}
           </select>
         </div>
       </div>
-      <div style="font-size:13px;font-weight:700;color:${fitColor};">${statusLabels[s.status]||s.status}</div>
+      <div style="font-size:13px;font-weight:700;color:${s.status==='closed'?'var(--green)':s.status==='dead'?'var(--red)':'var(--accent)'};">${statusLabels[s.status]||s.status}</div>
     </div>`;
   }).join('');
 }
 
 async function updateSavedStatus(i,val){
-  const c=saved[i];
-  const d=await api('/portal/contacts/update',{id:c.id,status:val});
+  const d=await api('/portal/contacts/update',{id:saved[i].id,status:val});
   if(d.success){saved[i]=d.contact;renderSaved();}
+}
+
+// ── REP-ADDED PROSPECTS (stored in Supabase contacts with status='prospect') ──
+async function loadRepProspects(){
+  const d=await api('/portal/contacts/get');
+  if(d.success){
+    repProspects=d.contacts.filter(c=>c.status==='prospect').map(c=>({
+      name:c.biz_name, type:c.trade||'Other Trade',
+      city:c.notes?tryParseCity(c.notes):'',
+      size:c.contact_name||'Unknown',
+      fit:tryParseFit(c.notes)||'warm',
+      signals:tryParseSignals(c.notes)||[],
+      phone:c.phone||'',
+      notes:tryParseNotes(c.notes)||'',
+      source:'rep', id:c.id,
+    }));
+  }
+}
+
+function tryParseCity(notes){try{const n=JSON.parse(notes);return n.city||'';}catch(e){return '';}}
+function tryParseFit(notes){try{const n=JSON.parse(notes);return n.fit||'warm';}catch(e){return 'warm';}}
+function tryParseSignals(notes){try{const n=JSON.parse(notes);return n.signals||[];}catch(e){return [];}}
+function tryParseNotes(notes){try{const n=JSON.parse(notes);return n.note||'';}catch(e){return '';}}
+
+// ── ADD PROSPECT MODAL ─────────────────────────────────────────────────────────
+function openAddModal(){
+  const cityVal=currentCity;
+  if(cityVal){
+    const parts=cityVal.split(',');
+    if(parts[0])document.getElementById('m-city').value=parts[0].trim();
+    if(parts[1])document.getElementById('m-state').value=parts[1].trim();
+  }
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddModal(){document.getElementById('add-modal').classList.remove('open');}
+
+async function submitAddProspect(){
+  const name=document.getElementById('m-name').value.trim();
+  const type=document.getElementById('m-type').value;
+  if(!name||!type){toast('Business name and industry are required.');return;}
+  const city=document.getElementById('m-city').value.trim();
+  const state=document.getElementById('m-state').value.trim();
+  const cityStr=city&&state?`${city}, ${state}`:city||state||currentCity||'';
+  const signals=document.getElementById('m-signals').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const fit=document.getElementById('m-fit').value;
+  const note=document.getElementById('m-notes').value.trim();
+  const size=document.getElementById('m-size').value||'Unknown';
+  const phone=document.getElementById('m-phone').value.trim();
+  const owner=document.getElementById('m-owner').value.trim();
+
+  const notesPayload=JSON.stringify({city:cityStr,fit,signals,note,size});
+
+  const d=await api('/portal/contacts',{
+    biz_name:name, contact_name:size, trade:type,
+    status:'prospect', phone, notes:notesPayload,
+  });
+
+  if(d.success){
+    repProspects.unshift({name,type,city:cityStr,size,fit,signals,phone,notes:note,source:'rep',id:d.contact.id});
+    filterProspects();
+    closeAddModal();
+    toast('✓ Prospect added');
+    ['m-name','m-owner','m-phone','m-city','m-state','m-signals','m-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('m-type').value='';
+    document.getElementById('m-size').value='';
+    document.getElementById('m-fit').value='warm';
+  }
+}
+
+// ── PROSPECT DATA ──────────────────────────────────────────────────────────────
+const PRESET_PROSPECTS=[
+  {name:"Heartland HVAC Services",type:"HVAC",size:"Small (2–3)",city:"Topeka, KS",fit:"hot",signals:["Misses calls on jobs","No office staff","Wants more reviews"],phone:"785-555-0101",notes:"Owner mentioned losing jobs to voicemail",source:"preset"},
+  {name:"Pat Plumbing & Air",type:"Plumbing",size:"Mid (4–7)",city:"Topeka, KS",fit:"hot",signals:["High call volume","No automation","Active on Google"],phone:"785-555-0102",notes:"Top-rated, growing fast",source:"preset"},
+  {name:"Alpha Roofing LLC",type:"Roofing",size:"Small (2–3)",city:"Topeka, KS",fit:"hot",signals:["Storm season surge","Misses leads","Needs reviews"],phone:"785-555-0103",notes:"Post-storm demand spike",source:"preset"},
+  {name:"Greenwave Electric",type:"Electrical",size:"Solo",city:"Topeka, KS",fit:"warm",signals:["Solo operator","Needs booking help"],phone:"785-555-0104",notes:"Recently licensed",source:"preset"},
+  {name:"Yard Crafters Landscaping",type:"Landscaping",size:"Small (2–3)",city:"Topeka, KS",fit:"hot",signals:["Spring peak season","No follow-up system"],phone:"785-555-0105",notes:"Booked solid April–Oct",source:"preset"},
+  {name:"Shorey Automotive",type:"Auto Repair",size:"Small (2–3)",city:"Topeka, KS",fit:"hot",signals:["Appointment based","Loyal repeat customers"],phone:"785-555-0106",notes:"Owner-run, trusted brand",source:"preset"},
+  {name:"Essentia Salon & Spa",type:"Hair/Beauty Salon",size:"Mid (4–7)",city:"Topeka, KS",fit:"hot",signals:["Appointment only","No auto-reminders"],phone:"785-555-0107",notes:"Peak season April–June",source:"preset"},
+  {name:"Covenant Roofing",type:"Roofing",size:"Mid (4–7)",city:"Topeka, KS",fit:"hot",signals:["Insurance claims","Storm follow-up needed"],phone:"785-555-0108",notes:"Family owned, very busy",source:"preset"},
+  {name:"CWC Electric & Plumbing",type:"Plumbing",size:"Mid (4–7)",city:"Topeka, KS",fit:"warm",signals:["Dual trade growing","New plumbing division"],phone:"785-555-0109",notes:"Recently expanded",source:"preset"},
+  {name:"Crossroads Automotive",type:"Auto Repair",size:"Small (2–3)",city:"Topeka, KS",fit:"hot",signals:["Appointment scheduled","Review focused"],phone:"785-555-0110",notes:"Professional shop, open to tools",source:"preset"},
+  {name:"Yingling's Auto Service",type:"Auto Repair",size:"Small (2–3)",city:"Topeka, KS",fit:"hot",signals:["Since 1956","Appointment based"],phone:"785-555-0117",notes:"Iconic local shop",source:"preset"},
+  {name:"Greentouch Landscaping",type:"Landscaping",size:"Small (2–3)",city:"Topeka, KS",fit:"hot",signals:["Multi-year clients","No follow-up seen"],phone:"785-555-0118",notes:"Strong retention, needs re-engagement",source:"preset"},
+  {name:"An Angel's Touch Day Spa",type:"Hair/Beauty Salon",size:"Mid (4–7)",city:"Topeka, KS",fit:"hot",signals:["Full service spa","No auto-reminders"],phone:"785-555-0119",notes:"Perfect fit",source:"preset"},
+  {name:"Torgeson Electric",type:"Electrical",size:"Large (8+)",city:"Topeka, KS",fit:"cold",signals:["Commercial focus"],phone:"785-555-0116",notes:"Commercial/industrial — less fit",source:"preset"},
+];
+
+function getAllProspects(){
+  return [...PRESET_PROSPECTS,...repProspects];
+}
+
+function filterProspects(){
+  const ind=document.getElementById('p-industry')?.value||'';
+  const fit=document.getElementById('p-fit')?.value||'';
+  const src=document.getElementById('p-source')?.value||'';
+  const search=document.getElementById('p-search')?.value.toLowerCase()||'';
+  let list=getAllProspects().filter(p=>{
+    if(ind&&p.type!==ind)return false;
+    if(fit==='hot'&&p.fit!=='hot')return false;
+    if(fit==='warm'&&p.fit==='cold')return false;
+    if(src&&p.source!==src)return false;
+    if(search&&!p.name.toLowerCase().includes(search))return false;
+    if(currentCity&&p.city&&!p.city.toLowerCase().includes(currentCity.toLowerCase().split(',')[0].toLowerCase()))return false;
+    return true;
+  });
+  renderProspects(list);
+}
+
+function renderProspects(list){
+  const hot=list.filter(p=>p.fit==='hot').length;
+  const warm=list.filter(p=>p.fit==='warm').length;
+  const cold=list.filter(p=>p.fit==='cold').length;
+  document.getElementById('prospect-stats').innerHTML=`
+    <div class="stat-chip"><div class="n">${list.length}</div><div class="l">Showing</div></div>
+    <div class="stat-chip"><div class="n" style="color:var(--green)">${hot}</div><div class="l">🔥 Hot</div></div>
+    <div class="stat-chip"><div class="n" style="color:var(--orange)">${warm}</div><div class="l">⚡ Warm</div></div>
+    <div class="stat-chip"><div class="n" style="color:var(--red)">${cold}</div><div class="l">❄️ Cold</div></div>`;
+  if(!list.length){
+    document.getElementById('prospect-list').innerHTML=`<div class="empty"><div class="icon">🔍</div>${currentCity?`No prospects found in ${currentCity}. Hit "+ Add Prospect" to add some.`:'No prospects match your filters.'}</div>`;
+    return;
+  }
+  document.getElementById('prospect-list').innerHTML=list.map((p,i)=>{
+    const isSaved=saved.some(s=>s.biz_name===p.name);
+    const bc=p.fit==='hot'?'badge-hot':p.fit==='warm'?'badge-warm':'badge-cold';
+    const fl=p.fit==='hot'?'🔥 Hot':p.fit==='warm'?'⚡ Warm':'❄️ Cold';
+    const srcBadge=p.source==='rep'?'<span class="pc-source rep-added">Rep Added</span>':'<span class="pc-source">Preset</span>';
+    return `<div class="prospect-card ${isSaved?'saved-card':''}">
+      <div>
+        <div class="pc-type">${p.type} ${srcBadge}</div>
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-meta">
+          <span class="pc-detail">📍 ${p.city||currentCity||'—'}</span>
+          <span class="pc-detail">👥 ${p.size}</span>
+          ${p.phone?`<span class="pc-detail">📞 ${p.phone}</span>`:''}
+        </div>
+        <div class="pc-signals">${p.signals.map((s,si)=>`<span class="signal-tag ${si===0?'hot-signal':''}">${s}</span>`).join('')}</div>
+        ${p.notes?`<div style="font-size:12px;color:var(--gray);margin-top:6px;font-style:italic;">"${p.notes}"</div>`:''}
+        <div class="pc-actions">
+          <button class="pc-action ${isSaved?'saved-btn':''}" onclick="toggleSave(${i},this,event)">${isSaved?'✓ Saved':'+ Save'}</button>
+          <button class="pc-action" onclick="quickPitch('${p.type}',event)">💬 Pitch</button>
+          <button class="pc-action" onclick="runFitCheck('${p.name}','${p.type}',event)">🎯 Fit Check</button>
+        </div>
+      </div>
+      <div><div class="pc-score-badge ${bc}">${fl}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSave(i,btn,e){
+  e.stopPropagation();
+  const all=getAllProspects();
+  const p=all[i];
+  if(!p)return;
+  addToSavedAPI({biz_name:p.name,trade:p.type,status:'new',phone:p.phone||'',notes:p.notes||''});
+  btn.className='pc-action saved-btn';
+  btn.textContent='✓ Saved';
+}
+
+function quickPitch(type,e){
+  if(e)e.stopPropagation();
+  switchTab('pitch',document.querySelectorAll('.tab')[3]);
+  document.querySelectorAll('#pitch-industry .pitch-pill').forEach(p=>{
+    if(p.textContent.trim()===type)p.click();
+  });
+}
+
+function runFitCheck(name,type,e){
+  if(e)e.stopPropagation();
+  document.getElementById('biz-name').value=name;
+  document.getElementById('biz-type').value=type;
+  switchTab('fit',document.querySelectorAll('.tab')[0]);
 }
 
 // ── FIT CHECKER ────────────────────────────────────────────────────────────────
@@ -571,16 +898,9 @@ function setAnswer(id,val,btn){
 
 function scoreFit(){
   const name=document.getElementById('biz-name').value||'This Business';
-  const type=document.getElementById('biz-type').value;
   if(Object.keys(fitAnswers).length<5){toast('Answer at least 5 questions first.');return;}
   let score=0;
-  FIT_QUESTIONS.forEach(q=>{
-    const a=fitAnswers[q.id];
-    if(!a)return;
-    if(a==='yes')score+=q.yes;
-    else if(a==='no')score+=q.no;
-    else score+=q.maybe;
-  });
+  FIT_QUESTIONS.forEach(q=>{const a=fitAnswers[q.id];if(!a)return;score+=a==='yes'?q.yes:a==='no'?q.no:q.maybe;});
   const max=FIT_QUESTIONS.reduce((a,q)=>a+q.yes,0);
   const pct=Math.max(0,Math.min(100,Math.round((score/max)*100)));
   const box=document.getElementById('score-result');
@@ -588,20 +908,20 @@ function scoreFit(){
   num.textContent=pct+'%';
   box.className='score-box show';
   if(pct>=70){
-    box.classList.add('fit-hot'); num.className='score-big score-hot';
+    box.classList.add('fit-hot');num.className='score-big score-hot';
     document.getElementById('score-label').textContent='🔥 Strong Fit — Move on This One';
-    document.getElementById('score-sub').textContent=`${name} shows clear signals that My Smart Slots solves real problems they have right now. Lead with the audit, not the pitch.`;
+    document.getElementById('score-sub').textContent=`${name} shows clear signals that My Smart Slots solves real problems right now. Lead with the free audit — let the revenue leak number close it.`;
     document.getElementById('score-tags').innerHTML=buildTags(['Missed call text back','AI chat booking','SMS confirmations','Review automation'],'tag-hot');
   } else if(pct>=45){
-    box.classList.add('fit-warm'); num.className='score-big score-warm';
+    box.classList.add('fit-warm');num.className='score-big score-warm';
     document.getElementById('score-label').textContent='⚡ Warm Fit — Worth Pursuing';
     document.getElementById('score-sub').textContent=`${name} has some of the right signals. Lead with the free audit and let the numbers do the talking.`;
     document.getElementById('score-tags').innerHTML=buildTags(['Offer free audit','Start with Starter plan','Follow up in 1 week'],'tag-warm');
   } else {
-    box.classList.add('fit-cold'); num.className='score-big score-cold';
+    box.classList.add('fit-cold');num.className='score-big score-cold';
     document.getElementById('score-label').textContent='❄️ Low Fit — Proceed Carefully';
     document.getElementById('score-sub').textContent=`${name} may not be the right fit right now. Don't over-invest follow-up time here.`;
-    document.getElementById('score-tags').innerHTML=buildTags(['Low priority','Maybe revisit in 90 days','Keep notes'],'tag-cold');
+    document.getElementById('score-tags').innerHTML=buildTags(['Low priority','Maybe revisit in 90 days'],'tag-cold');
   }
   box.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -610,10 +930,7 @@ function buildTags(list,cls){return list.map(t=>`<span class="score-tag ${cls}">
 
 function resetFit(){
   fitAnswers={};
-  ['biz-name','biz-type','biz-size','fit-notes'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.value='';
-  });
+  ['biz-name','biz-type','biz-size','fit-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('score-result').className='score-box';
   renderFitQuestions();
 }
@@ -630,109 +947,7 @@ function saveFromFit(){
 function goToPitch(){
   const type=document.getElementById('biz-type').value;
   switchTab('pitch',document.querySelectorAll('.tab')[3]);
-  if(type){
-    document.querySelectorAll('#pitch-industry .pitch-pill').forEach(p=>{
-      if(p.textContent.includes(type))p.click();
-    });
-  }
-}
-
-// ── PROSPECTS ──────────────────────────────────────────────────────────────────
-const PROSPECTS=[
-  {name:"Heartland HVAC Services",type:"HVAC",size:"Small (2–3)",city:"Topeka",fit:"hot",signals:["Misses calls on jobs","No office staff","Wants more reviews"],phone:"785-555-0101",notes:"Owner mentioned losing jobs to voicemail"},
-  {name:"Pat Plumbing & Air",type:"Plumbing",size:"Mid (4–7)",city:"Topeka",fit:"hot",signals:["High call volume","No automation","Active on Google"],phone:"785-555-0102",notes:"Top-rated, growing fast"},
-  {name:"Alpha Roofing LLC",type:"Roofing",size:"Small (2–3)",city:"Topeka",fit:"hot",signals:["Storm season surge","Misses leads","Needs reviews"],phone:"785-555-0103",notes:"Post-storm demand spike"},
-  {name:"Greenwave Electric",type:"Electrical",size:"Solo",city:"Topeka",fit:"warm",signals:["Solo operator","Needs booking help"],phone:"785-555-0104",notes:"Recently licensed"},
-  {name:"Yard Crafters Landscaping",type:"Landscaping",size:"Small (2–3)",city:"Topeka",fit:"hot",signals:["Spring peak season","Weekly route schedule","No follow-up system"],phone:"785-555-0105",notes:"Booked solid April–Oct"},
-  {name:"Shorey Automotive",type:"Auto Repair",size:"Small (2–3)",city:"Topeka",fit:"hot",signals:["High Google reviews","Appointment based","Loyal repeat customers"],phone:"785-555-0106",notes:"Owner-run, trusted brand"},
-  {name:"Essentia Salon & Spa",type:"Hair/Beauty Salon",size:"Mid (4–7)",city:"Topeka",fit:"hot",signals:["Appointment only","Prom/wedding season","No auto-reminders"],phone:"785-555-0107",notes:"Peak season April–June"},
-  {name:"Covenant Roofing",type:"Roofing",size:"Mid (4–7)",city:"Topeka",fit:"hot",signals:["Insurance claims","High lead volume","Storm follow-up needed"],phone:"785-555-0108",notes:"Family owned, very busy"},
-  {name:"CWC Electric & Plumbing",type:"Plumbing",size:"Mid (4–7)",city:"Topeka",fit:"warm",signals:["Dual trade growing","New plumbing division"],phone:"785-555-0109",notes:"Recently expanded"},
-  {name:"Crossroads Automotive",type:"Auto Repair",size:"Small (2–3)",city:"Topeka",fit:"hot",signals:["Appointment scheduled","3yr warranty offer","Review focused"],phone:"785-555-0110",notes:"Professional shop, open to tools"},
-  {name:"Eaton Roofing & Exteriors",type:"Roofing",size:"Mid (4–7)",city:"Topeka",fit:"warm",signals:["Est. 1993","Insurance work","High volume"],phone:"785-555-0111",notes:"Established, may have some systems"},
-  {name:"Lawn Care Topeka",type:"Landscaping",size:"Solo",city:"Topeka",fit:"warm",signals:["20yr experience","Solo operation","Needs scheduling"],phone:"785-555-0112",notes:"Rated #1 Shawnee County"},
-  {name:"Body Paradise Salon",type:"Hair/Beauty Salon",size:"Solo",city:"Topeka",fit:"warm",signals:["Repeat clientele","Walk-ins + appointments"],phone:"785-555-0113",notes:"Small but loyal base"},
-  {name:"Schmidtlein Electric",type:"Electrical",size:"Mid (4–7)",city:"Topeka",fit:"warm",signals:["Family owned 1984","NE Kansas focus"],phone:"785-555-0114",notes:"Established, trust-based"},
-  {name:"Blue Dot Services",type:"HVAC",size:"Large (8+)",city:"Topeka",fit:"warm",signals:["65yr business","Multi-trade","24/7 service"],phone:"785-555-0115",notes:"Larger — may already have systems"},
-  {name:"Torgeson Electric",type:"Electrical",size:"Large (8+)",city:"Topeka",fit:"cold",signals:["Employee owned","Commercial focus"],phone:"785-555-0116",notes:"Commercial focus — less fit"},
-  {name:"Yingling's Auto Service",type:"Auto Repair",size:"Small (2–3)",city:"Topeka",fit:"hot",signals:["Since 1956","Free tow offer","Appointment based"],phone:"785-555-0117",notes:"Iconic local shop, loyal customers"},
-  {name:"Greentouch Landscaping",type:"Landscaping",size:"Small (2–3)",city:"Topeka",fit:"hot",signals:["Multi-year clients","Design + install","No follow-up seen"],phone:"785-555-0118",notes:"Strong retention, needs re-engagement"},
-  {name:"An Angel's Touch Day Spa",type:"Hair/Beauty Salon",size:"Mid (4–7)",city:"Topeka",fit:"hot",signals:["Full service spa","Appointment based","No auto-reminders"],phone:"785-555-0119",notes:"Nails, hair, massage — perfect fit"},
-  {name:"Veteran's Exteriors KS",type:"Roofing",size:"Solo",city:"Topeka",fit:"warm",signals:["Family owned","40yr experience","Trust-based referrals"],phone:"785-555-0120",notes:"Ron & Nick Brown — veteran owned"},
-];
-
-function renderProspects(list){
-  const hot=list.filter(p=>p.fit==='hot').length;
-  const warm=list.filter(p=>p.fit==='warm').length;
-  const cold=list.filter(p=>p.fit==='cold').length;
-  document.getElementById('prospect-stats').innerHTML=`
-    <div class="stat-chip"><div class="n">${list.length}</div><div class="l">Showing</div></div>
-    <div class="stat-chip"><div class="n" style="color:var(--green)">${hot}</div><div class="l">🔥 Hot</div></div>
-    <div class="stat-chip"><div class="n" style="color:var(--orange)">${warm}</div><div class="l">⚡ Warm</div></div>
-    <div class="stat-chip"><div class="n" style="color:var(--red)">${cold}</div><div class="l">❄️ Cold</div></div>`;
-  if(!list.length){document.getElementById('prospect-list').innerHTML='<div class="empty"><div class="icon">🔍</div>No prospects match your filters.</div>';return;}
-  document.getElementById('prospect-list').innerHTML=list.map((p,i)=>{
-    const isSaved=saved.some(s=>s.biz_name===p.name);
-    const bc=p.fit==='hot'?'badge-hot':p.fit==='warm'?'badge-warm':'badge-cold';
-    const fl=p.fit==='hot'?'🔥 Hot':p.fit==='warm'?'⚡ Warm':'❄️ Cold';
-    return `<div class="prospect-card ${isSaved?'saved-card':''}" style="animation:fadeUp .3s ease;">
-      <div>
-        <div class="pc-type">${p.type}</div>
-        <div class="pc-name">${p.name}</div>
-        <div class="pc-details">
-          <span class="pc-detail">📍 ${p.city}</span>
-          <span class="pc-detail">👥 ${p.size}</span>
-          ${p.phone?`<span class="pc-detail">📞 ${p.phone}</span>`:''}
-        </div>
-        <div class="pc-signals">${p.signals.map((s,si)=>`<span class="signal-tag ${si===0?'hot-signal':''}">${s}</span>`).join('')}</div>
-        ${p.notes?`<div style="font-size:12px;color:var(--gray-text);margin-top:6px;font-style:italic;">"${p.notes}"</div>`:''}
-        <div class="pc-actions">
-          <button class="pc-action ${isSaved?'saved-btn':''}" onclick="toggleSaveProspect(${i},this)">${isSaved?'✓ Saved':'+ Save'}</button>
-          <button class="pc-action" onclick="quickPitch('${p.type}')">💬 Build Pitch</button>
-          <button class="pc-action" onclick="runFitCheck('${p.name}','${p.type}')">🎯 Fit Check</button>
-        </div>
-      </div>
-      <div><div class="pc-score-badge ${bc}">${fl}</div></div>
-    </div>`;
-  }).join('');
-}
-
-function filterProspects(){
-  const ind=document.getElementById('p-industry').value;
-  const fit=document.getElementById('p-fit').value;
-  const size=document.getElementById('p-size').value;
-  const search=document.getElementById('p-search').value.toLowerCase();
-  let list=PROSPECTS.filter(p=>{
-    if(ind&&p.type!==ind)return false;
-    if(fit==='hot'&&p.fit!=='hot')return false;
-    if(fit==='warm'&&p.fit==='cold')return false;
-    if(size&&!p.size.includes(size.split(' ')[0]))return false;
-    if(search&&!p.name.toLowerCase().includes(search))return false;
-    return true;
-  });
-  renderProspects(list);
-}
-
-function toggleSaveProspect(i,btn){
-  const p=PROSPECTS[i];
-  const isSaved=saved.some(s=>s.biz_name===p.name);
-  if(isSaved){toast('Already in your pipeline.');return;}
-  addToSavedAPI({biz_name:p.name,trade:p.type,status:'new',phone:p.phone||'',notes:p.notes||''});
-  btn.className='pc-action saved-btn';
-  btn.textContent='✓ Saved';
-}
-
-function quickPitch(type){
-  switchTab('pitch',document.querySelectorAll('.tab')[3]);
-  document.querySelectorAll('#pitch-industry .pitch-pill').forEach(p=>{
-    if(p.textContent.trim()===type)p.click();
-  });
-}
-
-function runFitCheck(name,type){
-  document.getElementById('biz-name').value=name;
-  document.getElementById('biz-type').value=type;
-  switchTab('fit',document.querySelectorAll('.tab')[0]);
+  if(type)document.querySelectorAll('#pitch-industry .pitch-pill').forEach(p=>{if(p.textContent.includes(type))p.click();});
 }
 
 // ── PITCH BUILDER ──────────────────────────────────────────────────────────────
@@ -746,59 +961,60 @@ function buildPitch(){
   const {industry,pain,method}=pitchState;
   if(!industry||!pain||!method){toast('Select an industry, pain point, and contact method.');return;}
   const rep=document.getElementById('p-rep').value.trim()||'[Your Name]';
-  const city=document.getElementById('p-city').value.trim()||'KC';
+  const city=currentCity||'your area';
 
-  const industryContext={
-    'HVAC':'HVAC companies are slammed during peak season — calls hit voicemail mid-job and most customers don\'t wait.',
-    'Plumbing':'Plumbers are usually on a job when calls come in — and customers who get voicemail usually call the next guy.',
-    'Roofing':'Roofing companies get flooded after storms but the first company to respond wins the job.',
-    'Electrical':'Electricians are on-site and can\'t pick up — that missed call almost always books with someone else.',
-    'Landscaping':'Landscapers are out on routes all day — easy to miss calls and hard to follow up by evening.',
-    'Auto Repair':'Auto shops get steady call volume but lose customers who hit voicemail to a shop down the street.',
-    'Salon':'Salons depend on repeat bookings — no-shows happen because nobody followed up to confirm.',
-    'Construction':'Contractors are on site all day — leads sit in voicemail and go cold fast.',
+  const industryCtx={
+    'HVAC':'HVAC companies are slammed during peak season — calls hit voicemail mid-job and most customers don\'t wait to call the next one.',
+    'Plumbing':'Plumbers are usually on a job when new calls come in — and customers who get voicemail typically call whoever picks up next.',
+    'Roofing':'Roofing companies get flooded after storms but the first company to respond wins the job. Speed of follow-up is everything.',
+    'Electrical':'Electricians are on-site and can\'t pick up — that missed call almost always books with someone else within minutes.',
+    'Landscaping':'Landscapers are on routes all day — easy to miss calls, and by evening most leads have already moved on.',
+    'Auto Repair':'Auto shops get steady call volume but lose customers to whoever picks up when they\'re already with a car.',
+    'Salon':'Salons run on repeat bookings — no-shows happen because nobody confirmed the appointment beforehand.',
+    'Construction':'Contractors are on site all day — leads sit in voicemail and go cold fast without a follow-up system.',
   };
 
-  const painContext={
-    'missed calls':'Every missed call during a job is potentially a $300–600 job going to whoever picks up next.',
-    'no-shows':'No-shows almost always happen because no one confirmed the booking beforehand.',
-    'no reviews':'Happy customers don\'t leave reviews unless someone asks — and timing right after the job is everything.',
-    'chasing leads':'Old leads in your phone are money you\'ve already spent to acquire. Most never get followed up on.',
-    'manual booking':'Manual scheduling creates gaps, double-books, and takes time you don\'t have.',
-    'after-hours calls':'Most trades lose 30–40% of inquiries after 6pm — when customers are finally free to call.',
+  const painCtx={
+    'missed calls':'Every missed call on a job is potentially a $300–600 job going to whoever picks up next. Most trade businesses lose 3–5 of those a month.',
+    'no-shows':'No-shows almost always happen because no one confirmed the booking. An automated reminder the day before and morning of cuts that dramatically.',
+    'no reviews':'Happy customers don\'t leave reviews unless someone asks right after the job. Timing is everything — most shops miss that window every single time.',
+    'chasing leads':'Old leads in your phone are money you\'ve already spent to acquire. Without a re-engagement system they just go cold.',
+    'manual booking':'Manual scheduling creates gaps, double-books, and eats time nobody has on a busy day.',
+    'after-hours calls':'Most trades lose 30–40% of inquiries after 6pm — when customers are finally free to call and no one is picking up.',
   };
+
+  const process=`\n\n📋 OUR PROCESS (if they want to know what happens next)\n"Here's how it works — I do a free 10-minute audit with you where I pull your numbers and show you exactly what you're losing per month. If it makes sense, we set everything up within 24 hours. You don't change anything about how you work — we plug in and the automations run on their own. Starts at $125/mo with a one-time $199 setup. 30-day guarantee — if you don't see measurable improvement, month two is free."`;
 
   const templates={
     'cold call':{
-      opener:`"Hey, is this [Owner Name]? ... Hey [Name], I'm ${rep} — I work with ${industry} companies in ${city} on something pretty specific. I'll keep it short.\n\nI noticed [Business Name] doesn't have an automated follow-up when calls go unanswered. ${industryContext[industry]}\n\nIs that something you run into?"`,
-      followup:`[If yes — and most will say yes]\n"That's exactly what I help with. We set up a system that automatically texts back missed calls with a booking link — within seconds. No new software for you, nothing to manage. We handle setup in 24 hours.\n\nI do a free 10-minute audit for ${industry} companies in ${city} — I just need a few numbers from you and I can show you exactly what it's worth for your business. Do you have time for that this week?"`,
-      audit_ask:`"What's a good day this week for a quick 10-minute call? I'll run the numbers live with you."`,
+      opener:`"Hey, is this [Owner Name]? ... Hey [Name], I'm ${rep} — I work with ${industry} companies in ${city} on something specific. I'll keep it short.\n\nI noticed [Business Name] doesn't have an automated follow-up when calls go unanswered. ${industryCtx[industry]}\n\nIs that something you run into?"`,
+      followup:`[If yes — most will]\n"That's exactly what I help with. We set up a system that automatically texts back missed calls with a booking link within seconds — before they think about calling someone else. No new software for you, nothing to manage.\n\nI do a free 10-minute audit for ${industry} companies in ${city}. I run the numbers live with you and show you exactly what it's worth for your business. Do you have 10 minutes this week for that call?"`,
+      audit_ask:`"What's a good day this week? I only need 10 minutes and I'll have real numbers for you."`,
     },
     'walk-in':{
-      opener:`Walk in, ask for the owner by name. When you get face time:\n\n"Hey — appreciate you giving me a minute. I work with ${industry} businesses in ${city} on one specific problem: ${painContext[pain].split('.')[0]}.\n\nI noticed [Business Name] doesn't have an automated system for that. Is that something that's cost you jobs?"`,
-      followup:`[When they engage]\n"We fix that in 24 hours — automated texts, booking confirmations, review requests. Nothing for you to set up or learn.\n\nCan I grab 10 minutes with you later this week? I'll do a free audit and show you the dollar amount — no commitment."`,
+      opener:`Walk in, ask for the owner by name. When you get face time:\n\n"Hey — appreciate you giving me a minute. I work with ${industry} businesses in ${city} on one specific problem: ${painCtx[pain].split('.')[0]}.\n\nI noticed [Business Name] doesn't have an automated system for that. Is that something that's cost you jobs?"`,
+      followup:`[When they engage]\n"We fix that in 24 hours — automated texts, booking confirmations, review requests. Nothing for you to set up or learn. We handle everything.\n\nCan I grab 10 minutes with you this week? I'll do a free audit and show you the dollar amount — no commitment, just real numbers."`,
       audit_ask:`"Would Thursday or Friday work for a quick call? 10 minutes and you'll know exactly what it's worth."`,
     },
     'LinkedIn DM':{
-      opener:`"Hey [First Name] — came across [Business Name] while looking at ${industry} companies in ${city}. Strong reputation.\n\nQuick question: when you're on a job and a new customer calls and gets voicemail — what happens to that lead?\n\nAsking because most ${industry} owners I talk to say the same thing: ${industryContext[industry]}"`,
-      followup:`[If they respond]\n"Appreciate the reply. We set up automated follow-up systems for ${industry} companies — missed call texts, booking confirmations, review requests. 24 hours to set up, runs on its own.\n\nWorth a 10-minute call to see what it might be worth for your business?"`,
-      audit_ask:`"I do a free audit — no pitch, just the numbers. Worth a quick call this week?"`,
+      opener:`"Hey [First Name] — came across [Business Name] while looking at ${industry} companies in ${city}. Strong reputation.\n\nQuick question: when you're on a job and a new customer calls and gets voicemail — what happens to that lead?\n\nAsking because ${industryCtx[industry]}"`,
+      followup:`[If they respond]\n"Appreciate the reply. We set up automated follow-up for ${industry} companies — missed call texts, booking confirmations, review requests. 24 hours to set up, runs on its own after that.\n\nWorth a free 10-minute audit to see what it might be worth for your business? No pitch — just your numbers."`,
+      audit_ask:`"Happy to do it over a quick call this week — 10 minutes, your numbers, no obligation."`,
     },
     'cold email':{
-      opener:`Subject: Quick observation about [Business Name]\n\nHey [Owner Name],\n\nI came across [Business Name] while looking at ${industry} businesses in ${city}. ${industryContext[industry]}\n\nMy Smart Slots sets up automated follow-up for ${industry} companies — missed call texts, booking confirmations, review requests. Setup in 24 hours. Nothing you have to manage.\n\nI do a free 10-minute audit for ${industry} companies — happy to show you exactly what it's worth for your business. Worth a quick call this week?\n\n${rep}\nMy Smart Slots · 785-329-0202`,
-      followup:`[Follow-up 3 days later]\n"Hey [Name] — just bumping this up. Happy to start with a free audit — no obligation, just a clear look at what's slipping. 10 minutes, your call."`,
+      opener:`Subject: Quick observation about [Business Name]\n\nHey [Owner Name],\n\nI came across [Business Name] while looking at ${industry} businesses in ${city}. ${industryCtx[industry]}\n\nMy Smart Slots sets up automated follow-up for ${industry} companies — missed call texts, booking confirmations, review requests. Setup in 24 hours. Nothing you have to manage.\n\nI do a free 10-minute audit — happy to show you exactly what it's worth for your business. Worth a quick call this week?\n\n${rep}\nMy Smart Slots · 785-329-0202 · mysmartslots.com`,
+      followup:`[Follow-up 3 days later]\n"Hey [Name] — just bumping this up. Free audit, no obligation — 10 minutes and you'll have real numbers. Worth it?"`,
       audit_ask:`"Does Thursday or Friday work for a 10-minute call?"`,
     },
     'text':{
-      opener:`"Hey [Name], this is ${rep} with My Smart Slots. Quick observation — [Business Name] doesn't have an automated follow-up when calls go to voicemail. For ${industry} companies, that's usually a few jobs a month going to whoever picks up next.\n\nDo you have 10 minutes this week for a free audit? I'll show you the dollar amount."`,
-      followup:`[If no reply after 2 days]\n"Hey [Name] — just following up. Free audit for ${industry} companies in ${city} — 10 minutes, I run the numbers live with you, no commitment. Worth it?"`,
+      opener:`"Hey [Name], this is ${rep} with My Smart Slots. Quick observation — [Business Name] doesn't have an automated follow-up when calls go to voicemail. For ${industry} companies that's usually a few jobs a month going to whoever picks up next.\n\nDo you have 10 minutes this week for a free audit? I'll show you the dollar amount."`,
+      followup:`[No reply after 2 days]\n"Hey [Name] — just following up. Free audit for ${industry} companies in ${city} — 10 minutes, I run the numbers live with you, no commitment. Worth it?"`,
       audit_ask:`"What day works best for you this week?"`,
     },
   };
 
   const t=templates[method];
-  const output=`📣 OPENER\n${t.opener}\n\n💡 IF THEY ENGAGE — CLOSE THE AUDIT\n${t.followup}\n\n📅 AUDIT ASK\n${t.audit_ask}\n\n🎯 KEY PAIN TO REFERENCE\n${painContext[pain]}\n\n✅ IF THEY ASK ABOUT PRICE\n"We start at $125/mo with a one-time $199 setup. There's a 30-day guarantee — if you don't see measurable improvement, month two is free. Most clients recover the cost in the first recovered job."`;
-
+  const output=`📣 OPENER\n${t.opener}\n\n💡 IF THEY ENGAGE — CLOSE THE AUDIT\n${t.followup}\n\n📅 AUDIT APPOINTMENT ASK\n${t.audit_ask}\n\n🎯 KEY PAIN TO REFERENCE\n${painCtx[pain]}${process}`;
   document.getElementById('pitch-output').textContent=output;
 }
 
@@ -816,8 +1032,8 @@ function resetPitch(){
 
 // ── ICEBREAKERS ────────────────────────────────────────────────────────────────
 function updateIcebreakers(){
-  const rep=document.getElementById('p-rep').value.trim()||'[Your Name]';
-  const city=document.getElementById('p-city').value.trim()||'KC';
+  const rep=document.getElementById('p-rep')?.value.trim()||'[Your Name]';
+  const city=currentCity||'your area';
   const pros=document.getElementById('ice-prospect')?.value.trim()||'[Name]';
   const biz=document.getElementById('ice-biz')?.value.trim()||'[Business Name]';
   const reviews=document.getElementById('ice-reviews')?.value.trim()||'[X]';
@@ -826,27 +1042,27 @@ function updateIcebreakers(){
   const icebreakers=[
     {
       trigger:'Low Google reviews',
-      text:`"Hey ${pros} — I came across ${biz} while looking at ${industry} companies in ${city}. You've got solid ratings but only ${reviews} reviews showing — for a business that's clearly been around a while, that's usually just a timing problem, not a quality problem. Is that something you're actively working on?"`,
+      text:`"Hey ${pros} — I came across ${biz} while looking at ${industry} companies in ${city}. You've got solid ratings but only ${reviews} reviews showing. For a business that's clearly been around a while, that's usually just a timing problem — nobody's asking right after the job. Is that something you've tried to fix?"`,
     },
     {
       trigger:'No chatbot or booking on website',
-      text:`"Hey ${pros}, I'm ${rep} — I looked at ${biz}'s site and noticed there's no way for a customer to book or even start a conversation after hours. For ${industry} companies, that's usually where leads go to die. Is after-hours outreach something you think about?"`,
+      text:`"Hey ${pros}, I'm ${rep} — I looked at ${biz}'s site and noticed there's no way for a customer to book or start a conversation after hours. For ${industry} companies that's usually where leads go to die. Is after-hours coverage something you've thought about?"`,
     },
     {
-      trigger:'No recent reviews (last review was weeks/months ago)',
-      text:`"Hey ${pros} — noticed ${biz} had a great run of reviews but the last one was a while back. That usually means happy customers just aren't being asked. Is that something you've tried to fix or just hasn't been a priority?"`,
+      trigger:'No recent reviews',
+      text:`"Hey ${pros} — noticed ${biz} had a solid run of reviews but the last one was a while back. That's usually not a quality problem — it's just that nobody's asking at the right moment after a job. Is that something on your radar?"`,
     },
     {
       trigger:'Busy season approaching',
-      text:`"Hey ${pros}, I'm ${rep}. Spring is about to get loud for ${industry} companies in ${city} — I work with a few shops on making sure calls don't fall through the cracks when it gets slammed. Is your follow-up system set up for the volume increase?"`,
+      text:`"Hey ${pros}, I'm ${rep}. Spring is about to get loud for ${industry} companies in ${city} — I work with a few shops on making sure calls don't slip through the cracks when it gets slammed. Is your follow-up system set up for the volume increase?"`,
     },
     {
-      trigger:'Small team / solo operator',
-      text:`"Hey ${pros} — I can see ${biz} is a tight operation. When you're on a job and a new call comes in, what happens to it? I ask because most solo ${industry} operators lose 3–5 jobs a month just from calls hitting voicemail at the wrong time."`,
+      trigger:'Solo operator / small team',
+      text:`"Hey ${pros} — I can see ${biz} is a tight operation. Quick question: when you're on a job and a new call comes in, what happens to it? Most solo ${industry} operators lose 3–5 jobs a month just from calls hitting voicemail at the wrong time."`,
     },
     {
-      trigger:'General observation (nothing specific)',
-      text:`"Hey ${pros}, I'm ${rep} — I work with ${industry} companies in ${city} on follow-up automation. One specific question: when you miss a call mid-job, does your business have any way to automatically reach back out? Most companies I talk to don't — and it costs them more than they realize."`,
+      trigger:'General — nothing specific observed',
+      text:`"Hey ${pros}, I'm ${rep} — I work with ${industry} companies in ${city} on follow-up automation. One specific question: when you miss a call mid-job, does your business have any way to automatically reach back out? Most don't — and it costs more than they realize."`,
     },
   ];
 
@@ -861,24 +1077,19 @@ function updateIcebreakers(){
   window._icebreakers=icebreakers;
 }
 
-function selectIce(i){
-  document.querySelectorAll('.ice-card').forEach((c,idx)=>c.classList.toggle('selected',idx===i));
-}
-
-function copyIce(i){
-  navigator.clipboard.writeText(window._icebreakers[i].text).then(()=>toast('Icebreaker copied!'));
-}
+function selectIce(i){document.querySelectorAll('.ice-card').forEach((c,idx)=>c.classList.toggle('selected',idx===i));}
+function copyIce(i){navigator.clipboard.writeText(window._icebreakers[i].text).then(()=>toast('Icebreaker copied!'));}
 
 // ── OBJECTIONS ─────────────────────────────────────────────────────────────────
 const OBJECTIONS=[
-  {q:'"I already have someone answering my phones."',a:'That\'s great — this isn\'t about replacing them. It\'s about what happens after hours, on weekends, or when they\'re on another call. Most shops lose 30–40% of after-hours inquiries before anyone can pick up. My Smart Slots fills that gap automatically.'},
-  {q:'"I get enough business from referrals."',a:'Referral businesses are the best kind — and this makes them even stronger. The post-job review request alone turns happy customers into public referrals on Google. One extra 5-star review per week compounds fast.'},
-  {q:'"$225 a month is too expensive."',a:'Fair to think about it that way. Here\'s the math: the average missed call in a trade business is worth $300–600. If this recovers even one job per month, it\'s already paid for itself. We have a starter plan at $125/mo and a 30-day guarantee — if you don\'t see value, you don\'t pay month two.'},
-  {q:'"I don\'t have time to set this up."',a:'We handle the entire setup — usually within 24 hours. You don\'t learn anything or change how you work. We plug into your existing calendar. You keep doing your jobs, automations run in the background.'},
-  {q:'"I tried something like this before and it didn\'t work."',a:'I appreciate you saying that — what did you try? Most of the time we hear about generic CRM tools not built for trades. My Smart Slots is configured specifically for your workflow, not a template you figure out yourself.'},
-  {q:'"My customers prefer calling, not texting."',a:'They still call — and if the call connects, great. The missed call text just catches the ones who hang up before leaving a message. 78% of people respond to a text before they return a voicemail. It\'s additive, not replacing anything.'},
-  {q:'"I need to think about it / talk to my partner."',a:'Completely understand. Would it help if I sent a quick summary you could share with them? I can also do the free audit first — we map your call flow and show you exactly what it\'s costing monthly, with real numbers, no obligation.'},
-  {q:'"I\'m too busy right now."',a:'The businesses that are "too busy" are usually the ones leaking the most from unconfirmed bookings and missed calls. Busy season is exactly when this pays off most. Setup takes 24 hours and requires nothing from you — we handle it.'},
+  {q:'"I already have someone answering my phones."',a:'That\'s great — this isn\'t replacing them. It\'s about what happens after hours, on weekends, or when they\'re on another call. Most shops lose 30–40% of after-hours inquiries before anyone can pick up. My Smart Slots fills that gap automatically — your person handles the complex stuff, automations handle the rest.\n\nWould it be worth 10 minutes to see what that gap is costing you monthly?'},
+  {q:'"I get enough business from referrals."',a:'Referral businesses are the best kind — and this makes them even stronger. The post-job review request alone turns happy customers into public referrals on Google. One extra 5-star review per week compounds fast. We also bring back cold leads and past customers with automated re-engagement — people who already know you.\n\nWould a free audit hurt? I\'d show you the numbers and you can decide.'},
+  {q:'"$225 a month is too expensive."',a:'Fair to think about it that way. Here\'s the math: the average missed call in a trade business is worth $300–600 in potential revenue. If this recovers even one job per month that would\'ve gone to voicemail, it\'s already paid for itself. We also have a Starter plan at $125/mo.\n\nAnd there\'s a 30-day guarantee — if you don\'t see measurable improvement in the first 30 days, month two is free. No long-term contract either.\n\nCan I show you the math on your specific numbers? Takes 10 minutes.'},
+  {q:'"I don\'t have time to set this up."',a:'We handle the entire setup within 24 hours. You don\'t learn anything new or change how you work. We plug into your existing Google or Outlook calendar. You just keep doing your jobs and the automations run in the background — missed calls get texted, bookings get confirmed, reviews get requested.\n\nThe only thing we need from you is 10 minutes for the audit call and then a few business details to configure it.'},
+  {q:'"I tried something like this before and it didn\'t work."',a:'I appreciate you saying that — what did you try? Most of the time we hear about generic CRM tools that weren\'t built for trades, or platforms that required a lot of manual setup and nobody maintained them.\n\nMy Smart Slots is configured specifically for your trade and your workflow — not a template you figure out yourself. And if it doesn\'t work in the first 30 days, you don\'t pay for month two.\n\nWould a free audit be worth it just to see if what we do is actually different?'},
+  {q:'"My customers prefer calling, not texting."',a:'They still call — and if it connects, great. The missed call text just catches the ones who hang up before leaving a message. 78% of people respond to a text before they\'ll return a voicemail. It\'s additive — it gives customers a second path when the call doesn\'t connect. Nobody\'s taking the phone away.\n\nWould 10 minutes to see how it works be worth your time?'},
+  {q:'"I need to think about it / talk to my partner."',a:'Completely understand. Would it help if I sent a quick summary you could share with them? I can also do the free audit first — we map your call flow and show you exactly what it\'s costing monthly with real numbers. That way you\'re making the decision with data, not hypotheticals.\n\nWhat\'s a good time this week for a 10-minute call?'},
+  {q:'"I\'m too busy right now."',a:'The businesses that are "too busy" are usually the ones leaking the most from unconfirmed bookings and missed calls. Busy season is exactly when this pays off most — your schedule is full but crews still show up to empty addresses and calls go unanswered during jobs.\n\nSetup takes 24 hours and requires nothing from you — we handle everything. Could you spare 10 minutes this week for the audit? That\'s the only ask.'},
 ];
 
 function renderObjections(){
@@ -887,7 +1098,7 @@ function renderObjections(){
       <div class="obj-q" id="oq-${i}" onclick="toggleObj(${i})">
         <span>${o.q}</span><span class="chevron">▾</span>
       </div>
-      <div class="obj-a" id="oa-${i}">${o.a}</div>
+      <div class="obj-a" id="oa-${i}" style="white-space:pre-line;">${o.a}</div>
     </div>`).join('');
 }
 
