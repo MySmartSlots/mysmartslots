@@ -1,258 +1,311 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client Setup — My Smart Slots</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f8fc; color: #1a1a2e; padding: 2rem 1rem; }
-    .setup-wrap { max-width: 640px; margin: 0 auto; padding: 1rem 0 2rem; }
-    h2 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #666; margin-bottom: 1rem; }
-    .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 1.5rem 0 0.5rem; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .field-row.full { grid-template-columns: 1fr; }
-    .field-group { display: flex; flex-direction: column; gap: 4px; }
-    .field-group label { font-size: 13px; color: #555; }
-    .field-group input,
-    .field-group select,
-    .field-group textarea {
-      width: 100%;
-      font-size: 13.5px;
-      font-family: inherit;
-      padding: 8px 10px;
-      border: 1.5px solid #dde;
-      border-radius: 8px;
-      background: #fff;
-      color: #1a1a2e;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .field-group input:focus,
-    .field-group select:focus,
-    .field-group textarea:focus { border-color: #1a1a2e; }
-    .field-group textarea { min-height: 70px; resize: vertical; }
-    .gen-btn {
-      margin-top: 1.5rem;
-      width: 100%;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      background: #1a1a2e;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .gen-btn:hover { opacity: 0.88; }
-    .output-box {
-      margin-top: 1.5rem;
-      background: #fff;
-      border: 1px solid #e0e4f0;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      display: none;
-    }
-    .output-box.visible { display: block; }
-    .output-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #888;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .copy-btn {
-      font-size: 12px;
-      font-weight: 500;
-      background: none;
-      border: 1px solid #dde;
-      border-radius: 6px;
-      padding: 3px 10px;
-      cursor: pointer;
-      color: #555;
-    }
-    .copy-btn:hover { background: #f7f8fc; }
-    .prompt-text {
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      color: #1a1a2e;
-      white-space: pre-wrap;
-      line-height: 1.6;
-      max-height: 320px;
-      overflow-y: auto;
-      background: #f7f8fc;
-      border-radius: 8px;
-      padding: 0.75rem;
-    }
-    .widget-tag {
-      margin-top: 1rem;
-      background: #f7f8fc;
-      border: 1px solid #e0e4f0;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      color: #1a1a2e;
-      word-break: break-all;
-    }
-    .divider { height: 1px; background: #e0e4f0; margin: 1.25rem 0 0; }
-    .checklist { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 8px; }
-    .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #1a1a2e; }
-    .check-item input[type=checkbox] { margin-top: 2px; flex-shrink: 0; width: 15px; height: 15px; cursor: pointer; }
-    @media (max-width: 520px) {
-      .field-row { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Client Setup</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a1a2e;--navy2:#222840;--navy3:#2a3350;
+  --blue:#1455a4;--blue2:#1a6fd4;--accent:#4ade80;
+  --orange:#f39c12;--red:#e74c3c;
+  --white:#fff;--gray:#8892a4;--border:#2a3348;
+  --card:#1e2640;--card2:#242c44;--text:#e2e8f0;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 20%,rgba(20,85,164,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 85% 70%,rgba(74,222,128,.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
+
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:340px;text-align:center;}
+.login-logo{font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+.login-box input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;color:var(--white);}
+.login-box input:focus{border-color:var(--blue2);}
+.login-btn{width:100%;padding:11px;background:var(--blue);color:var(--white);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+.login-btn:hover{background:var(--blue2);}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+#app{display:none;position:relative;z-index:1;min-height:100vh;}
+.topbar{background:rgba(26,26,46,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:15px;font-weight:800;color:var(--white);}
+.topbar-logo span{color:var(--accent);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.rep-badge{background:rgba(255,255,255,.1);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--white);}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.logout-btn:hover{color:var(--white);}
+
+.purpose-bar{background:rgba(20,85,164,.1);border-bottom:1px solid rgba(26,111,212,.2);padding:8px 1.5rem;font-size:12px;color:#6ab0f5;}
+
+.wrap{max-width:700px;margin:0 auto;padding:1.75rem 1rem 5rem;}
+.page-title{font-size:22px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--gray);margin-bottom:1.75rem;line-height:1.6;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:16px;}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin:1.25rem 0 .65rem;}
+.section-label:first-child{margin-top:0;}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.field-row.full{grid-template-columns:1fr;}
+.field-row.three{grid-template-columns:1fr 1fr 1fr;}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-group label{font-size:12px;color:var(--gray);}
+.field-group input,.field-group select,.field-group textarea{
+  width:100%;font-size:13px;font-family:inherit;padding:9px 10px;
+  background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  color:var(--white);outline:none;transition:border-color .15s;
+}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:var(--blue2);}
+.field-group select option{background:var(--navy2);}
+.field-group textarea{min-height:80px;resize:vertical;}
+.field-hint{font-size:11px;color:var(--gray);margin-top:3px;}
+
+.color-row{display:flex;align-items:center;gap:8px;}
+.color-row input[type=color]{width:40px;height:36px;padding:2px;border-radius:7px;border:1px solid var(--border);cursor:pointer;background:var(--card2);flex-shrink:0;}
+.color-row input[type=text]{flex:1;}
+
+.gen-btn{width:100%;padding:13px;font-size:14px;font-weight:700;background:var(--accent);color:var(--navy);border:none;border-radius:10px;cursor:pointer;margin-top:1.25rem;transition:opacity .15s;}
+.gen-btn:hover{opacity:.88;}
+
+.output-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:16px;display:none;}
+.output-card.visible{display:block;}
+.output-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.output-label span{color:var(--white);font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;}
+.copy-btn{font-size:12px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;color:var(--gray);font-family:inherit;transition:all .15s;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+.code-block{font-family:'Courier New',monospace;font-size:12px;color:var(--text);white-space:pre-wrap;line-height:1.65;max-height:260px;overflow-y:auto;background:var(--navy2);border-radius:8px;padding:.85rem;word-break:break-all;margin-top:0;}
+
+.checklist{display:flex;flex-direction:column;gap:8px;margin-top:.5rem;}
+.check-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);cursor:pointer;}
+.check-item input[type=checkbox]{margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+
+.divider{height:1px;background:var(--border);margin:1.25rem 0;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@media(max-width:540px){.field-row,.field-row.three{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
+<div id="toast-el" class="toast"></div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const pwd = prompt("Enter password:");
-    if (pwd !== "slots2025") {
-      document.body.innerHTML = "<p style='font-family:sans-serif;padding:2rem;color:#1a1a2e;'>Access denied.</p>";
-    }
-  });
-</script>
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">My Smart<span>Slots</span></div>
+    <div class="login-sub">Client Setup Tool — Internal Use Only</div>
+    <input type="text" id="username" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="password" placeholder="Password"/>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <p class="login-error" id="login-error">Incorrect username or password.</p>
+  </div>
+</div>
 
-<div class="setup-wrap">
-  <h2>Client setup tool</h2>
-  <p class="subtitle">Fill in the client's info from the audit worksheet. Generate their system prompt and widget tag.</p>
-
-  <div class="section-label">Business info</div>
-  <div class="field-row">
-    <div class="field-group"><label>Business name</label><input type="text" id="bizName" placeholder="e.g. Diamond Plumbing Co." /></div>
-    <div class="field-group"><label>Owner name</label><input type="text" id="ownerName" placeholder="e.g. Rick D." /></div>
-  </div>
-  <div class="field-row">
-    <div class="field-group">
-      <label>Trade type</label>
-      <select id="trade">
-        <option value="">Select trade...</option>
-        <option>Plumbing</option>
-        <option>HVAC / Heating & Cooling</option>
-        <option>Electrical</option>
-        <option>Roofing</option>
-        <option>General Contracting</option>
-        <option>Pest Control</option>
-        <option>Lawn & Landscaping</option>
-        <option>Auto Service</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <div class="field-group"><label>Phone number</label><input type="text" id="phone" placeholder="e.g. (816) 555-0192" /></div>
-  </div>
-  <div class="field-row">
-    <div class="field-group"><label>Email</label><input type="text" id="email" placeholder="e.g. rick@diamondplumbing.com" /></div>
-    <div class="field-group"><label>Service area</label><input type="text" id="area" placeholder="e.g. Kansas City Metro" /></div>
-  </div>
-
-  <div class="section-label">Services & pricing</div>
-  <div class="field-row full">
-    <div class="field-group">
-      <label>Services offered (one per line)</label>
-      <textarea id="services" placeholder="e.g.&#10;Drain cleaning — $150-$300&#10;Water heater install — $800-$1,200&#10;Emergency leak repair — $200+"></textarea>
-    </div>
-  </div>
-  <div class="field-row">
-    <div class="field-group"><label>Business hours</label><input type="text" id="hours" placeholder="e.g. Mon–Fri 7am–6pm, Sat 8am–2pm" /></div>
-    <div class="field-group">
-      <label>Emergency / after-hours?</label>
-      <select id="emergency">
-        <option value="no">No after-hours service</option>
-        <option value="yes">Yes, 24/7 emergency</option>
-        <option value="limited">Limited emergency calls</option>
-      </select>
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">My Smart<span>Slots</span> — Client Setup</div>
+    <div class="topbar-right">
+      <span class="rep-badge" id="rep-name-display"></span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
 
-  <div class="section-label">Plan & calendar</div>
-  <div class="field-row">
-    <div class="field-group">
-      <label>Plan</label>
-      <select id="plan">
-        <option>Starter — $125/mo</option>
-        <option>Pro — $225/mo</option>
-        <option>Elite — $375/mo</option>
-      </select>
-    </div>
-    <div class="field-group">
-      <label>Calendar type</label>
-      <select id="calendar">
-        <option>Google Calendar</option>
-        <option>Outlook</option>
-        <option>Calendly</option>
-        <option>None yet</option>
-      </select>
-    </div>
-  </div>
-  <div class="field-row full">
-    <div class="field-group"><label>Booking link (Calendly or booking page URL)</label><input type="text" id="bookingUrl" placeholder="e.g. https://calendly.com/diamondplumbing" /></div>
-  </div>
-  <div class="field-row full">
-    <div class="field-group">
-      <label>Anything special to know (optional)</label>
-      <textarea id="notes" placeholder="e.g. They only serve residential, not commercial. Owner prefers texts over calls." style="min-height:50px;"></textarea>
-    </div>
+  <div class="purpose-bar">
+    🛠 Internal tool — Fill in info from the client's onboard form to generate their system prompt, widget tag, and branded subdomain page.
   </div>
 
-  <button class="gen-btn" onclick="generate()">Generate system prompt + widget tag</button>
+  <div class="wrap">
+    <div class="page-title">Client Setup Tool</div>
+    <p class="page-sub">Complete this after the client pays and fills out their onboard form. Everything generates in one click — system prompt, widget code, and their branded page.</p>
 
-  <div class="output-box" id="outputBox">
-    <div class="output-label">
-      System prompt
-      <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+    <div class="card">
+      <div class="section-label">Business Info</div>
+      <div class="field-row">
+        <div class="field-group"><label>Business name</label><input type="text" id="bizName" placeholder="Diamond Plumbing Co."/></div>
+        <div class="field-group"><label>Owner name</label><input type="text" id="ownerName" placeholder="Rick"/></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><label>Trade type</label>
+          <select id="trade">
+            <option value="">Select trade...</option>
+            <option>Plumbing</option><option>HVAC / Heating & Cooling</option>
+            <option>Electrical</option><option>Roofing</option>
+            <option>General Contracting</option><option>Pest Control</option>
+            <option>Lawn & Landscaping</option><option>Auto Service</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Phone number</label><input type="text" id="phone" placeholder="(816) 555-0192"/></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><label>Email</label><input type="text" id="email" placeholder="rick@diamondplumbing.com"/></div>
+        <div class="field-group"><label>Service area</label><input type="text" id="area" placeholder="Kansas City Metro"/></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Brand color</label>
+          <div class="color-row">
+            <input type="color" id="colorPicker" value="#1455a4" oninput="document.getElementById('colorHex').value=this.value"/>
+            <input type="text" id="colorHex" value="#1455a4" placeholder="#1455a4" oninput="syncPicker()"/>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Subdomain slug</label>
+          <input type="text" id="slug" placeholder="e.g. diamond" oninput="updateSlugPreview()"/>
+          <div class="field-hint">Live at: <strong id="slugPreview" style="color:var(--accent);">slug</strong>.mysmartslots.com</div>
+        </div>
+      </div>
+
+      <div class="section-label">Services & Pricing</div>
+      <div class="field-row full">
+        <div class="field-group">
+          <label>Services offered (one per line, include pricing range)</label>
+          <textarea id="services" placeholder="Drain cleaning — $150–$300&#10;Water heater install — $800–$1,200&#10;Emergency leak repair — $200+"></textarea>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><label>Business hours</label><input type="text" id="hours" placeholder="Mon–Fri 7am–6pm, Sat 8am–2pm"/></div>
+        <div class="field-group"><label>Emergency / after-hours?</label>
+          <select id="emergency">
+            <option value="no">No after-hours service</option>
+            <option value="yes">Yes, 24/7 emergency</option>
+            <option value="limited">Limited emergency calls</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label">Plan & Calendar</div>
+      <div class="field-row">
+        <div class="field-group"><label>Plan</label>
+          <select id="plan">
+            <option value="starter">Starter — $125/mo</option>
+            <option value="pro" selected>Pro — $225/mo</option>
+            <option value="elite">Elite — $375/mo</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Calendar type</label>
+          <select id="calendar">
+            <option>Google Calendar</option><option>Outlook</option>
+            <option>Calendly</option><option>None yet</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row full">
+        <div class="field-group">
+          <label>Booking / calendar link</label>
+          <input type="text" id="bookingUrl" placeholder="https://calendly.com/diamondplumbing"/>
+        </div>
+      </div>
+      <div class="field-row full">
+        <div class="field-group">
+          <label>Special notes (optional)</label>
+          <textarea id="notes" placeholder="Residential only, owner prefers texts, any special instructions..." style="min-height:55px;"></textarea>
+        </div>
+      </div>
+
+      <button class="gen-btn" onclick="generate()">⚡ Generate System Prompt + Widget + Page</button>
     </div>
-    <div class="prompt-text" id="promptOut"></div>
 
-    <div class="divider"></div>
-
-    <div class="output-label" style="margin-top:1rem;">
-      Widget script tag
-      <button class="copy-btn" onclick="copyTag()">Copy</button>
+    <!-- OUTPUT: SYSTEM PROMPT -->
+    <div class="output-card" id="outPrompt">
+      <div class="output-label">System Prompt <button class="copy-btn" onclick="copyBlock('promptText',this)">Copy</button></div>
+      <div class="code-block" id="promptText"></div>
     </div>
-    <div class="widget-tag" id="tagOut"></div>
 
-    <div class="divider"></div>
+    <!-- OUTPUT: WIDGET TAG -->
+    <div class="output-card" id="outTag">
+      <div class="output-label">Widget Script Tag — paste above &lt;/body&gt; on client's site <button class="copy-btn" onclick="copyBlock('tagText',this)">Copy</button></div>
+      <div class="code-block" id="tagText"></div>
+    </div>
 
-    <div class="output-label" style="margin-top:1rem;">Onboarding checklist</div>
-    <div class="checklist" id="checklistOut"></div>
+    <!-- OUTPUT: SUBDOMAIN PAGE -->
+    <div class="output-card" id="outPage">
+      <div class="output-label">
+        Branded Subdomain Page — save as <span id="pageFilename"></span>
+        <button class="copy-btn" onclick="copyBlock('pageText',this)">Copy</button>
+      </div>
+      <div class="code-block" id="pageText"></div>
+    </div>
+
+    <!-- OUTPUT: CHECKLIST -->
+    <div class="output-card" id="outChecklist">
+      <div class="output-label">Onboarding Checklist</div>
+      <div class="checklist" id="checklistOut"></div>
+    </div>
   </div>
 </div>
 
 <script>
-function generate() {
-  const biz = document.getElementById('bizName').value.trim() || 'this business';
-  const owner = document.getElementById('ownerName').value.trim() || 'the owner';
-  const trade = document.getElementById('trade').value || 'trade service';
-  const phone = document.getElementById('phone').value.trim() || '[phone TBD]';
-  const email = document.getElementById('email').value.trim() || '[email TBD]';
-  const area = document.getElementById('area').value.trim() || 'the local area';
-  const services = document.getElementById('services').value.trim() || '[services TBD]';
-  const hours = document.getElementById('hours').value.trim() || '[hours TBD]';
-  const emergency = document.getElementById('emergency').value;
-  const calendar = document.getElementById('calendar').value;
-  const bookingUrl = document.getElementById('bookingUrl').value.trim();
-  const notes = document.getElementById('notes').value.trim();
-  const plan = document.getElementById('plan').value;
+const API="https://mysmartslots-portal.onrender.com";
+let currentU=null,currentP=null;
 
-  const emergencyText = emergency === 'yes'
-    ? 'Yes, they offer 24/7 emergency service.'
-    : emergency === 'limited'
-    ? 'They handle limited emergency calls — ask the customer to call the main number for emergencies.'
-    : 'No after-hours or emergency service. Direct after-hours inquiries to leave a message and they will follow up next business day.';
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
-  const bookingText = bookingUrl
-    ? `Direct customers to book here: ${bookingUrl}`
-    : `Ask the customer for their name, phone number, and preferred appointment time, then let them know the team will confirm shortly.`;
+async function doLogin(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  try{
+    const r=await fetch(`${API}/portal/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok){document.getElementById('login-error').style.display='block';return;}
+    currentU=u.toLowerCase();currentP=p;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('rep-name-display').textContent=d.name;
+    // Log setup access so admin can see who is using this tool
+    fetch(`${API}/portal/setup/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,action:'setup_access'})}).catch(()=>{});
+  }catch(e){document.getElementById('login-error').style.display='block';}
+}
 
-  const prompt = `You are a friendly, professional booking assistant for ${biz} — a ${trade} company serving ${area}.
+function doLogout(){
+  currentU=null;currentP=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('password').value='';
+  document.getElementById('login-error').style.display='none';
+}
+
+function toast(msg){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function syncPicker(){
+  const v=document.getElementById('colorHex').value;
+  if(/^#[0-9A-Fa-f]{6}$/.test(v))document.getElementById('colorPicker').value=v;
+}
+
+function updateSlugPreview(){
+  const v=document.getElementById('slug').value.trim().toLowerCase().replace(/\s+/g,'-')||'slug';
+  document.getElementById('slugPreview').textContent=v;
+}
+
+function generate(){
+  const biz=document.getElementById('bizName').value.trim()||'this business';
+  const owner=document.getElementById('ownerName').value.trim()||'the owner';
+  const trade=document.getElementById('trade').value||'trade service';
+  const phone=document.getElementById('phone').value.trim()||'[phone TBD]';
+  const email=document.getElementById('email').value.trim()||'[email TBD]';
+  const area=document.getElementById('area').value.trim()||'the local area';
+  const services=document.getElementById('services').value.trim()||'[services TBD]';
+  const hours=document.getElementById('hours').value.trim()||'[hours TBD]';
+  const emergency=document.getElementById('emergency').value;
+  const calendar=document.getElementById('calendar').value;
+  const bookingUrl=document.getElementById('bookingUrl').value.trim();
+  const notes=document.getElementById('notes').value.trim();
+  const color=document.getElementById('colorHex').value.trim()||'#1455a4';
+  const slug=(document.getElementById('slug').value.trim().toLowerCase().replace(/\s+/g,'-'))||'client';
+  const plan=document.getElementById('plan').value;
+  const renderUrl='https://mysmartslots-chat.onrender.com';
+
+  const emergencyText=emergency==='yes'?'Yes — 24/7 emergency service available.':emergency==='limited'?'Limited emergency availability — direct urgent calls to the main number.':'No after-hours service. Customers should leave a message and expect a callback next business day.';
+  const bookingText=bookingUrl?`Direct customers to book at: ${bookingUrl}`:`Ask the customer for their name, phone number, and preferred appointment time, then let them know the team will confirm shortly.`;
+
+  // ── SYSTEM PROMPT ──────────────────────────────────────────────────────────
+  const prompt=`You are a friendly, professional booking assistant for ${biz} — a ${trade} company serving ${area}.
 
 BUSINESS INFO:
 - Business: ${biz}
@@ -268,18 +321,18 @@ SERVICES & PRICING:
 ${services}
 
 YOUR JOB:
-You help customers of ${biz} get answers and book appointments. You are NOT a salesperson — you are a helpful assistant representing ${biz} directly.
+You help customers of ${biz} get answers and book appointments. You represent ${biz} directly — not My Smart Slots.
 
 BOOKING:
 ${bookingText}
 
 CONVERSATION RULES:
-- Always be friendly, clear, and concise
-- Answer service and pricing questions directly using the info above
-- If asked something you don't know, say "Great question — let me have ${owner} follow up with you directly. Can I get your name and number?"
+- Be friendly, clear, and concise
+- Answer service and pricing questions using the info above
+- If asked something you don't know: "Great question — let me have ${owner} follow up with you directly. Can I get your name and number?"
 - Never make up prices or services not listed above
-- Always end with a question that moves toward booking or capturing their contact info
-- Keep replies to 2-4 sentences
+- Always move toward booking or capturing contact info
+- Keep replies to 2–4 sentences max
 
 COLLECT WHEN BOOKING:
 - Customer name
@@ -289,46 +342,113 @@ COLLECT WHEN BOOKING:
 
 When you have all four, end your message with:
 [BOOKING_READY: name=<name>, contact=<contact>, service=<service>, datetime=<datetime>]
-${notes ? '\nADDITIONAL NOTES:\n' + notes : ''}`;
+${notes?'\nSPECIAL NOTES:\n'+notes:''}`;
 
-  const renderUrl = 'https://mysmartslots-chat.onrender.com';
-  const tag = `<script src="${renderUrl}/widget.js" data-business="${biz}" data-api="${renderUrl}"><\/script>`;
+  // ── WIDGET TAG ─────────────────────────────────────────────────────────────
+  const tag=`<script src="${renderUrl}/widget.js" data-business="${biz}" data-color="${color}" data-api="${renderUrl}"><\/script>`;
 
-  const checks = [
-    `Payment received from ${owner}`,
+  // ── SUBDOMAIN PAGE ─────────────────────────────────────────────────────────
+  const serviceLines=services.split('\n').filter(s=>s.trim()).map(s=>`<li>${s.trim()}</li>`).join('\n          ');
+  const page=`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>${biz} — Book Online</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fc;color:#1a1a2e;}
+.header{background:${color};padding:1.5rem 2rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.header h1{font-size:22px;font-weight:800;}
+.header p{font-size:13px;opacity:.85;margin-top:3px;}
+.phone-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;}
+.hero{background:#fff;border-bottom:1px solid #e0e4f0;padding:2.5rem 2rem;text-align:center;}
+.hero h2{font-size:28px;font-weight:800;margin-bottom:.5rem;color:#1a1a2e;}
+.hero p{font-size:15px;color:#555;max-width:480px;margin:0 auto 1.5rem;}
+.book-btn{display:inline-block;background:${color};color:#fff;padding:14px 32px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;}
+.content{max-width:800px;margin:0 auto;padding:2rem;}
+.services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:1.25rem;}
+.service-card{background:#fff;border:1px solid #e0e4f0;border-radius:10px;padding:1rem 1.25rem;font-size:14px;color:#1a1a2e;}
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:1.5rem;}
+.info-card{background:#fff;border:1px solid #e0e4f0;border-radius:10px;padding:1.25rem;}
+.info-card h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:.6rem;}
+.info-card p{font-size:14px;color:#1a1a2e;line-height:1.6;}
+.badge{display:inline-block;background:${color}20;color:${color};border:1px solid ${color}40;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-top:.5rem;}
+footer{text-align:center;padding:2rem;font-size:12px;color:#aaa;border-top:1px solid #e0e4f0;margin-top:2rem;}
+@media(max-width:580px){.services-grid,.info-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>${biz}</h1>
+    <p>${trade} · ${area}</p>
+  </div>
+  <a href="tel:${phone.replace(/\D/g,'')}" class="phone-btn">📞 ${phone}</a>
+</div>
+<div class="hero">
+  <h2>Book Your Appointment</h2>
+  <p>Fast, reliable ${trade.toLowerCase()} service in ${area}. Book online or call us directly.</p>
+  ${bookingUrl?`<a href="${bookingUrl}" class="book-btn">Book Online →</a>`:`<a href="tel:${phone.replace(/\D/g,'')}" class="book-btn">Call to Book: ${phone}</a>`}
+</div>
+<div class="content">
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:.5rem;">Our Services</h3>
+  <div class="services-grid">
+    ${serviceLines?serviceLines.split('\n').map(l=>`<div class="service-card">${l.replace('<li>','').replace('</li>','')}</div>`).join('\n    '):'<div class="service-card">Contact us for service details.</div>'}
+  </div>
+  <div class="info-row">
+    <div class="info-card">
+      <h3>Hours</h3>
+      <p>${hours}</p>
+      ${emergency==='yes'?`<span class="badge">24/7 Emergency Available</span>`:''}
+    </div>
+    <div class="info-card">
+      <h3>Contact</h3>
+      <p><a href="tel:${phone.replace(/\D/g,'')}" style="color:${color};font-weight:600;">${phone}</a><br/><a href="mailto:${email}" style="color:#555;">${email}</a></p>
+    </div>
+  </div>
+</div>
+${tag}
+<footer>Powered by <a href="https://mysmartslots.com" style="color:${color};">My Smart Slots</a> · AI-powered booking automation</footer>
+</body>
+</html>`;
+
+  // ── CHECKLIST ──────────────────────────────────────────────────────────────
+  const checks=[
+    `Payment received from ${owner} — $199 setup fee confirmed`,
     `Swap SYSTEM_PROMPT in server.js with the generated prompt above`,
-    `Add widget script tag to ${biz}'s website (above closing </body> tag)`,
-    calendar !== 'None yet'
-      ? `Connect ${calendar} — get access from ${owner}`
-      : `Set up Calendly for ${owner} and update booking URL`,
-    `Test booking flow end-to-end — confirm email hits your inbox`,
-    `Send ${owner} a "you're live" message with screenshot`,
-    `Schedule Day 14 check-in with ${owner}`
+    `Add widget script tag to ${biz}'s website (above closing </body>)`,
+    calendar!=='None yet'?`Connect ${calendar} — get access from ${owner}`:`Set up Calendly for ${owner} and update booking URL`,
+    `Save subdomain page as <strong>${slug}.html</strong> and deploy to Netlify`,
+    `Test booking flow end-to-end — confirm booking email hits your inbox`,
+    `Send ${owner} their live page: <strong>mysmartslots.com/${slug}</strong>`,
+    `Schedule Day 14 check-in with ${owner}`,
   ];
 
-  document.getElementById('promptOut').textContent = prompt;
-  document.getElementById('tagOut').textContent = tag;
+  // Show outputs
+  document.getElementById('promptText').textContent=prompt;
+  document.getElementById('tagText').textContent=tag;
+  document.getElementById('pageText').textContent=page;
+  document.getElementById('pageFilename').textContent=`${slug}.html`;
+  document.getElementById('checklistOut').innerHTML=checks.map(c=>`<label class="check-item"><input type="checkbox"> <span>${c}</span></label>`).join('');
+  ['outPrompt','outTag','outPage','outChecklist'].forEach(id=>document.getElementById(id).classList.add('visible'));
+  document.getElementById('outPrompt').scrollIntoView({behavior:'smooth',block:'start'});
+  toast('✓ Generated successfully');
 
-  const cl = document.getElementById('checklistOut');
-  cl.innerHTML = checks.map(c => `<label class="check-item"><input type="checkbox"> <span>${c}</span></label>`).join('');
-
-  const box = document.getElementById('outputBox');
-  box.classList.add('visible');
-  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Log the client setup to backend so admin knows who ran it
+  fetch(`${API}/portal/setup/log`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:currentU,password:currentP,action:'generated',client_name:biz})
+  }).catch(()=>{});
 }
 
-function copyPrompt() {
-  navigator.clipboard.writeText(document.getElementById('promptOut').textContent);
-  event.target.textContent = 'Copied!';
-  setTimeout(() => event.target.textContent = 'Copy', 1500);
-}
-
-function copyTag() {
-  navigator.clipboard.writeText(document.getElementById('tagOut').textContent);
-  event.target.textContent = 'Copied!';
-  setTimeout(() => event.target.textContent = 'Copy', 1500);
+function copyBlock(id,btn){
+  const text=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);
+  });
 }
 </script>
-
 </body>
 </html>
