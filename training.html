@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Rep Training</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a1a2e;--navy2:#222840;--navy3:#2a3350;
+  --blue:#1455a4;--blue2:#1a6fd4;--accent:#4ade80;
+  --orange:#f39c12;--red:#e74c3c;--green:#4ade80;
+  --purple:#a78bfa;
+  --white:#fff;--gray:#8892a4;--border:#2a3348;
+  --card:#1e2640;--card2:#242c44;--text:#e2e8f0;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 20%,rgba(20,85,164,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 85% 70%,rgba(74,222,128,.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:360px;text-align:center;}
+.login-logo{font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;line-height:1.6;}
+.login-box input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;color:var(--white);}
+.login-box input:focus{border-color:var(--blue2);}
+.login-btn{width:100%;padding:11px;background:var(--accent);color:var(--navy);border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;}
+.login-btn:hover{opacity:.88;}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+.topbar{background:rgba(26,26,46,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:15px;font-weight:800;color:var(--white);}
+.topbar-logo span{color:var(--accent);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.rep-badge{background:rgba(255,255,255,.1);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--white);}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.logout-btn:hover{color:var(--white);}
+
+/* LAYOUT */
+.app-body{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 56px);}
+@media(max-width:768px){.app-body{grid-template-columns:1fr;}}
+
+/* SIDEBAR */
+.sidebar{background:var(--card);border-right:1px solid var(--border);padding:1.25rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.sidebar-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);padding:0 1.25rem;margin-bottom:.75rem;}
+.module-item{display:flex;align-items:center;gap:10px;padding:.7rem 1.25rem;cursor:pointer;transition:background .15s;border-left:3px solid transparent;}
+.module-item:hover{background:var(--card2);}
+.module-item.active{background:var(--navy3);border-left-color:var(--accent);}
+.module-item.completed{border-left-color:var(--green);}
+.module-item.locked{opacity:.45;cursor:not-allowed;}
+.mod-num{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gray);flex-shrink:0;}
+.module-item.active .mod-num{background:var(--accent);color:var(--navy);}
+.module-item.completed .mod-num{background:var(--green);color:var(--navy);}
+.mod-info{flex:1;min-width:0;}
+.mod-title{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mod-status{font-size:10px;color:var(--gray);margin-top:1px;}
+.module-item.completed .mod-status{color:var(--green);}
+.mod-score{font-size:11px;font-weight:700;color:var(--accent);}
+.sidebar-progress{padding:1rem 1.25rem;border-top:1px solid var(--border);margin-top:.5rem;}
+.prog-label{font-size:11px;color:var(--gray);margin-bottom:6px;display:flex;justify-content:space-between;}
+.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s;}
+
+/* MAIN CONTENT */
+.main{padding:2rem 2.5rem 5rem;max-width:760px;}
+@media(max-width:768px){.main{padding:1.25rem 1rem 4rem;}}
+
+/* MODULE HEADER */
+.module-header{margin-bottom:2rem;}
+.mod-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:.5rem;}
+.mod-h1{font-size:26px;font-weight:800;color:var(--white);margin-bottom:.5rem;line-height:1.2;}
+.mod-sub{font-size:14px;color:var(--gray);line-height:1.7;}
+.mod-time{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);margin-top:.75rem;}
+.time-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* CONTENT BLOCKS */
+.content-block{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;}
+.block-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:.75rem;display:flex;align-items:center;gap:8px;}
+.block-body{font-size:14px;color:var(--gray);line-height:1.8;}
+.block-body p{margin-bottom:.75rem;}
+.block-body p:last-child{margin-bottom:0;}
+.block-body strong{color:var(--text);}
+.block-body ul{padding-left:1.25rem;margin-bottom:.75rem;}
+.block-body ul li{margin-bottom:.4rem;}
+.block-body .highlight{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:.85rem 1rem;margin:.75rem 0;color:var(--text);}
+.block-body .warning{background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.2);border-radius:8px;padding:.85rem 1rem;margin:.75rem 0;color:var(--text);}
+.block-body .script-box{background:var(--navy2);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-line;margin:.75rem 0;}
+.block-body .tip{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:4px;}
+
+/* PLAN TABLE */
+.plan-table{width:100%;border-collapse:collapse;font-size:13px;margin:.75rem 0;}
+.plan-table th{background:var(--navy2);color:var(--gray);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 12px;text-align:left;}
+.plan-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);}
+.plan-table tr:last-child td{border-bottom:none;}
+.plan-table tr:hover td{background:rgba(255,255,255,.02);}
+
+/* QUIZ */
+.quiz-section{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-top:1.5rem;}
+.quiz-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:.25rem;}
+.quiz-sub{font-size:12px;color:var(--gray);margin-bottom:1.25rem;}
+.quiz-q{margin-bottom:1.25rem;}
+.quiz-q-text{font-size:14px;font-weight:600;color:var(--white);margin-bottom:.75rem;line-height:1.5;}
+.quiz-options{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;font-size:13px;color:var(--text);line-height:1.5;}
+.quiz-opt:hover{border-color:var(--blue2);}
+.quiz-opt.selected{background:rgba(20,85,164,.2);border-color:var(--blue2);}
+.quiz-opt.correct{background:rgba(74,222,128,.12);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:rgba(231,76,60,.1);border-color:var(--red);color:var(--red);}
+.quiz-opt input{flex-shrink:0;margin-top:2px;accent-color:var(--accent);}
+.quiz-submit{background:var(--accent);color:var(--navy);border:none;border-radius:8px;padding:11px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:1rem;}
+.quiz-submit:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-result{margin-top:1rem;padding:1rem 1.25rem;border-radius:8px;font-size:14px;font-weight:600;display:none;}
+.quiz-result.pass{background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+.quiz-result.fail{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.2);color:var(--red);}
+.quiz-result p{font-size:13px;font-weight:400;color:var(--gray);margin-top:4px;line-height:1.6;}
+.retry-btn{background:transparent;border:1px solid var(--border);color:var(--gray);border-radius:8px;padding:8px 18px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:8px;}
+.retry-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* NEXT BUTTON */
+.next-btn{background:var(--accent);color:var(--navy);border:none;border-radius:10px;padding:13px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:1.5rem;display:none;}
+.next-btn:hover{opacity:.88;}
+.complete-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:var(--green);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;margin-top:1.5rem;}
+
+/* ADMIN VIEW */
+#admin-panel{display:none;}
+.admin-header{margin-bottom:1.5rem;}
+.admin-header h2{font-size:20px;font-weight:700;color:var(--white);}
+.admin-header p{font-size:13px;color:var(--gray);margin-top:4px;}
+.rep-progress-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:12px;}
+.rpc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.rpc-name{font-size:15px;font-weight:700;color:var(--white);}
+.rpc-overall{font-size:13px;font-weight:700;color:var(--accent);}
+.rpc-modules{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+@media(max-width:600px){.rpc-modules{grid-template-columns:repeat(4,1fr);}}
+.rpc-mod{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;}
+.rpc-mod.done{background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.25);}
+.rpc-mod.failed{background:rgba(231,76,60,.08);border-color:rgba(231,76,60,.2);}
+.rpc-mod-num{font-size:10px;font-weight:700;color:var(--gray);margin-bottom:3px;}
+.rpc-mod-score{font-size:13px;font-weight:800;color:var(--text);}
+.rpc-mod.done .rpc-mod-score{color:var(--green);}
+.rpc-mod.failed .rpc-mod-score{color:var(--red);}
+.rpc-mod-time{font-size:9px;color:var(--gray);margin-top:1px;}
+.rpc-stats{display:flex;gap:12px;margin-top:.75rem;flex-wrap:wrap;}
+.rpc-stat{font-size:12px;color:var(--gray);}
+.rpc-stat strong{color:var(--text);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+.empty{text-align:center;padding:3rem;color:var(--gray);font-size:14px;}
+</style>
+</head>
+<body>
+<div id="toast-el" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">My Smart<span>Slots</span></div>
+    <div class="login-sub">Rep Training Portal<br/>Use your same portal username and password.</div>
+    <input type="text" id="username" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="password" placeholder="Password"/>
+    <button class="login-btn" onclick="doLogin()">Start Training</button>
+    <p class="login-error" id="login-error">Incorrect username or password.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">My Smart<span>Slots</span> — Rep Training</div>
+    <div class="topbar-right">
+      <span class="rep-badge" id="rep-name-display"></span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-title">Training Modules</div>
+      <div id="module-nav"></div>
+      <div class="sidebar-progress">
+        <div class="prog-label"><span>Overall Progress</span><span id="prog-pct">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+      <div id="admin-nav-btn" style="display:none;padding:.75rem 1.25rem;border-top:1px solid var(--border);margin-top:.25rem;">
+        <div class="module-item" style="padding:.5rem 0;border:none;" onclick="showAdminPanel()">
+          <div class="mod-num" style="background:rgba(243,156,18,.15);color:var(--orange);">🔐</div>
+          <div class="mod-info"><div class="mod-title" style="color:var(--orange);">Admin View</div><div class="mod-status">Rep progress tracker</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" id="main-content"></div>
+  </div>
+</div>
+
+<script>
+const API="https://mysmartslots-portal.onrender.com";
+let currentU=null,currentP=null,currentName=null,isAdmin=false;
+let currentModule=0,moduleStartTime=null;
+let progress={};// {moduleIndex: {completed, score, timeSeconds, attempts}}
+
+// ── MODULES ───────────────────────────────────────────────────────────────────
+const MODULES=[
+  {
+    title:"What Is My Smart Slots?",
+    emoji:"🤖",
+    sub:"Product knowledge — what we sell, how it works, and why it matters.",
+    readTime:"8 min",
+    content:[
+      {
+        title:"The One-Line Pitch",
+        body:`My Smart Slots is an AI-powered automation system for local service businesses. We handle missed call follow-up, booking confirmations, appointment reminders, review requests, and lead re-engagement — automatically, 24/7, without the business owner lifting a finger.
+
+<div class="highlight"><strong>The simplest way to say it:</strong> "We make sure every customer who reaches out to your business gets a response — even when you're on a job, after hours, or on a weekend."</div>
+
+That's it. If you can say that clearly and confidently, you can open a conversation with anyone.`
+      },
+      {
+        title:"The 10 Automations We Sell",
+        body:`Every plan includes some combination of these. Know them cold — customers will ask.
+
+<ul>
+<li><strong>Missed Call Text Back</strong> — When a call goes unanswered, the customer automatically gets a text with a booking link within seconds. This is our #1 closer.</li>
+<li><strong>AI Chat Booking</strong> — A smart chatbot on their website answers questions and books appointments 24/7.</li>
+<li><strong>SMS Confirmations</strong> — Every new booking triggers a confirmation text to the customer automatically.</li>
+<li><strong>Appointment Reminders</strong> — Automated texts the day before and morning of every appointment. Eliminates most no-shows.</li>
+<li><strong>Live SMS Chat</strong> — Customers can text the business number and get real-time AI responses.</li>
+<li><strong>Post-Job Review Requests</strong> — After a completed job, an auto-text asks for a Google review at exactly the right moment.</li>
+<li><strong>Lead Re-Engagement</strong> — Old cold leads get an automated follow-up sequence to bring them back.</li>
+<li><strong>Partial Email Replies</strong> — Email inquiries get an instant auto-reply that captures info and moves toward booking.</li>
+<li><strong>Calendar Sync</strong> — Bookings go directly to their Google, Outlook, or Calendly calendar.</li>
+<li><strong>Monthly Report</strong> — Client gets a monthly recap of calls recovered, bookings confirmed, reviews requested, revenue impact.</li>
+</ul>`
+      },
+      {
+        title:"Our Three Plans",
+        body:`<table class="plan-table">
+<thead><tr><th>Plan</th><th>Monthly</th><th>Annual</th><th>Setup Fee</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td><strong>Starter</strong></td><td>$125/mo</td><td>$1,250/yr</td><td>$199</td><td>Solo / 1–2 employees</td></tr>
+<tr><td><strong>Pro</strong></td><td>$225/mo</td><td>$2,250/yr</td><td>$199</td><td>3–6 employees</td></tr>
+<tr><td><strong>Elite</strong></td><td>$375/mo</td><td>$3,750/yr</td><td>$199</td><td>7+ employees / multi-location</td></tr>
+</tbody>
+</table>
+
+<div class="warning"><strong>Important:</strong> The $199 setup fee is collected first — before any monthly billing starts. Never quote just the monthly price without mentioning setup.</div>
+
+Every plan has a <strong>30-day guarantee</strong> — no measurable improvement in 30 days, month two is free. No long-term contracts.`
+      },
+      {
+        title:"Who We Sell To",
+        body:`Any local service business that lives and dies by the phone. Our biggest verticals:
+
+<ul>
+<li>Plumbing, HVAC, Electrical, Roofing, General Contracting</li>
+<li>Pest Control, Lawn & Landscaping, Auto Service</li>
+<li>Hair Salons, Nail Techs, Med Spas, Massage & Wellness</li>
+<li>Dental & Medical offices</li>
+</ul>
+
+The common thread: <strong>they book appointments, they get calls, and missed calls cost them real money.</strong> That's all you need.`
+      }
+    ],
+    quiz:[
+      {
+        q:"What is the #1 automation that closes the most deals?",
+        options:["Calendar Sync","Missed Call Text Back","Monthly Report","Lead Re-Engagement"],
+        correct:1,
+        explanation:"Missed Call Text Back is the single most compelling demo because the pain is immediate and universal — every service business misses calls."
+      },
+      {
+        q:"A plumber with 4 employees asks about pricing. What plan do you recommend?",
+        options:["Starter — $125/mo","Pro — $225/mo","Elite — $375/mo","Doesn't matter, let them pick"],
+        correct:1,
+        explanation:"Pro is the right fit for 3–6 employees. Match the plan to their size — this makes the recommendation feel personalized and knowledgeable."
+      },
+      {
+        q:"A prospect asks 'what's the setup fee?' — what do you say?",
+        options:["There's no setup fee","$199 one-time, collected before monthly billing starts","$199 per month","It depends on the plan"],
+        correct:1,
+        explanation:"Always be upfront about the $199 setup fee. Hiding it creates distrust. Frame it as: 'One-time fee, we have everything live within 24 hours of receiving it.'"
+      },
+      {
+        q:"Which of these is NOT one of our 10 automations?",
+        options:["Appointment Reminders","Social Media Posting","Post-Job Review Requests","Lead Re-Engagement"],
+        correct:1,
+        explanation:"We don't do social media posting. Know our exact 10 automations so you never overpromise."
+      }
+    ]
+  },
+  {
+    title:"Who We Sell To & Why",
+    emoji:"🎯",
+    sub:"Ideal customer profile, fit scoring, and red flags to watch for.",
+    readTime:"6 min",
+    content:[
+      {
+        title:"The Perfect Prospect",
+        body:`Before you pick up the phone, you should know whether this business is worth your time. The ideal My Smart Slots customer checks most of these boxes:
+
+<div class="highlight">
+<strong>✓ They rely on phone calls for new customers</strong><br/>
+<strong>✓ They miss calls when they're with another customer or on a job</strong><br/>
+<strong>✓ They don't have dedicated office staff to answer phones</strong><br/>
+<strong>✓ They book appointments (not purely walk-in)</strong><br/>
+<strong>✓ They're trying to grow or fill their schedule</strong><br/>
+<strong>✓ They get 10+ inquiries per week</strong><br/>
+<strong>✓ They can afford $125–$375/mo</strong>
+</div>
+
+You don't need all 7. But the more boxes they check, the easier the close.`
+      },
+      {
+        title:"Red Flags — Know When to Walk Away",
+        body:`Not every business is a good fit. These are signs to proceed carefully or skip entirely:
+
+<ul>
+<li><strong>Walk-in only</strong> — If they don't book appointments (like a convenience store), the automations don't make sense.</li>
+<li><strong>Already has a full system</strong> — If they're on GoHighLevel or ServiceTitan and using it well, your pitch is harder. Ask what's missing, don't fight their existing setup.</li>
+<li><strong>Too small</strong> — A solo operator doing 3–4 jobs a week may not generate enough call volume for this to pay off quickly.</li>
+<li><strong>Resistant to technology</strong> — A prospect who says "I don't believe in all this AI stuff" requires extra work. Not impossible, but know your uphill battle.</li>
+<li><strong>Commercial only</strong> — Commercial contractors often have purchasing departments and long sales cycles. Not our sweet spot.</li>
+</ul>`
+      },
+      {
+        title:"The Fit Score",
+        body:`In the Prospector tool, every prospect gets a fit score 0–100% based on 10 qualifying questions. Use this as your guide:
+
+<ul>
+<li><strong>70%+ (Hot)</strong> — Move on this one. Lead with the audit, be direct.</li>
+<li><strong>45–69% (Warm)</strong> — Worth pursuing. Offer the free audit and let the numbers do the work.</li>
+<li><strong>Under 45% (Cold)</strong> — Proceed carefully. Don't over-invest follow-up time.</li>
+</ul>
+
+<div class="warning"><strong>Don't skip the fit check.</strong> Calling a cold prospect wastes your time and hurts your confidence. 10 minutes of research before a call is worth more than 10 cold calls to the wrong businesses.</div>`
+      }
+    ],
+    quiz:[
+      {
+        q:"A nail salon with 3 chairs and a receptionist who answers phones — what's their fit level likely to be?",
+        options:["Cold — they already have someone answering","Hot — appointment-based, multiple staff, phone-dependent","Warm — too small to matter","Can't determine without more info"],
+        correct:1,
+        explanation:"Nail salons are a strong fit. They're appointment-based, they get constant call volume, no-shows are common, and review volume directly drives new clients."
+      },
+      {
+        q:"A prospect says 'we only do commercial contracts.' What do you do?",
+        options:["Pitch them harder — commercial pays more","Ask what their current follow-up system looks like before deciding","Move on — not our sweet spot","Offer them a discount to close"],
+        correct:1,
+        explanation:"Always ask a question before deciding. Some commercial contractors also do residential work. But if it's purely commercial with long procurement cycles, it's not our best fit."
+      },
+      {
+        q:"What fit score range means 'Hot — move on this one'?",
+        options:["50% and above","60% and above","70% and above","80% and above"],
+        correct:2,
+        explanation:"70%+ is Hot. This means the business shows strong signals across multiple qualifying questions and the audit conversation should be straightforward."
+      }
+    ]
+  },
+  {
+    title:"The Full Sales Process",
+    emoji:"📋",
+    sub:"Every step from first contact to client going live.",
+    readTime:"10 min",
+    content:[
+      {
+        title:"The 10-Step Process",
+        body:`Know this cold. Every client goes through the same path.
+
+<ul>
+<li><strong>Step 1 — Research</strong>: Use the Prospector to research the business. Check their Google reviews, website, fit score.</li>
+<li><strong>Step 2 — Icebreaker</strong>: Pick your icebreaker based on what you observed. Specific always beats generic.</li>
+<li><strong>Step 3 — First contact</strong>: Call, text, email, or walk in. Your goal is ONE thing — book a 10-minute audit call. Nothing else.</li>
+<li><strong>Step 4 — Audit call</strong>: Run the revenue leak calculator live. Show them their number. Recommend a plan based on size.</li>
+<li><strong>Step 5 — They say yes</strong>: Send the Stripe payment link immediately — while you're still on the call if possible.</li>
+<li><strong>Step 6 — Payment confirmed</strong>: You notify the owner. Client gets confirmation: "Live within 24 hours."</li>
+<li><strong>Step 7 — Client fills onboard form</strong>: Send them to mysmartslots.com/onboard?plan=pro (or starter/elite).</li>
+<li><strong>Step 8 — Owner sets up system</strong>: Uses the setup tool to generate their system prompt and subdomain page.</li>
+<li><strong>Step 9 — Go live</strong>: Client gets their link. Chatbot active. Automations running.</li>
+<li><strong>Step 10 — Day 14 check-in</strong>: Text the client to check in. Keeps the relationship warm and catches any issues early.</li>
+</ul>`
+      },
+      {
+        title:"Your Only Job on the First Contact",
+        body:`This is the most important thing in this entire training.
+
+<div class="highlight"><strong>Your goal on the first call / text / email is NOT to sell the product. It is to book a 10-minute audit call.</strong></div>
+
+That's it. One goal. If you go into a cold call trying to explain all 10 automations and get them to say yes on the spot, you will fail every time.
+
+The script is simple:
+<div class="script-box">"I noticed [Business Name] doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're with a customer?
+
+[They answer]
+
+That's exactly what I help with. I do a free 10-minute audit for businesses in your area — I run the math live with you and show you exactly what it's costing you per month. Would that be worth 10 minutes?"</div>
+
+<div class="warning"><strong>If they say yes to the audit</strong> — immediately lock in a day and time. Don't leave it open-ended.</div>`
+      },
+      {
+        title:"The Audit Call — This Is Where You Close",
+        body:`The audit call is your close. It's not a demo, it's not a pitch — it's a math conversation.
+
+<strong>The formula:</strong>
+<div class="script-box">Missed calls/week × 0.8 × avg job value × 4 weeks = Monthly leak from missed calls
+No-shows/month × avg job value = Monthly leak from no-shows
+Total = What they're losing every month</div>
+
+When someone sees they're losing $4,200/month and you're asking for $225/month, the math closes itself.
+
+<strong>After the number:</strong> "Based on your size I'd recommend the Pro plan at $225/mo. There's a $199 setup fee — we get everything live within 24 hours of receiving that. Want to move forward?"
+
+Then stop talking. Let them respond.`
+      }
+    ],
+    quiz:[
+      {
+        q:"What is your ONLY goal on the first cold call?",
+        options:["Explain all 10 automations","Close them on a plan","Book a 10-minute audit call","Get their email address"],
+        correct:2,
+        explanation:"One goal: book the audit. Everything else — demos, pricing, features — comes on the audit call. Trying to sell on the first call almost always fails."
+      },
+      {
+        q:"A prospect has 8 employees, misses about 6 calls a week, and average job is $400. What's their estimated monthly leak from missed calls?",
+        options:["$1,920","$7,680","$9,600","$4,800"],
+        correct:1,
+        explanation:"6 missed calls × 0.8 (80% conversion) × $400 × 4 weeks = $7,680/month. That number closes the deal — not your pitch."
+      },
+      {
+        q:"After the prospect agrees to move forward, what do you do immediately?",
+        options:["Schedule a follow-up call","Send the Stripe payment link right now","Send the onboard form","Email them the pricing PDF"],
+        correct:1,
+        explanation:"Send the payment link immediately — ideally while still on the call. Every minute you wait gives them time to talk themselves out of it."
+      },
+      {
+        q:"A prospect says 'I need to think about it.' What's the best response?",
+        options:["'No problem, I'll follow up next week'","'Of course — what's the main thing you're unsure about?'","'The price goes up next week so I'd decide now'","'Most people say that but then regret waiting'"],
+        correct:1,
+        explanation:"Always find the real objection. 'I need to think about it' is almost never the real issue — it's usually price, trust, or timing. Ask the question and you'll find out."
+      }
+    ]
+  },
+  {
+    title:"Live Call Scripts",
+    emoji:"📞",
+    sub:"Word-for-word scripts for cold calls, texts, and emails.",
+    readTime:"8 min",
+    content:[
+      {
+        title:"The Cold Call Script — Full Version",
+        body:`<div class="tip">USE THE PERSONALIZER IN /REP BEFORE EVERY CALL — it updates all scripts with the rep name, prospect name, and business name automatically.</div>
+
+<div class="script-box">OPENING:
+"Hey, is this [Owner Name]? ... Hey [Name], my name's [Your Name] — I work with service businesses in the area on something specific. I'll keep it short.
+
+I noticed [Business Name] doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're with a customer?"
+
+[PAUSE. Let them answer. Don't rush.]
+
+IF THEY SAY VOICEMAIL / NOTHING:
+"Yeah that's what most people tell me. The problem is about 80% of people who hit voicemail just call the next business on Google — they don't leave a message, they move on.
+
+What we do is automatically text them back within seconds with a booking link — before they think about calling someone else. Most of our clients recover 3 to 5 jobs a month just from that.
+
+I'm not trying to sell you anything today — I just do a free 10-minute audit where I show you exactly how many calls you're likely losing and what it's costing you monthly. Would that be worth 10 minutes?"
+
+CLOSE THE AUDIT:
+"Perfect. What's a good day this week? I only need 10 minutes — I'll have real numbers for you."
+
+IF NOT INTERESTED:
+"Totally fair. Can I just send you a quick link so you can see what it looks like? Takes 30 seconds."
+→ Send mysmartslots.com/subdomain</div>`
+      },
+      {
+        title:"Cold Text Templates",
+        body:`<div class="script-box">FIRST TEXT:
+"Hey [Name], my name's [Your Name] — I work with service businesses helping them recover missed calls automatically. Noticed [Business] doesn't have a follow-up system.
+
+Quick question — how are you handling calls that come in while you're with a customer?
+
+Not a sales pitch, just a 10-minute conversation if it's useful."
+
+FOLLOW-UP (Day 3 — no response):
+"Hey [Name] — did this reach you? Happy to send the short version if easier."
+
+FINAL FOLLOW-UP (Day 7):
+"Last reach out [Name] — here's what we built: mysmartslots.com/subdomain
+
+If timing's ever right, just reply and I'll set up a free audit."</div>
+
+<div class="warning"><strong>Never send more than 3 texts to a prospect who hasn't responded.</strong> After 3 you move them to "Not Interested" in the pipeline and move on.</div>`
+      },
+      {
+        title:"Tone — Peer to Peer, Never Pushy",
+        body:`This is the most important thing about how you deliver these scripts.
+
+<strong>You are not a salesperson calling to pitch a product.</strong> You are a peer who noticed something about their business and is offering to show them the math. That's it.
+
+<div class="highlight">
+<strong>Peer-to-peer tone sounds like:</strong> Confident, direct, no hesitation, asking real questions, listening to answers.<br/><br/>
+<strong>Salesperson tone sounds like:</strong> Over-explaining, rushing through features, not pausing, defensive when pushed back on.
+</div>
+
+The script is a guide — not a word-for-word recitation. Know it well enough that you can have a real conversation, not read from a page.`
+      }
+    ],
+    quiz:[
+      {
+        q:"A prospect picks up and sounds rushed. What do you do?",
+        options:["Launch into the full script immediately","Acknowledge it: 'Hey I'll keep it under 30 seconds' — then ask your one question","Hang up and call back later","Ask if they have time for a 10-minute demo"],
+        correct:1,
+        explanation:"Always acknowledge their time. A rushed prospect who feels respected is more likely to engage than one who feels like they're being steamrolled."
+      },
+      {
+        q:"How many follow-up texts should you send to a non-responding prospect?",
+        options:["As many as it takes","5 — persistence pays","3 maximum, then move them to Not Interested","1 — if they don't respond once, move on"],
+        correct:2,
+        explanation:"3 texts maximum. After that you move them to Not Interested in the pipeline. Continuing to text non-responding prospects wastes time and can get you blocked."
+      },
+      {
+        q:"What's the correct tone for these calls?",
+        options:["Enthusiastic and high-energy — excitement is contagious","Formal and professional — treat it like a business meeting","Peer-to-peer — confident, direct, like you're talking to someone you already know","Soft and apologetic — you don't want to bother them"],
+        correct:2,
+        explanation:"Peer-to-peer is the sweet spot. Not too corporate, not too salesy. You noticed something about their business and you're offering to help. That's a conversation, not a pitch."
+      }
+    ]
+  },
+  {
+    title:"Objection Handling",
+    emoji:"🛡️",
+    sub:"The 8 most common objections and exactly how to respond.",
+    readTime:"7 min",
+    content:[
+      {
+        title:"The Golden Rule of Objections",
+        body:`<div class="highlight"><strong>An objection is not a no. It's a question disguised as resistance.</strong></div>
+
+Most objections mean one of three things:
+<ul>
+<li>They don't fully understand what they're getting</li>
+<li>They don't trust you yet</li>
+<li>The timing feels wrong</li>
+</ul>
+
+Your job is to figure out which one and address it — then redirect back to the free audit as the zero-risk next step.
+
+<strong>Never get defensive. Never argue. Always acknowledge first.</strong>`
+      },
+      {
+        title:"The 8 Most Common Objections",
+        body:`<strong>1. "I don't have time for this."</strong>
+<div class="script-box">"Totally get it — that's exactly why this exists. It runs itself, you don't touch it. Can I send you the demo link? Takes 30 seconds to look at." → mysmartslots.com/subdomain</div>
+
+<strong>2. "I already have someone answering my phones."</strong>
+<div class="script-box">"This isn't replacing them — it's about what happens after hours, on weekends, or when they're on another call. Most businesses lose 30–40% of after-hours inquiries before anyone can pick up."</div>
+
+<strong>3. "$225 a month is too expensive."</strong>
+<div class="script-box">"Fair to think about it that way. The average missed call in a service business is worth $300–600. If this recovers even one job per month, it's already paid for itself. And there's a 30-day guarantee — no improvement, month two is free. Can I show you the math on your specific numbers?"</div>
+
+<strong>4. "I'm not tech savvy."</strong>
+<div class="script-box">"You don't have to be — we set everything up in 24 hours. You just work the jobs, appointments land in your calendar. Nothing for you to learn."</div>
+
+<strong>5. "I tried something like this before and it didn't work."</strong>
+<div class="script-box">"I appreciate you saying that — what did you try? Most of the time we hear about generic tools that weren't built for your specific business. My Smart Slots is configured specifically for how you work."</div>
+
+<strong>6. "Send me some info."</strong>
+<div class="script-box">Send mysmartslots.com + mysmartslots.com/subdomain. Follow up in 2 days: "Hey, had a chance to look at that? Happy to walk you through it on a quick call."</div>
+
+<strong>7. "I need to think about it."</strong>
+<div class="script-box">"Of course — what's the main thing you're unsure about?" → Find the real objection. Always offer the free audit as the low-commitment next step.</div>
+
+<strong>8. "I'm too busy right now."</strong>
+<div class="script-box">"Busy season is exactly when this pays off most. Setup takes 24 hours and requires nothing from you. Could you spare 10 minutes this week for the audit?"</div>`
+      }
+    ],
+    quiz:[
+      {
+        q:"A prospect says '$225/mo is too much.' What's your first move?",
+        options:["Offer them a discount","Acknowledge it, then reframe with the math — one recovered job pays for it","Explain all the features they're getting","Tell them the Starter plan is only $125"],
+        correct:1,
+        explanation:"Always acknowledge first, then reframe. The price objection almost always disappears when you show that one recovered job covers the entire monthly cost."
+      },
+      {
+        q:"A prospect says 'I already have someone answering phones.' What do you say?",
+        options:["'Then you probably don't need this — have a good day'","'This replaces your receptionist and saves you money'","'This isn't replacing them — it covers after hours, weekends, and overflow that slips through'","'How much are you paying them? We're cheaper'"],
+        correct:2,
+        explanation:"This is an additive tool, not a replacement. The objection comes from misunderstanding — clarify that it fills the gaps their person can't cover."
+      },
+      {
+        q:"What is the zero-risk next step you always redirect to?",
+        options:["A 30-day free trial","The free 10-minute audit","A product demo video","The pricing page"],
+        correct:1,
+        explanation:"The free audit is your answer to almost every objection. No commitment, no pitch — just math. It's the lowest-friction next step and it lets the numbers do the selling."
+      }
+    ]
+  },
+  {
+    title:"Commission & Getting Paid",
+    emoji:"💰",
+    sub:"How commissions work, when you get paid, and how to track your earnings.",
+    readTime:"5 min",
+    content:[
+      {
+        title:"Your Commission Structure",
+        body:`<table class="plan-table">
+<thead><tr><th>What</th><th>Your Cut</th><th>When</th></tr></thead>
+<tbody>
+<tr><td><strong>Monthly recurring</strong></td><td>30% of monthly plan price, every month while they stay</td><td>Last Friday of each month</td></tr>
+<tr><td><strong>Setup fee bonus</strong></td><td>$50 flat per new client closed</td><td>Within 7 business days of payment</td></tr>
+</tbody>
+</table>
+
+<div class="highlight">
+<strong>Monthly recurring breakdown:</strong><br/>
+Starter ($125/mo) → You earn <strong>$37.50/mo</strong> per client<br/>
+Pro ($225/mo) → You earn <strong>$67.50/mo</strong> per client<br/>
+Elite ($375/mo) → You earn <strong>$112.50/mo</strong> per client
+</div>
+
+This is <strong>lifetime recurring</strong> — as long as the client stays, you get paid. A client you close today could be paying you in 3 years.`
+      },
+      {
+        title:"The Math on 5 Clients",
+        body:`This is the target that unlocks real passive income.
+
+<div class="highlight">
+<strong>5 Pro clients = $1,125/mo recurring</strong><br/>
+5 Pro clients + setup bonuses = $1,375 in month one<br/><br/>
+10 Pro clients = $2,250/mo recurring<br/>
+20 Pro clients = $4,500/mo recurring
+</div>
+
+The compounding effect is real. Every client you close adds to your base. Focus on Pro and Elite — the extra effort per sale is minimal but the monthly difference adds up fast.`
+      },
+      {
+        title:"How Payment Works",
+        body:`<ul>
+<li><strong>Payment method:</strong> CashApp or cashier's check — your choice</li>
+<li><strong>Payment date:</strong> Last Friday of every month</li>
+<li><strong>Setup bonuses:</strong> Paid within 7 business days of the client's setup fee clearing</li>
+<li><strong>90-day tail:</strong> If you leave, you continue to earn on clients you closed for 90 days after your last day</li>
+</ul>
+
+<div class="warning"><strong>Important:</strong> A client only counts as "closed" once the $199 setup fee is collected. Verbal commitments don't count. Get the payment link sent and collected before celebrating.</div>
+
+Use the Commission Calculator in the Rep Portal (/rep) to see your projected monthly earnings at any client count.`
+      }
+    ],
+    quiz:[
+      {
+        q:"You close a Pro client. What do you earn in month one total?",
+        options:["$67.50","$117.50","$225.00","$50.00"],
+        correct:1,
+        explanation:"$67.50 (30% of $225 monthly) + $50 setup bonus = $117.50 in month one. From month two onward it's $67.50/mo recurring as long as they stay."
+      },
+      {
+        q:"When does a client officially count as 'closed'?",
+        options:["When they verbally agree on the call","When they sign the agreement","When the $199 setup fee is collected","When their first monthly payment clears"],
+        correct:2,
+        explanation:"Setup fee collected = closed. Don't count anything before that. Payment is the only real commitment."
+      },
+      {
+        q:"What is the '90-day tail' in your commission agreement?",
+        options:["You get a 90-day trial period before commissions start","If you leave, you keep earning on your clients for 90 days","Clients can cancel within 90 days for a refund","You must give 90 days notice before leaving"],
+        correct:1,
+        explanation:"The 90-day tail protects your earnings if you ever leave. Clients you closed continue to generate commission for you for 90 days after your termination date."
+      }
+    ]
+  },
+  {
+    title:"Tools Walkthrough",
+    emoji:"🛠️",
+    sub:"How to use /prospector and /rep to work your pipeline every day.",
+    readTime:"6 min",
+    content:[
+      {
+        title:"The Two Tools — Their Purpose",
+        body:`<div class="highlight">
+<strong>/prospector</strong> — Pre-call tool. Everything that happens BEFORE you pick up the phone.<br/>
+Research a business → score their fit → build your pitch → pick your icebreaker → send to pipeline.
+</div>
+<div class="highlight">
+<strong>/rep</strong> — Active sales tool. Everything that happens DURING and AFTER the call.<br/>
+Live call scripts → audit calculator → pipeline management → onboarding tracker → goals.
+</div>
+
+These two tools cover your entire workflow. Use them in order — Prospector first, then Rep during and after calls.`
+      },
+      {
+        title:"Daily Workflow — What to Do Every Day",
+        body:`<strong>Morning (15–20 min):</strong>
+<ul>
+<li>Log into /prospector</li>
+<li>Set your target city</li>
+<li>Research 5–10 businesses, run fit scores, add the hot ones</li>
+<li>Build pitches and pick icebreakers for your top prospects</li>
+<li>Send qualified ones to /rep pipeline</li>
+</ul>
+
+<strong>During calls (live):</strong>
+<ul>
+<li>Open /rep — fill in the personalizer (your name, prospect name, business name)</li>
+<li>Use the Scripts tab for live call guidance</li>
+<li>Use the Audit Calculator to run numbers live on the call</li>
+<li>Update the contact status immediately after every call</li>
+</ul>
+
+<strong>End of day (5 min):</strong>
+<ul>
+<li>Go to the Goals tab in /rep</li>
+<li>Log your daily activity — calls made, texts sent, emails sent, audits booked, clients closed</li>
+<li>Set follow-up dates for any warm prospects</li>
+</ul>`
+      },
+      {
+        title:"Pipeline Statuses — Use Them Correctly",
+        body:`Your pipeline only works if every contact is in the right status. Here's exactly what each one means:
+
+<table class="plan-table">
+<thead><tr><th>Status</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><strong>New</strong></td><td>Added to pipeline, not yet contacted</td></tr>
+<tr><td><strong>Contacted</strong></td><td>At least one reach-out attempt made</td></tr>
+<tr><td><strong>Audit Set</strong></td><td>10-minute audit call is scheduled</td></tr>
+<tr><td><strong>Follow-Up</strong></td><td>Had a conversation, needs follow-up — set a follow-up date</td></tr>
+<tr><td><strong>Closed</strong></td><td>Setup fee collected — they're a paying client</td></tr>
+<tr><td><strong>Not Interested</strong></td><td>Explicitly said no or no response after 3 attempts</td></tr>
+</tbody>
+</table>
+
+<div class="warning"><strong>Never leave a contact in New or Contacted without a follow-up date.</strong> If you're not moving them forward, you're letting them go cold.</div>`
+      }
+    ],
+    quiz:[
+      {
+        q:"You just called a prospect and left a voicemail. What status do you set in the pipeline?",
+        options:["New","Contacted","Follow-Up","Audit Set"],
+        correct:1,
+        explanation:"Contacted means at least one reach-out attempt. A voicemail counts. Set a follow-up date for 2 days from now."
+      },
+      {
+        q:"Which tool do you open BEFORE making a call to research a prospect?",
+        options:["/rep — Scripts tab","/prospector — to research and build the pitch","/admin — to check the pipeline","/setup — to prepare the demo"],
+        correct:1,
+        explanation:"Prospector is your pre-call research tool. Research → fit score → pitch → icebreaker → then call. Never go into a cold call without knowing something specific about the business."
+      },
+      {
+        q:"A prospect said 'maybe, call me next week.' What do you do in the pipeline?",
+        options:["Leave them as Contacted","Move them to Follow-Up and set a follow-up date for next week","Move them to Not Interested","Move them to Audit Set"],
+        correct:1,
+        explanation:"Follow-Up with a specific date. Never leave a warm prospect without a scheduled next action. If you don't set the date now, they'll fall through the cracks."
+      }
+    ]
+  }
+];
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogin(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  try{
+    const r=await fetch(`${API}/portal/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok){document.getElementById('login-error').style.display='block';return;}
+    currentU=u.toLowerCase();currentP=p;currentName=d.name;isAdmin=d.isAdmin;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('rep-name-display').textContent=d.name;
+    loadProgress();
+    renderSidebar();
+    if(isAdmin)document.getElementById('admin-nav-btn').style.display='block';
+    loadModule(0);
+    // Log training access
+    fetch(`${API}/portal/setup/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,action:'training_access',client_name:'Training Portal'})}).catch(()=>{});
+  }catch(e){document.getElementById('login-error').style.display='block';}
+}
+
+function doLogout(){
+  currentU=null;currentP=null;progress={};
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('password').value='';
+}
+
+function toast(msg){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── PROGRESS STORAGE ──────────────────────────────────────────────────────────
+function loadProgress(){
+  const saved=localStorage.getItem(`training_${currentU}`);
+  progress=saved?JSON.parse(saved):{};
+}
+
+function saveProgress(){
+  localStorage.setItem(`training_${currentU}`,JSON.stringify(progress));
+  // Save to backend so admin can see it
+  fetch(`${API}/portal/setup/log`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      username:currentU,password:currentP,
+      action:'training_progress',
+      client_name:JSON.stringify(progress)
+    })
+  }).catch(()=>{});
+}
+
+function getCompletedCount(){
+  return MODULES.filter((_,i)=>progress[i]?.completed).length;
+}
+
+function getAvgScore(){
+  const scores=MODULES.map((_,i)=>progress[i]?.score).filter(s=>s!==undefined);
+  if(!scores.length)return null;
+  return Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function renderSidebar(){
+  const nav=document.getElementById('module-nav');
+  nav.innerHTML=MODULES.map((m,i)=>{
+    const p=progress[i];
+    const completed=p?.completed;
+    const score=p?.score;
+    const locked=i>0&&!progress[i-1]?.completed;
+    let cls='module-item';
+    if(i===currentModule)cls+=' active';
+    if(completed)cls+=' completed';
+    if(locked)cls+=' locked';
+    return `<div class="${cls}" onclick="tryLoadModule(${i})">
+      <div class="mod-num">${completed?'✓':i+1}</div>
+      <div class="mod-info">
+        <div class="mod-title">${m.emoji} ${m.title}</div>
+        <div class="mod-status">${completed?`Completed`:`${m.readTime} read`}</div>
+      </div>
+      ${score!==undefined?`<div class="mod-score">${score}%</div>`:''}
+    </div>`;
+  }).join('');
+
+  const total=MODULES.length;
+  const done=getCompletedCount();
+  const pct=Math.round((done/total)*100);
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-fill').style.width=pct+'%';
+}
+
+function tryLoadModule(i){
+  if(i>0&&!progress[i-1]?.completed){
+    toast('Complete the previous module first.');return;
+  }
+  loadModule(i);
+}
+
+// ── LOAD MODULE ───────────────────────────────────────────────────────────────
+function loadModule(i){
+  currentModule=i;
+  moduleStartTime=Date.now();
+  renderSidebar();
+
+  const m=MODULES[i];
+  const p=progress[i];
+  const main=document.getElementById('main-content');
+  document.getElementById('admin-panel')&&(document.getElementById('admin-panel').style.display='none');
+  main.style.display='block';
+
+  let html=`<div class="module-header">
+    <div class="mod-eyebrow">Module ${i+1} of ${MODULES.length}</div>
+    <div class="mod-h1">${m.emoji} ${m.title}</div>
+    <div class="mod-sub">${m.sub}</div>
+    <div class="mod-time"><div class="time-dot"></div>${m.readTime} read · ${m.quiz.length} quiz questions</div>
+  </div>`;
+
+  m.content.forEach(block=>{
+    html+=`<div class="content-block">
+      <div class="block-title">📖 ${block.title}</div>
+      <div class="block-body">${block.body}</div>
+    </div>`;
+  });
+
+  // Quiz
+  const quizDone=p?.score!==undefined;
+  html+=`<div class="quiz-section" id="quiz-section">
+    <div class="quiz-title">✏️ Module Quiz</div>
+    <div class="quiz-sub">Answer all questions to complete this module. You need 75% or higher to pass and unlock the next module.</div>
+    ${m.quiz.map((q,qi)=>`
+      <div class="quiz-q" id="qq-${qi}">
+        <div class="quiz-q-text">${qi+1}. ${q.q}</div>
+        <div class="quiz-options">
+          ${q.options.map((opt,oi)=>`
+            <label class="quiz-opt" id="qo-${qi}-${oi}">
+              <input type="radio" name="q${qi}" value="${oi}" ${quizDone?'disabled':''}/> ${opt}
+            </label>`).join('')}
+        </div>
+      </div>`).join('')}
+    <button class="quiz-submit" id="quiz-submit-btn" onclick="submitQuiz(${i})" ${quizDone?'disabled':''}>
+      ${quizDone?'Already submitted':'Submit Answers'}
+    </button>
+    <div class="quiz-result" id="quiz-result"></div>
+    ${quizDone?`<button class="retry-btn" onclick="retryQuiz(${i})">↺ Retake Quiz</button>`:''}
+  </div>`;
+
+  if(p?.completed){
+    html+=`<div class="complete-badge">✓ Module Complete — Score: ${p.score}%</div>`;
+    if(i<MODULES.length-1){
+      html+=`<button class="next-btn" id="next-btn" style="display:inline-block;" onclick="loadModule(${i+1})">Next Module: ${MODULES[i+1].title} →</button>`;
+    } else {
+      html+=`<div style="margin-top:1.5rem;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:12px;padding:1.5rem;text-align:center;">
+        <div style="font-size:28px;margin-bottom:.5rem;">🎉</div>
+        <div style="font-size:18px;font-weight:800;color:var(--white);margin-bottom:.5rem;">Training Complete!</div>
+        <div style="font-size:14px;color:var(--gray);">You've completed all 7 modules. Average score: ${getAvgScore()}%. Head to the Rep Portal to start working your pipeline.</div>
+        <a href="/rep" style="display:inline-block;margin-top:1rem;background:var(--accent);color:var(--navy);padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;">Open Rep Portal →</a>
+      </div>`;
+    }
+  } else {
+    html+=`<button class="next-btn" id="next-btn" onclick="loadModule(${i+1})">Next Module →</button>`;
+  }
+
+  main.innerHTML=html;
+
+  // If already done, show the correct/wrong answers
+  if(quizDone&&p?.answers){
+    restoreQuizAnswers(i,p.answers,p.score);
+  }
+}
+
+// ── QUIZ LOGIC ────────────────────────────────────────────────────────────────
+function submitQuiz(moduleIdx){
+  const m=MODULES[moduleIdx];
+  const answers=[];
+  let correct=0;
+
+  for(let qi=0;qi<m.quiz.length;qi++){
+    const selected=document.querySelector(`input[name="q${qi}"]:checked`);
+    if(!selected){toast('Please answer all questions first.');return;}
+    const val=parseInt(selected.value);
+    answers.push(val);
+    if(val===m.quiz[qi].correct)correct++;
+  }
+
+  const score=Math.round((correct/m.quiz.length)*100);
+  const passed=score>=75;
+  const timeSpent=Math.round((Date.now()-moduleStartTime)/1000);
+
+  // Record progress
+  if(!progress[moduleIdx])progress[moduleIdx]={};
+  progress[moduleIdx]={
+    completed:passed,
+    score,
+    attempts:(progress[moduleIdx].attempts||0)+1,
+    timeSeconds:(progress[moduleIdx].timeSeconds||0)+timeSpent,
+    answers
+  };
+  saveProgress();
+  renderSidebar();
+  restoreQuizAnswers(moduleIdx,answers,score);
+
+  const resultEl=document.getElementById('quiz-result');
+  resultEl.style.display='block';
+  if(passed){
+    resultEl.className='quiz-result pass';
+    resultEl.innerHTML=`✓ Passed — ${score}% (${correct}/${m.quiz.length} correct)<p>Module complete! ${moduleIdx<MODULES.length-1?'The next module is now unlocked.':'You\'ve completed all modules!'}</p>`;
+    document.getElementById('quiz-submit-btn').disabled=true;
+    document.getElementById('next-btn').style.display='inline-block';
+    toast('🎉 Module passed!');
+  } else {
+    resultEl.className='quiz-result fail';
+    resultEl.innerHTML=`✗ ${score}% — need 75% to pass (${correct}/${m.quiz.length} correct)<p>Review the content above and try again. No limit on retries.</p>`;
+    // Add retry button
+    const retryBtn=document.createElement('button');
+    retryBtn.className='retry-btn';
+    retryBtn.textContent='↺ Retake Quiz';
+    retryBtn.onclick=()=>retryQuiz(moduleIdx);
+    resultEl.after(retryBtn);
+  }
+}
+
+function restoreQuizAnswers(moduleIdx,answers,score){
+  const m=MODULES[moduleIdx];
+  answers.forEach((val,qi)=>{
+    const correctVal=m.quiz[qi].correct;
+    const isCorrect=val===correctVal;
+    const selectedOpt=document.getElementById(`qo-${qi}-${val}`);
+    const correctOpt=document.getElementById(`qo-${qi}-${correctVal}`);
+    if(selectedOpt)selectedOpt.classList.add(isCorrect?'correct':'wrong');
+    if(!isCorrect&&correctOpt)correctOpt.classList.add('correct');
+    document.querySelectorAll(`input[name="q${qi}"]`).forEach(r=>r.disabled=true);
+  });
+}
+
+function retryQuiz(moduleIdx){
+  // Reset quiz answers but keep attempt count
+  if(progress[moduleIdx]){
+    progress[moduleIdx].score=undefined;
+    progress[moduleIdx].completed=false;
+    progress[moduleIdx].answers=undefined;
+    saveProgress();
+  }
+  loadModule(moduleIdx);
+}
+
+// ── ADMIN PANEL ───────────────────────────────────────────────────────────────
+async function showAdminPanel(){
+  const main=document.getElementById('main-content');
+  main.style.display='none';
+
+  let adminEl=document.getElementById('admin-panel');
+  if(!adminEl){
+    adminEl=document.createElement('div');
+    adminEl.id='admin-panel';
+    adminEl.style.cssText='padding:2rem 2.5rem 5rem;max-width:900px;';
+    document.querySelector('.main').parentNode.appendChild(adminEl);
+  }
+  adminEl.style.display='block';
+
+  adminEl.innerHTML=`<div class="admin-header">
+    <h2>🔐 Training Progress — All Reps</h2>
+    <p>Scores, time spent, and completion status per module per rep. Data updates each time a rep submits a quiz.</p>
+  </div>
+  <div id="admin-progress-body"><div class="empty">Loading rep progress...</div></div>`;
+
+  // Fetch login data to find all reps who have accessed training
+  try{
+    const d=await fetch(`${API}/portal/admin/logins`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP})});
+    const data=await d.json();
+
+    if(!data.success){adminEl.querySelector('#admin-progress-body').innerHTML='<div class="empty">Could not load data.</div>';return;}
+
+    // Find reps who logged into training + their progress from setup logs
+    const trainingLogins=data.logins.filter(l=>l.rep_name.includes('[setup]')&&l.rep_name.includes('training'));
+    const repNames={};
+    data.logins.filter(l=>!l.rep_name.includes('[')&&!l.rep_name.includes('Owner')).forEach(l=>{
+      repNames[l.username]=l.rep_name;
+    });
+
+    // Get progress logs
+    const progressLogs=data.logins.filter(l=>l.rep_name.includes('training_progress'));
+    const repProgress={};
+    progressLogs.forEach(l=>{
+      try{
+        const dataStr=l.rep_name.replace(/.*training_progress.*?: /,'');
+        const match=l.rep_name.match(/\{.*\}/);
+        if(match){
+          repProgress[l.username]=JSON.parse(match[0]);
+        }
+      }catch(e){}
+    });
+
+    // Also pull from setup logs for training access
+    const trainingReps=[...new Set(data.logins.filter(l=>l.rep_name.includes('[setup]: Training Portal')).map(l=>l.username))];
+
+    if(!trainingReps.length){
+      adminEl.querySelector('#admin-progress-body').innerHTML='<div class="empty">No reps have started training yet.</div>';
+      return;
+    }
+
+    adminEl.querySelector('#admin-progress-body').innerHTML=trainingReps.map(rep=>{
+      const prog=repProgress[rep]||{};
+      const completed=MODULES.filter((_,i)=>prog[i]?.completed).length;
+      const scores=MODULES.map((_,i)=>prog[i]?.score).filter(s=>s!==undefined);
+      const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null;
+      const totalTime=Object.values(prog).reduce((a,p)=>a+(p.timeSeconds||0),0);
+      const timeStr=totalTime>3600?`${Math.floor(totalTime/3600)}h ${Math.floor((totalTime%3600)/60)}m`:totalTime>60?`${Math.floor(totalTime/60)}m ${totalTime%60}s`:`${totalTime}s`;
+      const lastAccess=data.logins.find(l=>l.username===rep&&!l.rep_name.includes('['));
+
+      return `<div class="rep-progress-card">
+        <div class="rpc-header">
+          <div>
+            <div class="rpc-name">${repNames[rep]||rep}</div>
+            <div style="font-size:12px;color:var(--gray);">Last active: ${lastAccess?new Date(lastAccess.logged_in_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}</div>
+          </div>
+          <div class="rpc-overall">${completed}/${MODULES.length} modules · ${avg!==null?avg+'% avg':' No scores yet'}</div>
+        </div>
+        <div class="rpc-modules">
+          ${MODULES.map((m,i)=>{
+            const mp=prog[i];
+            const cls=mp?.completed?'done':mp?.score!==undefined?'failed':'';
+            return `<div class="rpc-mod ${cls}">
+              <div class="rpc-mod-num">Mod ${i+1}</div>
+              <div class="rpc-mod-score">${mp?.score!==undefined?mp.score+'%':'—'}</div>
+              <div class="rpc-mod-time">${mp?.timeSeconds?Math.round(mp.timeSeconds/60)+'min':''}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="rpc-stats">
+          <span class="rpc-stat">⏱ Total time: <strong>${timeStr}</strong></span>
+          <span class="rpc-stat">🔄 Total attempts: <strong>${Object.values(prog).reduce((a,p)=>a+(p.attempts||0),0)}</strong></span>
+          <span class="rpc-stat">✅ Completed: <strong>${completed}/${MODULES.length}</strong></span>
+          ${avg!==null?`<span class="rpc-stat">📊 Avg score: <strong>${avg}%</strong></span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+
+  }catch(e){
+    adminEl.querySelector('#admin-progress-body').innerHTML='<div class="empty">Error loading data — check console.</div>';
+  }
+}
+</script>
+</body>
+</html>
