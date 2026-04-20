@@ -610,43 +610,54 @@ async function sendToPipeline(i,btn,e){
   const p=all[i];
   if(!p||p.sentToPipeline){toast('Already in pipeline.');return;}
 
-  // Duplicate check across ALL reps
-  const dupCheck=await api('/portal/contacts/get');
-  if(dupCheck.success){
-    const existing=dupCheck.contacts.find(c=>
-      c.biz_name.toLowerCase()===p.name.toLowerCase()&&c.status!=='prospect'
-    );
-    if(existing){toast(`⚠️ ${p.name} is already in ${existing.rep_username}'s pipeline.`,true);return;}
-  }
+  btn.textContent='Sending...';
+  btn.disabled=true;
 
-  const d=await api('/portal/contacts',{
-    biz_name:p.name,contact_name:'',trade:p.type,
-    status:'new',phone:p.phone||'',
-    notes:JSON.stringify([{date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:`Sent from Prospector. Fit score: ${p.fitScore||'—'}%. ${p.notes||''}`}]),
-  });
-  if(d.success){
-    // Mark as sent in Supabase if rep-added
-    if(p.source==='rep'&&p.id){
-      const idx=repProspects.findIndex(x=>x.id===p.id);
-      if(idx>-1){
-        repProspects[idx].sentToPipeline=true;
-        let meta={};try{meta=JSON.parse(await getContactNotes(p.id));}catch(e2){}
-        meta.sentToPipeline=true;
-        await api('/portal/contacts/update',{id:p.id,notes:JSON.stringify(meta)});
+  try{
+    // Duplicate check
+    const dupCheck=await api('/portal/contacts/get');
+    if(dupCheck.success){
+      const existing=dupCheck.contacts.find(c=>
+        c.biz_name.toLowerCase()===p.name.toLowerCase()&&c.status!=='prospect'
+      );
+      if(existing){
+        toast(`⚠️ ${p.name} is already in ${existing.rep_username}'s pipeline.`,true);
+        btn.textContent='→ Send to Pipeline';btn.disabled=false;return;
       }
-    } else if(p.source==='preset'){
-      p.sentToPipeline=true;
     }
-    btn.className='pc-action sent-btn';
-    btn.textContent='✓ In Pipeline';
-    toast('✓ Sent to Rep Portal pipeline');
-  }
-}
 
-async function getContactNotes(id){
-  const d=await api('/portal/contacts/get');
-  if(d.success){const c=d.contacts.find(x=>x.id===id);return c?.notes||'{}';}
-  return '{}';
+    const d=await api('/portal/contacts',{
+      biz_name:p.name,contact_name:'',trade:p.type,
+      status:'new',phone:p.phone||'',
+      notes:JSON.stringify([{date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:`Sent from Prospector. Fit: ${p.fitScore||'—'}%. ${p.notes||''}`}]),
+    });
+
+    if(d.success){
+      if(p.source==='rep'&&p.id){
+        const idx=repProspects.findIndex(x=>x.id===p.id);
+        if(idx>-1)repProspects[idx].sentToPipeline=true;
+        // Update prospect record to mark sentToPipeline=true
+        try{
+          let meta={city:p.city,fit:p.fit,signals:p.signals,note:p.notes,size:p.size,fitScore:p.fitScore,sentToPipeline:true};
+          await api('/portal/contacts/update',{id:p.id,notes:JSON.stringify(meta)});
+        }catch(e2){console.warn('Could not mark prospect as sent:',e2);}
+      } else if(p.source==='preset'){
+        p.sentToPipeline=true;
+      }
+      btn.className='pc-action sent-btn';
+      btn.textContent='✓ In Pipeline';
+      btn.disabled=false;
+      toast('✓ Sent to Rep Portal pipeline');
+      filterProspects();
+    } else {
+      toast('Send failed: '+(d.error||'unknown error'),true);
+      btn.textContent='→ Send to Pipeline';btn.disabled=false;
+    }
+  }catch(err){
+    console.error('sendToPipeline error:',err);
+    toast('Connection error — try again.',true);
+    btn.textContent='→ Send to Pipeline';btn.disabled=false;
+  }
 }
 
 function buildPitchFor(type,e){
@@ -775,50 +786,55 @@ async function submitProspect(action){
   const type=document.getElementById('m-type').value;
   if(!name||!type){toast('Business name and industry required.',true);return;}
 
-  // Duplicate check
-  const dupCheck=await api('/portal/contacts/get');
-  if(dupCheck.success){
-    const existing=dupCheck.contacts.find(c=>c.biz_name.toLowerCase()===name.toLowerCase());
-    if(existing&&existing.status!=='prospect'){
-      toast(`⚠️ ${name} is already in ${existing.rep_username}'s pipeline.`,true);return;
+  try{
+    // Duplicate check
+    const dupCheck=await api('/portal/contacts/get');
+    if(dupCheck.success){
+      const existing=dupCheck.contacts.find(c=>c.biz_name.toLowerCase()===name.toLowerCase()&&c.status!=='prospect');
+      if(existing){toast(`⚠️ ${name} is already in ${existing.rep_username}'s pipeline.`,true);return;}
+      const existingProspect=dupCheck.contacts.find(c=>c.biz_name.toLowerCase()===name.toLowerCase()&&c.status==='prospect');
+      if(existingProspect){toast(`⚠️ ${name} already exists in the Prospector.`,true);return;}
     }
-    const existingProspect=dupCheck.contacts.find(c=>c.biz_name.toLowerCase()===name.toLowerCase()&&c.status==='prospect');
-    if(existingProspect){toast(`⚠️ ${name} already exists in the Prospector.`,true);return;}
-  }
 
-  const city=document.getElementById('m-city').value.trim();
-  const state=document.getElementById('m-state').value.trim();
-  const cityStr=city&&state?`${city}, ${state}`:city||state||currentCity||'';
-  const signals=document.getElementById('m-signals').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const note=document.getElementById('m-notes').value.trim();
-  const size=document.getElementById('m-size').value||'Unknown';
-  const phone=document.getElementById('m-phone').value.trim();
-  const fit=modalFitScore>=70?'hot':modalFitScore>=45?'warm':'cold';
-  const sentToPipeline=action==='send';
+    const city=document.getElementById('m-city').value.trim();
+    const state=document.getElementById('m-state').value.trim();
+    const cityStr=city&&state?`${city}, ${state}`:city||state||currentCity||'';
+    const signals=document.getElementById('m-signals').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const note=document.getElementById('m-notes').value.trim();
+    const size=document.getElementById('m-size').value||'Unknown';
+    const phone=document.getElementById('m-phone').value.trim();
+    const fit=modalFitScore>=70?'hot':modalFitScore>=45?'warm':'cold';
+    const sentToPipeline=action==='send';
 
-  const meta=JSON.stringify({city:cityStr,fit,signals,note,size,fitScore:modalFitScore,sentToPipeline});
+    const meta=JSON.stringify({city:cityStr,fit,signals,note,size,fitScore:modalFitScore,sentToPipeline});
 
-  // Save as prospect in Supabase
-  const d=await api('/portal/contacts',{
-    biz_name:name,contact_name:size,trade:type,
-    status:'prospect',phone,notes:meta,
-  });
+    const d=await api('/portal/contacts',{
+      biz_name:name,contact_name:size,trade:type,
+      status:'prospect',phone,notes:meta,
+    });
 
-  if(d.success){
+    if(!d.success){toast('Failed to save: '+(d.error||'unknown error'),true);return;}
+
     repProspects.unshift({id:d.contact.id,name,type,city:cityStr,size,fit,signals,phone,notes:note,source:'rep',fitScore:modalFitScore,sentToPipeline});
 
-    // If send action, also create a pipeline contact
     if(action==='send'){
-      await api('/portal/contacts',{
+      const pipelineResult=await api('/portal/contacts',{
         biz_name:name,contact_name:'',trade:type,status:'new',phone,
         notes:JSON.stringify([{date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:`Sent from Prospector. Fit: ${modalFitScore}%. ${note}`}]),
       });
-      toast('✓ Added to Prospector and sent to Rep Pipeline');
+      if(pipelineResult.success){
+        toast('✓ Added to Prospector and sent to Rep Pipeline');
+      } else {
+        toast('Saved to Prospector — pipeline send failed, try "Send to Pipeline" from the card.',true);
+      }
     } else {
       toast('✓ Prospect added to Prospector');
     }
     filterProspects();
     closeAddModal();
+  }catch(err){
+    console.error('submitProspect error:',err);
+    toast('Connection error — check your connection and try again.',true);
   }
 }
 
