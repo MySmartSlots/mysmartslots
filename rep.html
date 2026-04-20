@@ -1,170 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Smart Slots — Rep Portal</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy: #1a1a2e; --blue: #1455a4; --light-blue: #e8f0fb;
-      --mid-blue: #a8c8f0; --white: #ffffff; --gray-bg: #f4f6fb;
-      --gray-border: #e0e4f0; --gray-text: #555; --green: #1e7a3a;
-      --green-bg: #d6f0dd; --orange: #c45c00; --orange-bg: #fff0e0;
-      --yellow: #fff9c4; --red: #c0392b; --red-bg: #fdf0f0;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --navy:#1a1a2e;--navy2:#222840;--navy3:#2a3350;
+      --blue:#1455a4;--blue2:#1a6fd4;--accent:#4ade80;
+      --orange:#f39c12;--red:#e74c3c;--green:#4ade80;
+      --white:#fff;--gray:#8892a4;--border:#2a3348;
+      --card:#1e2640;--card2:#242c44;--text:#e2e8f0;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-bg); color: var(--navy); }
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 20%,rgba(20,85,164,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 85% 70%,rgba(74,222,128,.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
 
-    #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--navy); }
-    .login-box { background: var(--white); border-radius: 16px; padding: 2.5rem 2rem; width: 340px; text-align: center; }
-    .login-logo { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
-    .login-sub { font-size: 13px; color: var(--gray-text); margin-bottom: 1.5rem; }
-    .login-box input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 14px; margin-bottom: 10px; font-family: inherit; outline: none; }
-    .login-box input:focus { border-color: var(--blue); }
-    .login-btn { width: 100%; padding: 11px; background: var(--blue); color: var(--white); border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; }
-    .login-btn:hover { opacity: 0.88; }
-    .login-error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
+    /* LOGIN */
+    #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);position:relative;z-index:10;}
+    .login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:340px;text-align:center;}
+    .login-logo{font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px;}
+    .login-logo span{color:var(--accent);}
+    .login-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+    .login-box input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;color:var(--white);}
+    .login-box input:focus{border-color:var(--blue2);}
+    .login-btn{width:100%;padding:11px;background:var(--blue);color:var(--white);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+    .login-btn:hover{background:var(--blue2);}
+    .login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
 
-    #app { display: none; min-height: 100vh; flex-direction: column; }
-    .topbar { background: var(--navy); color: var(--white); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .topbar-logo { font-size: 15px; font-weight: 700; }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .rep-badge { background: rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-    .logout-btn { background: none; border: 1px solid rgba(255,255,255,0.25); color: var(--white); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
-    .logout-btn:hover { background: rgba(255,255,255,0.1); }
+    /* APP */
+    #app{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+    .topbar{background:rgba(26,26,46,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .topbar-logo{font-size:15px;font-weight:800;color:var(--white);}
+    .topbar-logo span{color:var(--accent);}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .rep-badge{background:rgba(255,255,255,.1);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--white);}
+    .logout-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;}
+    .logout-btn:hover{color:var(--white);}
 
-    .personalizer { background: var(--yellow); border-bottom: 1px solid #e0d000; padding: 10px 1.5rem; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .personalizer label { font-size: 12px; font-weight: 700; color: var(--navy); white-space: nowrap; }
-    .personalizer input { padding: 6px 10px; border: 1.5px solid #ccc; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; flex: 1; min-width: 130px; }
-    .personalizer input:focus { border-color: var(--blue); }
-    .p-hint { font-size: 11px; color: #7a6000; width: 100%; }
+    /* PERSONALIZER */
+    .personalizer{background:rgba(255,220,0,.07);border-bottom:1px solid rgba(255,220,0,.12);padding:10px 1.5rem;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+    .personalizer label{font-size:12px;font-weight:700;color:#ffd700;white-space:nowrap;}
+    .personalizer input{padding:6px 10px;background:var(--card2);border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;color:var(--white);flex:1;min-width:130px;}
+    .personalizer input:focus{border-color:var(--blue2);}
+    .p-hint{font-size:11px;color:#ffd700;opacity:.7;width:100%;}
 
-    .nav-tabs { background: var(--white); border-bottom: 1px solid var(--gray-border); display: flex; overflow-x: auto; padding: 0 1rem; position: sticky; top: 56px; z-index: 99; }
-    .nav-tabs::-webkit-scrollbar { display: none; }
-    .nav-tab { padding: 13px 15px; font-size: 13px; font-weight: 500; white-space: nowrap; color: var(--gray-text); border-bottom: 2.5px solid transparent; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
-    .nav-tab:hover { color: var(--blue); }
-    .nav-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
-    .nav-tab.admin-tab { color: var(--orange); }
-    .nav-tab.admin-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+    /* NAV */
+    .nav-tabs{background:var(--card);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 1rem;position:sticky;top:56px;z-index:99;}
+    .nav-tabs::-webkit-scrollbar{display:none;}
+    .nav-tab{padding:13px 14px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--gray);border-bottom:2.5px solid transparent;cursor:pointer;transition:all .15s;flex-shrink:0;}
+    .nav-tab:hover{color:var(--white);}
+    .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+    .nav-tab.admin-tab{color:var(--orange);}
+    .nav-tab.admin-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
 
-    .content { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    /* CONTENT */
+    .content{max-width:860px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+    .section-head{margin-bottom:1.5rem;}
+    .section-head h2{font-size:20px;font-weight:700;color:var(--white);margin-bottom:4px;}
+    .section-head p{font-size:13px;color:var(--gray);line-height:1.6;}
 
-    .card { background: var(--white); border: 1px solid var(--gray-border); border-radius: 12px; padding: 1.25rem; margin-bottom: 16px; }
-    .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--blue); margin-bottom: 1rem; }
+    /* CARDS */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:16px;}
+    .card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:1rem;}
 
-    .script-block { margin-bottom: 14px; }
-    .script-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--white); background: var(--blue); padding: 4px 10px; border-radius: 4px 4px 0 0; display: inline-block; }
-    .script-label.note { background: var(--orange); }
-    .script-label.tip { background: var(--green); }
-    .script-text { background: var(--gray-bg); border: 1px solid var(--gray-border); border-radius: 0 8px 8px 8px; padding: 12px 14px; font-size: 14px; line-height: 1.75; color: var(--navy); }
-    .script-text.note { background: var(--orange-bg); border-color: #f5c6a0; }
-    .script-text.tip { background: var(--green-bg); border-color: #a0d8b0; }
+    /* INPUTS */
+    .inp{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--white);font-family:inherit;font-size:13px;outline:none;width:100%;transition:border-color .2s;}
+    .inp:focus{border-color:var(--blue2);}
+    .inp option{background:var(--navy2);}
+    textarea.inp{resize:vertical;min-height:65px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+    .form-group{display:flex;flex-direction:column;gap:4px;}
+    .form-group label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);}
+    @media(max-width:560px){.form-grid{grid-template-columns:1fr;}}
 
-    .obj-card { border: 1px solid var(--gray-border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
-    .obj-question { background: var(--light-blue); padding: 10px 14px; font-size: 13.5px; font-weight: 600; color: var(--navy); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-    .obj-answer { padding: 12px 14px; font-size: 13.5px; line-height: 1.65; color: #333; display: none; }
-    .obj-answer.open { display: block; }
-    .obj-toggle { color: var(--blue); font-size: 18px; }
+    /* BUTTONS */
+    .btn{font-size:13px;font-weight:600;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;font-family:inherit;}
+    .btn-primary{background:var(--accent);color:var(--navy);}
+    .btn-primary:hover{opacity:.88;}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--gray);}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-blue{background:var(--blue);color:var(--white);}
+    .btn-blue:hover{background:var(--blue2);}
+    .btn-red{background:transparent;border:1px solid var(--red);color:var(--red);}
+    .btn-red:hover{background:rgba(231,76,60,.1);}
+    .btn-sm{padding:5px 12px;font-size:12px;}
 
-    .calc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-    .calc-group { display: flex; flex-direction: column; gap: 4px; }
-    .calc-group label { font-size: 12px; font-weight: 600; color: var(--gray-text); }
-    .calc-group input, .calc-group select { padding: 9px 10px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; }
-    .calc-group input:focus, .calc-group select:focus { border-color: var(--blue); }
-    .audit-result { background: var(--light-blue); border: 1px solid var(--mid-blue); border-radius: 10px; padding: 1.25rem; margin-top: 1rem; }
-    .audit-big { font-size: 36px; font-weight: 800; color: var(--blue); }
+    /* SCRIPT BLOCKS */
+    .script-block{margin-bottom:14px;}
+    .script-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--white);background:var(--blue);padding:4px 10px;border-radius:4px 4px 0 0;display:inline-block;}
+    .script-label.note{background:var(--orange);}
+    .script-label.tip{background:#1e7a3a;}
+    .script-text{background:var(--card2);border:1px solid var(--border);border-radius:0 8px 8px 8px;padding:12px 14px;font-size:14px;line-height:1.75;color:var(--text);}
+    .script-text.note{background:rgba(243,156,18,.08);border-color:rgba(243,156,18,.3);}
+    .script-text.tip{background:rgba(74,222,128,.07);border-color:rgba(74,222,128,.25);}
 
-    .plan-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; align-items: center; }
-    .plan-input { padding: 8px 10px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 14px; text-align: center; width: 100%; font-family: inherit; outline: none; }
-    .plan-input:focus { border-color: var(--blue); }
-    .plan-earn { font-size: 14px; font-weight: 700; color: var(--green); text-align: right; }
-    .comm-total { background: var(--navy); color: var(--white); border-radius: 10px; padding: 1.25rem; text-align: center; margin-top: 1rem; }
-    .comm-big { font-size: 40px; font-weight: 800; color: #4ade80; }
-    .col-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-text); text-align: center; }
+    /* OBJECTIONS */
+    .obj-card{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;}
+    .obj-q{background:var(--card2);padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+    .obj-q:hover{background:var(--navy3);}
+    .obj-a{padding:12px 14px;font-size:13px;line-height:1.7;color:#c5cfe0;display:none;background:var(--card);}
+    .obj-a.open{display:block;}
+    .obj-toggle{color:var(--accent);font-size:18px;}
 
-    .pipeline { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
-    .pipeline-col { min-width: 175px; flex: 1; }
-    .pipeline-header { padding: 8px 10px; border-radius: 8px 8px 0 0; font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
-    .pipeline-body { background: var(--gray-bg); border: 1px solid var(--gray-border); border-top: none; border-radius: 0 0 8px 8px; min-height: 100px; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
-    .pipeline-card { background: var(--white); border: 1px solid var(--gray-border); border-radius: 8px; padding: 8px 10px; font-size: 12px; cursor: pointer; }
-    .pipeline-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .pipeline-card .pc-biz { font-weight: 600; color: var(--navy); }
-    .pipeline-card .pc-meta { color: var(--gray-text); font-size: 11px; margin-top: 1px; }
-    .p-new .pipeline-header { background: var(--light-blue); color: var(--blue); }
-    .p-contacted .pipeline-header { background: var(--yellow); color: #7a6000; }
-    .p-audit .pipeline-header { background: #e8f5e9; color: var(--green); }
-    .p-followup .pipeline-header { background: var(--orange-bg); color: var(--orange); }
-    .p-closed .pipeline-header { background: var(--green-bg); color: var(--green); }
-    .p-dead .pipeline-header { background: var(--red-bg); color: var(--red); }
+    /* AUDIT CALC */
+    .calc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+    .calc-group{display:flex;flex-direction:column;gap:4px;}
+    .calc-group label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);}
+    .calc-group input,.calc-group select{padding:9px 10px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;color:var(--white);}
+    .calc-group input:focus,.calc-group select:focus{border-color:var(--blue2);}
+    .calc-group select option{background:var(--navy2);}
+    .audit-result{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-top:1rem;}
+    .audit-big{font-size:36px;font-weight:800;color:var(--accent);}
 
-    .crm-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-    .crm-group { display: flex; flex-direction: column; gap: 3px; }
-    .crm-group label { font-size: 12px; font-weight: 600; color: var(--gray-text); }
-    .crm-group input, .crm-group select, .crm-group textarea { padding: 8px 10px; border: 1.5px solid var(--gray-border); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; }
-    .crm-group input:focus, .crm-group select:focus, .crm-group textarea:focus { border-color: var(--blue); }
-    .crm-group textarea { min-height: 60px; resize: vertical; }
-    .add-btn { background: var(--blue); color: var(--white); border: none; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .add-btn:hover { opacity: 0.88; }
+    /* COMMISSION */
+    .plan-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:8px;align-items:center;}
+    .plan-input{padding:8px 10px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;text-align:center;width:100%;font-family:inherit;outline:none;color:var(--white);}
+    .plan-input:focus{border-color:var(--blue2);}
+    .plan-earn{font-size:14px;font-weight:700;color:var(--accent);text-align:right;}
+    .col-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);text-align:center;}
+    .comm-total{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;margin-top:1rem;}
+    .comm-big{font-size:40px;font-weight:800;color:var(--accent);}
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: var(--white); border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; }
-    .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
-    .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-text); }
-    .notes-log { background: var(--gray-bg); border-radius: 8px; padding: 10px; max-height: 140px; overflow-y: auto; font-size: 13px; margin-top: 6px; }
-    .note-entry { padding: 5px 0; border-bottom: 1px solid var(--gray-border); }
-    .note-entry:last-child { border-bottom: none; }
-    .note-date { font-size: 11px; color: var(--gray-text); margin-bottom: 1px; }
-    .save-btn { background: var(--green); color: var(--white); border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; }
-    .del-btn-m { background: none; border: 1px solid var(--red); color: var(--red); border-radius: 8px; padding: 7px; font-size: 12px; cursor: pointer; margin-top: 6px; width: 100%; }
+    /* PIPELINE */
+    .pipeline{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;}
+    .pipeline-col{min-width:170px;flex:1;}
+    .pipeline-header{padding:8px 10px;border-radius:8px 8px 0 0;font-size:11px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.05em;}
+    .pipeline-body{background:var(--card2);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;min-height:100px;padding:6px;display:flex;flex-direction:column;gap:5px;}
+    .pipeline-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;cursor:pointer;transition:border-color .15s;}
+    .pipeline-card:hover{border-color:var(--blue2);}
+    .pc-biz{font-weight:600;color:var(--white);}
+    .pc-meta{color:var(--gray);font-size:11px;margin-top:1px;}
+    .p-new .pipeline-header{background:rgba(20,85,164,.3);color:#6ab0f5;}
+    .p-contacted .pipeline-header{background:rgba(243,156,18,.2);color:var(--orange);}
+    .p-audit .pipeline-header{background:rgba(74,222,128,.15);color:var(--green);}
+    .p-followup .pipeline-header{background:rgba(243,156,18,.15);color:var(--orange);}
+    .p-closed .pipeline-header{background:rgba(74,222,128,.2);color:var(--green);}
+    .p-dead .pipeline-header{background:rgba(231,76,60,.15);color:var(--red);}
 
-    .tracker-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
-    .t-stat { background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px; padding: 12px; text-align: center; }
-    .t-stat .n { font-size: 22px; font-weight: 700; color: var(--blue); }
-    .t-stat .l { font-size: 11px; color: var(--gray-text); margin-top: 2px; }
+    /* CRM FORM */
+    .crm-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+    .crm-group{display:flex;flex-direction:column;gap:3px;}
+    .crm-group label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);}
+    .crm-group input,.crm-group select,.crm-group textarea{padding:8px 10px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;color:var(--white);}
+    .crm-group input:focus,.crm-group select:focus,.crm-group textarea:focus{border-color:var(--blue2);}
+    .crm-group select option{background:var(--navy2);}
+    .crm-group textarea{min-height:60px;resize:vertical;}
+    .add-btn{background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;}
+    .add-btn:hover{background:var(--blue2);}
 
-    .admin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .admin-stat { background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px; padding: 1rem; text-align: center; }
-    .admin-stat .n { font-size: 28px; font-weight: 800; color: var(--orange); }
-    .admin-stat .l { font-size: 12px; color: var(--gray-text); margin-top: 4px; }
-    .data-row { display: grid; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--gray-border); font-size: 13px; align-items: center; }
-    .data-row.hdr { background: var(--navy); color: var(--white); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 8px 8px 0 0; border-bottom: none; }
-    .data-row:last-child { border-bottom: none; }
-    .section-div { font-size: 13px; font-weight: 700; color: var(--navy); margin: 1.5rem 0 0.75rem; padding-bottom: 6px; border-bottom: 2px solid var(--light-blue); }
-    .refresh-btn { background: var(--orange); color: var(--white); border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+    /* TRACKER STATS */
+    .tracker-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+    .t-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+    .t-stat .n{font-size:22px;font-weight:700;color:var(--accent);}
+    .t-stat .l{font-size:11px;color:var(--gray);margin-top:2px;}
 
-    .step-item { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
-    .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: var(--white); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .step-title { font-weight: 600; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
-    .step-desc { font-size: 13.5px; color: var(--gray-text); line-height: 1.6; }
+    /* GOALS */
+    .goals-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1rem;}
+    @media(max-width:600px){.goals-grid{grid-template-columns:1fr 1fr;}}
+    .goal-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;}
+    .goal-card .goal-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:8px;}
+    .goal-card .goal-actual{font-size:28px;font-weight:800;color:var(--accent);line-height:1;}
+    .goal-card .goal-target{font-size:11px;color:var(--gray);margin-top:3px;}
+    .goal-card .goal-bar{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+    .goal-card .goal-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+    .goal-card .goal-fill.over{background:var(--orange);}
+    .goal-input-row{display:flex;gap:6px;align-items:center;margin-top:6px;}
+    .goal-inc{background:var(--card2);border:1px solid var(--border);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--gray);font-weight:700;flex-shrink:0;}
+    .goal-inc:hover{border-color:var(--accent);color:var(--accent);}
+    .goal-set-inp{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--white);font-family:inherit;outline:none;width:50px;text-align:center;}
+    .goal-set-inp:focus{border-color:var(--blue2);}
+    .trend-chart{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;overflow-x:auto;}
+    .trend-table{width:100%;border-collapse:collapse;font-size:12px;min-width:500px;}
+    .trend-table th{color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);}
+    .trend-table td{padding:7px 10px;border-bottom:1px solid rgba(42,51,72,.5);color:var(--text);}
+    .trend-table tr:last-child td{border-bottom:none;}
+    .today-row td{background:rgba(20,85,164,.15);font-weight:600;}
+    .week-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1rem;}
+    .ws-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
+    .ws-card .n{font-size:18px;font-weight:700;color:var(--accent);}
+    .ws-card .l{font-size:10px;color:var(--gray);margin-top:2px;}
+    .month-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1rem;}
 
-    @media (max-width: 560px) {
-      .calc-row, .crm-form { grid-template-columns: 1fr; }
-      .tracker-stats, .admin-stats { grid-template-columns: 1fr 1fr; }
-      .plan-row { grid-template-columns: 1fr 1fr; }
-      .pipeline { flex-direction: column; }
-      .pipeline-col { min-width: unset; }
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;}
+    .modal-title{font-size:16px;font-weight:700;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;color:var(--white);}
+    .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);}
+    .modal-close:hover{color:var(--white);}
+    .modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1rem;}
+    .modal-tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--gray);border-bottom:2px solid transparent;cursor:pointer;}
+    .modal-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .modal-panel{display:none;}
+    .modal-panel.active{display:block;}
+    .notes-log{background:var(--card2);border-radius:8px;padding:10px;max-height:130px;overflow-y:auto;font-size:13px;margin-top:6px;}
+    .note-entry{padding:5px 0;border-bottom:1px solid var(--border);color:#c5cfe0;}
+    .note-entry:last-child{border-bottom:none;}
+    .note-date{font-size:11px;color:var(--gray);margin-bottom:1px;}
+    .save-btn{background:var(--green);color:var(--navy);border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;width:100%;}
+    .del-btn-m{background:none;border:1px solid var(--red);color:var(--red);border-radius:8px;padding:7px;font-size:12px;cursor:pointer;margin-top:6px;width:100%;}
+
+    /* AUDIT FORM */
+    .audit-section{margin-bottom:1.25rem;}
+    .audit-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+    .audit-field{display:flex;flex-direction:column;gap:3px;margin-bottom:8px;}
+    .audit-field label{font-size:11px;font-weight:600;color:var(--gray);}
+    .audit-field input,.audit-field select,.audit-field textarea{padding:8px 10px;background:var(--navy2);border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:var(--white);}
+    .audit-field input:focus,.audit-field select:focus{border-color:var(--blue2);}
+    .audit-math{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin:1rem 0;}
+    .audit-math-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px;border-bottom:1px solid var(--border);}
+    .audit-math-row:last-child{border-bottom:none;font-weight:700;color:var(--accent);font-size:15px;}
+    .audit-math-label{color:var(--gray);}
+    .audit-math-val{color:var(--white);font-weight:600;}
+    .plan-checkbox-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+    .plan-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer;}
+    .checklist-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);padding:5px 0;border-bottom:1px solid var(--border);}
+    .checklist-item:last-child{border-bottom:none;}
+    .checklist-item input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--accent);}
+    .outcome-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+    .outcome-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;}
+    .outcome-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .outcome-btn.selected-closed{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green);}
+    .outcome-btn.selected-followup{background:rgba(243,156,18,.12);border-color:var(--orange);color:var(--orange);}
+    .outcome-btn.selected-notfit{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
+
+    /* ONBOARDING STEPS */
+    .ob-steps{display:flex;flex-direction:column;gap:10px;}
+    .ob-step{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;transition:border-color .15s;}
+    .ob-step.completed{background:rgba(74,222,128,.07);border-color:rgba(74,222,128,.25);}
+    .ob-step-num{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gray);flex-shrink:0;}
+    .ob-step.completed .ob-step-num{background:var(--accent);color:var(--navy);}
+    .ob-step-title{font-weight:600;font-size:13px;color:var(--white);margin-bottom:2px;}
+    .ob-step-desc{font-size:12px;color:var(--gray);line-height:1.5;}
+    .ob-step-meta{font-size:11px;color:var(--accent);margin-top:3px;}
+    .ob-step-btn{margin-left:auto;flex-shrink:0;}
+
+    /* ADMIN */
+    .admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+    .admin-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;}
+    .admin-stat .n{font-size:28px;font-weight:800;color:var(--orange);}
+    .admin-stat .l{font-size:12px;color:var(--gray);margin-top:4px;}
+    .data-row{display:grid;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:13px;align-items:center;}
+    .data-row.hdr{background:var(--navy2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);border-radius:8px 8px 0 0;border-bottom:none;}
+    .section-div{font-size:13px;font-weight:700;color:var(--white);margin:1.5rem 0 .75rem;padding-bottom:6px;border-bottom:1px solid var(--border);}
+    .refresh-btn{background:var(--orange);color:var(--white);border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:12px;}
+
+    /* ONBOARDING STEPS TAB */
+    .contact-search{display:flex;gap:10px;margin-bottom:1rem;}
+    .contact-search input{flex:1;}
+    .contact-search-results{display:flex;flex-direction:column;gap:8px;}
+    .search-result-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;transition:border-color .15s;display:flex;justify-content:space-between;align-items:center;}
+    .search-result-card:hover{border-color:var(--blue2);}
+    .src-name{font-weight:600;font-size:14px;color:var(--white);}
+    .src-meta{font-size:12px;color:var(--gray);margin-top:2px;}
+    .src-step{font-size:12px;font-weight:700;color:var(--accent);}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    @media(max-width:560px){
+      .calc-row,.crm-form,.form-grid{grid-template-columns:1fr;}
+      .tracker-stats{grid-template-columns:1fr 1fr;}
+      .goals-grid{grid-template-columns:1fr 1fr;}
+      .week-summary,.month-summary{grid-template-columns:1fr 1fr;}
+      .plan-row{grid-template-columns:1fr 1fr;}
+      .pipeline{flex-direction:column;}
+      .pipeline-col{min-width:unset;}
+      .admin-stats{grid-template-columns:1fr 1fr;}
     }
   </style>
 </head>
 <body>
+<div id="toast-el" class="toast"></div>
 
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">My Smart Slots</div>
+    <div class="login-logo">My Smart<span>Slots</span></div>
     <div class="login-sub">Rep Portal — Sign in to continue</div>
-    <input type="text" id="username" placeholder="Username" autocomplete="off" />
-    <input type="password" id="password" placeholder="Password" />
+    <input type="text" id="username" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="password" placeholder="Password"/>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
     <p class="login-error" id="login-error">Incorrect username or password.</p>
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <div class="topbar">
-    <div class="topbar-logo">My Smart Slots — Rep Portal</div>
+    <div class="topbar-logo">My Smart<span>Slots</span> — Rep Portal</div>
     <div class="topbar-right">
       <span class="rep-badge" id="rep-name-display"></span>
       <button class="logout-btn" onclick="doLogout()">Sign Out</button>
@@ -173,11 +301,11 @@
 
   <div class="personalizer">
     <label>Your name:</label>
-    <input type="text" id="p-rep" placeholder="e.g. Alex" oninput="updateScripts()" />
+    <input type="text" id="p-rep" placeholder="e.g. Alex" oninput="updateScripts()"/>
     <label>Prospect name:</label>
-    <input type="text" id="p-pros" placeholder="e.g. Rick" oninput="updateScripts()" />
+    <input type="text" id="p-pros" placeholder="e.g. Rick" oninput="updateScripts()"/>
     <label>Business name:</label>
-    <input type="text" id="p-biz" placeholder="e.g. Diamond Plumbing" oninput="updateScripts()" />
+    <input type="text" id="p-biz" placeholder="e.g. Diamond Plumbing" oninput="updateScripts()"/>
     <div class="p-hint">Fill these in before a call — all scripts update automatically.</div>
   </div>
 
@@ -185,9 +313,11 @@
     <div class="nav-tab active" onclick="switchTab('scripts',this)">📞 Scripts</div>
     <div class="nav-tab" onclick="switchTab('objections',this)">💬 Objections</div>
     <div class="nav-tab" onclick="switchTab('audit',this)">📊 Audit Calc</div>
-    <div class="nav-tab" onclick="switchTab('commission',this)">💰 My Commission</div>
-    <div class="nav-tab" onclick="switchTab('tracker',this)">📋 My Pipeline</div>
-    <div class="nav-tab" onclick="switchTab('onboarding',this)">✅ Onboarding</div>
+    <div class="nav-tab" onclick="switchTab('commission',this)">💰 Commission</div>
+    <div class="nav-tab" onclick="switchTab('tracker',this)">📋 Pipeline</div>
+    <div class="nav-tab" onclick="switchTab('clients',this)">🔄 Onboarding</div>
+    <div class="nav-tab" onclick="switchTab('goals',this)">🎯 Goals</div>
+    <div class="nav-tab" onclick="switchTab('onboarding',this)">✅ Process</div>
   </div>
 
   <div class="content">
@@ -199,7 +329,7 @@
         <div class="script-block"><div class="script-label">Opening</div><div class="script-text" id="s-open"></div></div>
         <div class="script-block"><div class="script-label tip">Pause here</div><div class="script-text tip">Let them say okay. Don't rush. Silence is fine.</div></div>
         <div class="script-block"><div class="script-label">The question</div><div class="script-text" id="s-q"></div></div>
-        <div class="script-block"><div class="script-label tip">Listen carefully</div><div class="script-text tip">Most say voicemail or nothing. Let them finish before responding.</div></div>
+        <div class="script-block"><div class="script-label tip">Listen carefully</div><div class="script-text tip">Most say voicemail or nothing. Let them finish — don't interrupt.</div></div>
         <div class="script-block"><div class="script-label">If voicemail / nothing</div><div class="script-text" id="s-vm"></div></div>
         <div class="script-block"><div class="script-label">If they have something</div><div class="script-text" id="s-has"></div></div>
         <div class="script-block"><div class="script-label">Closing the audit</div><div class="script-text" id="s-cls"></div></div>
@@ -215,7 +345,7 @@
         <div class="card-title">Cold Email Templates</div>
         <div class="script-block"><div class="script-label">Subject line</div><div class="script-text" id="s-subj"></div></div>
         <div class="script-block"><div class="script-label">Email body</div><div class="script-text" id="s-email"></div></div>
-        <div class="script-block"><div class="script-label">Follow-up email Day 3</div><div class="script-text" id="s-efu"></div></div>
+        <div class="script-block"><div class="script-label">Follow-up Day 3</div><div class="script-text" id="s-efu"></div></div>
       </div>
     </div>
 
@@ -227,20 +357,20 @@
       </div>
     </div>
 
-    <!-- AUDIT -->
+    <!-- AUDIT CALC -->
     <div class="tab-panel" id="tab-audit">
       <div class="card">
-        <div class="card-title">Live Audit Calculator</div>
+        <div class="card-title">Live Audit Calculator — run this with the prospect on the call</div>
         <div class="calc-row">
-          <div class="calc-group"><label>Jobs per week</label><input type="number" id="a-jobs" value="15" min="1" oninput="calcAudit()" /></div>
-          <div class="calc-group"><label>Average job value ($)</label><input type="number" id="a-val" value="350" min="1" oninput="calcAudit()" /></div>
+          <div class="calc-group"><label>Jobs per week</label><input type="number" id="a-jobs" value="15" min="1" oninput="calcAudit()"/></div>
+          <div class="calc-group"><label>Average job value ($)</label><input type="number" id="a-val" value="350" min="1" oninput="calcAudit()"/></div>
         </div>
         <div class="calc-row">
-          <div class="calc-group"><label>Missed calls per week</label><input type="number" id="a-miss" value="5" min="0" oninput="calcAudit()" /></div>
-          <div class="calc-group"><label>No-shows per month</label><input type="number" id="a-ns" value="3" min="0" oninput="calcAudit()" /></div>
+          <div class="calc-group"><label>Missed calls per week</label><input type="number" id="a-miss" value="5" min="0" oninput="calcAudit()"/></div>
+          <div class="calc-group"><label>No-shows per month</label><input type="number" id="a-ns" value="3" min="0" oninput="calcAudit()"/></div>
         </div>
         <div class="calc-row">
-          <div class="calc-group"><label>Google reviews count</label><input type="number" id="a-rev" value="12" min="0" oninput="calcAudit()" /></div>
+          <div class="calc-group"><label>Google reviews count</label><input type="number" id="a-rev" value="12" min="0" oninput="calcAudit()"/></div>
           <div class="calc-group"><label>Fleet size</label>
             <select id="a-fleet" oninput="calcAudit()">
               <option value="1">Solo / 1 truck</option>
@@ -262,31 +392,31 @@
           <div></div><div class="col-header">Clients</div><div class="col-header">Rate</div><div class="col-header">I earn</div>
         </div>
         <div class="plan-row">
-          <div style="font-size:14px;font-weight:500;">Starter — $125/mo</div>
-          <input class="plan-input" type="number" id="c-s" value="0" min="0" oninput="calcComm()" />
-          <div style="text-align:center;font-size:13px;color:var(--gray-text);">$125</div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);">Starter — $125/mo</div>
+          <input class="plan-input" type="number" id="c-s" value="0" min="0" oninput="calcComm()"/>
+          <div style="text-align:center;font-size:13px;color:var(--gray);">$125</div>
           <div class="plan-earn" id="e-s">$0.00</div>
         </div>
         <div class="plan-row">
-          <div style="font-size:14px;font-weight:500;">Pro — $225/mo</div>
-          <input class="plan-input" type="number" id="c-p" value="0" min="0" oninput="calcComm()" />
-          <div style="text-align:center;font-size:13px;color:var(--gray-text);">$225</div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);">Pro — $225/mo</div>
+          <input class="plan-input" type="number" id="c-p" value="0" min="0" oninput="calcComm()"/>
+          <div style="text-align:center;font-size:13px;color:var(--gray);">$225</div>
           <div class="plan-earn" id="e-p">$0.00</div>
         </div>
         <div class="plan-row">
-          <div style="font-size:14px;font-weight:500;">Elite — $375/mo</div>
-          <input class="plan-input" type="number" id="c-e" value="0" min="0" oninput="calcComm()" />
-          <div style="text-align:center;font-size:13px;color:var(--gray-text);">$375</div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);">Elite — $375/mo</div>
+          <input class="plan-input" type="number" id="c-e" value="0" min="0" oninput="calcComm()"/>
+          <div style="text-align:center;font-size:13px;color:var(--gray);">$375</div>
           <div class="plan-earn" id="e-e">$0.00</div>
         </div>
         <div class="comm-total">
-          <div style="font-size:12px;opacity:0.7;margin-bottom:4px;">Monthly recurring commission</div>
+          <div style="font-size:12px;color:var(--gray);margin-bottom:4px;">Monthly recurring commission</div>
           <div class="comm-big" id="c-total">$0.00</div>
-          <div style="font-size:12px;opacity:0.6;margin-top:4px;" id="c-sub">0 active clients</div>
-          <div style="font-size:11px;opacity:0.5;margin-top:10px;">Paid every last Friday of the month · CashApp or cashier's check</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:4px;" id="c-sub">0 active clients</div>
+          <div style="font-size:11px;color:var(--gray);opacity:.6;margin-top:10px;">Paid every last Friday of the month · CashApp or cashier's check</div>
         </div>
-        <div style="margin-top:1rem;padding:12px;background:var(--light-blue);border-radius:8px;font-size:13px;color:var(--gray-text);">
-          <strong style="color:var(--blue);">Setup bonus:</strong> $50 per new client closed, paid within 7 business days of their setup payment.
+        <div style="margin-top:1rem;padding:12px;background:rgba(20,85,164,.15);border:1px solid rgba(26,111,212,.2);border-radius:8px;font-size:13px;color:var(--gray);">
+          <strong style="color:var(--accent);">Setup bonus:</strong> $50 per new client closed, paid within 7 business days of their setup payment.
         </div>
       </div>
     </div>
@@ -297,9 +427,9 @@
       <div class="card">
         <div class="card-title">Add New Contact</div>
         <div class="crm-form">
-          <div class="crm-group"><label>Business name *</label><input type="text" id="t-biz" placeholder="Diamond Plumbing Co." /></div>
-          <div class="crm-group"><label>Owner name</label><input type="text" id="t-owner" placeholder="Rick" /></div>
-          <div class="crm-group"><label>Phone / email</label><input type="text" id="t-phone" placeholder="(816) 555-0192" /></div>
+          <div class="crm-group"><label>Business name *</label><input type="text" id="t-biz" placeholder="Diamond Plumbing Co."/></div>
+          <div class="crm-group"><label>Owner name</label><input type="text" id="t-owner" placeholder="Rick"/></div>
+          <div class="crm-group"><label>Phone / email</label><input type="text" id="t-phone" placeholder="(816) 555-0192"/></div>
           <div class="crm-group"><label>Trade</label>
             <select id="t-trade">
               <option value="">Select...</option>
@@ -317,18 +447,18 @@
           <div class="crm-group"><label>Status</label>
             <select id="t-status">
               <option value="new">New — not contacted</option>
-              <option value="contacted">Contacted — awaiting response</option>
+              <option value="contacted">Contacted</option>
               <option value="audit">Audit scheduled</option>
               <option value="followup">Follow-up needed</option>
               <option value="closed">Closed — paying client</option>
               <option value="dead">Not interested</option>
             </select>
           </div>
-          <div class="crm-group"><label>Follow-up date</label><input type="date" id="t-fu" /></div>
-          <div class="crm-group"><label>Notes</label><input type="text" id="t-notes" placeholder="Any details..." /></div>
+          <div class="crm-group"><label>Follow-up date</label><input type="date" id="t-fu"/></div>
+          <div class="crm-group"><label>Notes</label><input type="text" id="t-notes" placeholder="What did you observe?"/></div>
         </div>
         <button class="add-btn" onclick="addContact()">+ Add Contact</button>
-        <span id="add-msg" style="font-size:12px;color:var(--green);margin-left:10px;"></span>
+        <span id="add-msg" style="font-size:12px;color:var(--accent);margin-left:10px;"></span>
       </div>
       <div class="card">
         <div class="card-title">Pipeline</div>
@@ -336,10 +466,57 @@
       </div>
     </div>
 
-    <!-- ONBOARDING -->
+    <!-- ONBOARDING / CLIENTS TAB -->
+    <div class="tab-panel" id="tab-clients">
+      <div class="section-head">
+        <h2>Client Onboarding Tracker</h2>
+        <p>Search any contact to view their onboarding progress and audit form.</p>
+      </div>
+      <div class="contact-search">
+        <input class="inp" type="text" id="client-search" placeholder="Search by business name..." oninput="searchClients()"/>
+      </div>
+      <div class="contact-search-results" id="client-search-results">
+        <div style="text-align:center;padding:2rem;color:var(--gray);font-size:13px;">Search for a client above to view their onboarding status.</div>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div class="tab-panel" id="tab-goals">
+      <div class="section-head">
+        <h2>Daily Goals</h2>
+        <p>Track your activity every day. Set your targets below and hit + to log each action.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Today — <span id="today-date"></span></div>
+        <div class="goals-grid" id="goals-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">This Week Summary</div>
+        <div class="week-summary" id="week-summary"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">This Month Summary</div>
+        <div class="month-summary" id="month-summary"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Activity Log — Last 30 Days</div>
+        <div class="trend-chart">
+          <table class="trend-table" id="trend-table">
+            <thead><tr><th>Date</th><th>Calls</th><th>Texts</th><th>Emails</th><th>Audits</th><th>Closed</th></tr></thead>
+            <tbody id="trend-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROCESS / ONBOARDING STEPS -->
     <div class="tab-panel" id="tab-onboarding">
       <div class="card">
-        <div class="card-title">What happens after they say yes</div>
+        <div class="card-title">Our Full Process — Step by Step</div>
         <div id="ob-steps"></div>
       </div>
     </div>
@@ -366,153 +543,243 @@
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- CONTACT DETAIL MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-title">
       <span id="m-biz">Contact</span>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
-    <div class="crm-form">
-      <div class="crm-group"><label>Status</label>
-        <select id="m-status">
-          <option value="new">New</option><option value="contacted">Contacted</option>
-          <option value="audit">Audit scheduled</option><option value="followup">Follow-up needed</option>
-          <option value="closed">Closed</option><option value="dead">Not interested</option>
-        </select>
+    <div class="modal-tabs">
+      <div class="modal-tab active" onclick="switchModalTab('details',this)">Details</div>
+      <div class="modal-tab" onclick="switchModalTab('audit',this)">Audit Form</div>
+      <div class="modal-tab" onclick="switchModalTab('ob',this)">Onboarding</div>
+      <div class="modal-tab" onclick="switchModalTab('notes',this)">Notes</div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="modal-panel active" id="mp-details">
+      <div class="crm-form">
+        <div class="crm-group"><label>Status</label>
+          <select id="m-status">
+            <option value="new">New</option><option value="contacted">Contacted</option>
+            <option value="audit">Audit scheduled</option><option value="followup">Follow-up needed</option>
+            <option value="closed">Closed</option><option value="dead">Not interested</option>
+          </select>
+        </div>
+        <div class="crm-group"><label>Follow-up date</label><input type="date" id="m-fu"/></div>
+        <div class="crm-group"><label>Phone</label><input type="text" id="m-phone-edit"/></div>
+        <div class="crm-group"><label>Trade</label><input type="text" id="m-trade-edit"/></div>
       </div>
-      <div class="crm-group"><label>Follow-up date</label><input type="date" id="m-fu" /></div>
     </div>
-    <div class="crm-group" style="margin-bottom:8px;">
-      <label>Add a note</label>
-      <textarea id="m-note" placeholder="What happened on this contact? Next steps?"></textarea>
+
+    <!-- AUDIT FORM -->
+    <div class="modal-panel" id="mp-audit">
+      <div style="font-size:11px;color:var(--gray);margin-bottom:12px;">MY SMART SLOTS — FREE AUDIT WORKSHEET · Saves automatically with this contact.</div>
+
+      <div class="audit-section">
+        <div class="audit-section-title">Discovery</div>
+        <div class="form-grid">
+          <div class="audit-field"><label>Average jobs per week</label><input type="number" id="af-jobs" placeholder="e.g. 15" oninput="calcAuditForm()"/></div>
+          <div class="audit-field"><label>Average job value ($)</label><input type="number" id="af-val" placeholder="e.g. 350" oninput="calcAuditForm()"/></div>
+          <div class="audit-field"><label>Estimated missed calls per week</label><input type="number" id="af-missed" placeholder="e.g. 5" oninput="calcAuditForm()"/></div>
+          <div class="audit-field"><label>Current follow-up system</label><input type="text" id="af-followup" placeholder="e.g. Voicemail only"/></div>
+          <div class="audit-field"><label>Current booking / calendar tool</label><input type="text" id="af-calendar" placeholder="e.g. Google Calendar"/></div>
+          <div class="audit-field"><label>Google reviews (total)</label><input type="number" id="af-reviews" placeholder="e.g. 12"/></div>
+          <div class="audit-field"><label>Last review received (approx)</label><input type="text" id="af-lastreview" placeholder="e.g. 2 weeks ago"/></div>
+          <div class="audit-field"><label>No-shows per month</label><input type="number" id="af-noshows" placeholder="e.g. 3" oninput="calcAuditForm()"/></div>
+        </div>
+        <div class="audit-field"><label>Current confirmation process</label><input type="text" id="af-confirm" placeholder="e.g. Manual call day before"/></div>
+      </div>
+
+      <div class="audit-section">
+        <div class="audit-section-title">The Math</div>
+        <div class="audit-math" id="audit-math-display">
+          <div class="audit-math-row"><span class="audit-math-label">Missed calls/week × job value × 4 weeks</span><span class="audit-math-val" id="am-missed">$—</span></div>
+          <div class="audit-math-row"><span class="audit-math-label">No-shows/month × job value</span><span class="audit-math-val" id="am-noshows">$—</span></div>
+          <div class="audit-math-row"><span class="audit-math-label">Total monthly leak</span><span class="audit-math-val" id="am-total">$—</span></div>
+        </div>
+      </div>
+
+      <div class="audit-section">
+        <div class="audit-section-title">Recommendation</div>
+        <div class="plan-checkbox-row">
+          <label class="plan-check"><input type="radio" name="af-plan" value="Starter $125/mo" id="af-starter"/> Starter $125/mo</label>
+          <label class="plan-check"><input type="radio" name="af-plan" value="Pro $225/mo" id="af-pro"/> Pro $225/mo</label>
+          <label class="plan-check"><input type="radio" name="af-plan" value="Elite $375/mo" id="af-elite"/> Elite $375/mo</label>
+        </div>
+        <div class="audit-field" style="margin-top:8px;"><label>Reason</label><input type="text" id="af-reason" placeholder="e.g. 3 trucks, high missed call volume"/></div>
+      </div>
+
+      <div class="audit-section">
+        <div class="audit-section-title">What We Need From Client</div>
+        <div class="checklist-item"><input type="checkbox" id="af-c1"/><label for="af-c1">Forward business number to Twilio (we handle this)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="af-c2"/><label for="af-c2">Google Calendar access OR Calendly link</label></div>
+        <div class="checklist-item"><input type="checkbox" id="af-c3"/><label for="af-c3">Website access to add chat widget (1 line of code, optional)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="af-c4"/><label for="af-c4">Confirm business name, hours, services for AI training</label></div>
+      </div>
+
+      <div class="audit-section">
+        <div class="audit-section-title">Outcome</div>
+        <div class="outcome-row">
+          <button class="outcome-btn" id="ob-closed" onclick="setOutcome('closed')">✓ Closed</button>
+          <button class="outcome-btn" id="ob-followup" onclick="setOutcome('followup')">↻ Follow-up needed</button>
+          <button class="outcome-btn" id="ob-notfit" onclick="setOutcome('notfit')">✗ Not a fit</button>
+        </div>
+        <div class="audit-field" style="margin-top:8px;"><label>Notes / reason</label><textarea id="af-outcome-notes" placeholder="Any additional context..."></textarea></div>
+      </div>
     </div>
-    <div style="font-size:11px;font-weight:700;color:var(--gray-text);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Notes history</div>
-    <div class="notes-log" id="m-log"></div>
-    <button class="save-btn" onclick="saveModal()">Save Changes</button>
+
+    <!-- ONBOARDING STEPS -->
+    <div class="modal-panel" id="mp-ob">
+      <div class="ob-steps" id="modal-ob-steps"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="modal-panel" id="mp-notes">
+      <div class="crm-group" style="margin-bottom:8px;">
+        <label>Add a note</label>
+        <textarea class="inp" id="m-note" placeholder="What happened? Next steps?"></textarea>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Notes history</div>
+      <div class="notes-log" id="m-log"></div>
+    </div>
+
+    <button class="save-btn" onclick="saveModal()">Save All Changes</button>
     <button class="del-btn-m" onclick="deleteModal()">Delete Contact</button>
   </div>
 </div>
 
 <script>
-const API = "https://mysmartslots-portal.onrender.com";
-let currentUser = null, currentU = null, currentP = null;
-let contacts = [], editId = null;
+const API="https://mysmartslots-portal.onrender.com";
+let currentUser=null,currentU=null,currentP=null;
+let contacts=[],editId=null,auditOutcome='';
 
-async function doLogin() {
-  const u = document.getElementById('username').value.trim();
-  const p = document.getElementById('password').value;
-  try {
-    const r = await fetch(`${API}/portal/login`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({username:u, password:p})
-    });
-    const d = await r.json();
-    if (!r.ok) { document.getElementById('login-error').style.display='block'; return; }
-    currentUser=d; currentU=u.toLowerCase(); currentP=p;
+const GOAL_KEYS=['calls','texts','emails','audits','closed'];
+const GOAL_LABELS=['Calls Made','Texts Sent','Emails Sent','Audits Booked','Clients Closed'];
+const GOAL_ICONS=['📞','💬','📧','📅','✅'];
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────────
+async function doLogin(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  try{
+    const r=await fetch(`${API}/portal/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok){document.getElementById('login-error').style.display='block';return;}
+    currentUser=d;currentU=u.toLowerCase();currentP=p;
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='flex';
     document.getElementById('rep-name-display').textContent=d.name;
     document.getElementById('p-rep').value=d.name;
-    updateScripts();
-    if (d.isAdmin) {
+    if(d.isAdmin){
       const t=document.createElement('div');
-      t.className='nav-tab admin-tab';
-      t.textContent='🔐 Admin';
+      t.className='nav-tab admin-tab';t.textContent='🔐 Admin';
       t.onclick=function(){switchTab('admin',this);loadAdmin();};
       document.getElementById('nav-tabs').appendChild(t);
     }
     await loadContacts();
-    calcAudit(); calcComm();
-  } catch(e) { document.getElementById('login-error').style.display='block'; }
+    updateScripts();calcAudit();calcComm();
+    initGoals();renderSteps();
+    document.getElementById('today-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }catch(e){document.getElementById('login-error').style.display='block';}
 }
-
-document.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-
-function doLogout() {
-  currentUser=null; currentU=null; currentP=null; contacts=[];
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogout(){
+  currentUser=null;currentU=null;currentP=null;contacts=[];
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').style.display='none';
   document.getElementById('password').value='';
-  document.getElementById('login-error').style.display='none';
   document.querySelectorAll('.admin-tab').forEach(t=>t.remove());
 }
 
-function switchTab(name, el) {
+// ── TOAST ──────────────────────────────────────────────────────────────────────
+function toast(msg,color){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;
+  t.style.borderColor=color==='red'?'var(--red)':'var(--border)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────────
+function switchTab(name,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  if(el) el.classList.add('active');
+  if(el)el.classList.add('active');
 }
 
-function updateScripts() {
-  const rep  = document.getElementById('p-rep').value.trim()  || '[Your Name]';
-  const pros = document.getElementById('p-pros').value.trim() || '[Name]';
-  const biz  = document.getElementById('p-biz').value.trim()  || '[Business Name]';
-  const s = {
-    's-open': `"Hey, is this <b>${pros}</b>? ... Hey ${pros}, my name's <b>${rep}</b> — I run a company called My Smart Slots. We work exclusively with trade contractors in KC. I'm not going to take up much of your time — I had one quick question for you."`,
-    's-q':    `"How are you handling it when a call comes in while you or your guys are <b>on a job</b>? Like, is there a system for that or does it kind of just go to voicemail?"`,
-    's-vm':   `"Yeah that's what most guys tell me. The problem is about 80% of people who hit voicemail just call the next guy on Google. They don't leave a message — they move on.<br><br>What we do is automatically text them back within seconds with a booking link — before they even think about calling someone else. Most of our clients recover 3 to 5 jobs a month just from that one thing alone.<br><br>I'm not trying to sell you anything today — I just do a free 10-minute audit where I show you exactly how many calls you're likely losing and what it's costing you. Would that be worth 10 minutes?"`,
-    's-has':  `"That's great — what are you using? ... [listen] ... Got it. Does it text people back automatically when a call gets missed, or is it more of a scheduling tool?"`,
-    's-cls':  `"Perfect. I can do the audit over the phone — takes about 10 minutes. I just need a few numbers from you and I'll run the math live. What's a good time this week or next?"`,
-    's-ni':   `"Totally fair. Can I just send you a quick link so you can see what it looks like? Takes 30 seconds and if it's not for you, no worries at all."<br><br>Send: <b>mysmartslots.com/subdomain</b>`,
-    's-t1':   `Hey <b>${pros}</b>, my name's <b>${rep}</b> — I work with trade contractors in KC helping them recover missed calls and fill their schedule automatically. Noticed <b>${biz}</b> doesn't have a follow-up system on your site.<br><br>Quick question — how are you handling calls that come in while you're on a job?<br><br>Not a sales pitch, just a 10-minute conversation if it's useful.`,
-    's-t2':   `Hey ${pros} — did this reach you? Happy to send the short version if easier.`,
-    's-t3':   `Last reach out ${pros} — here's what we built for contractors like you: <b>mysmartslots.com/subdomain</b><br><br>If the timing's ever right, just reply and I'll set up a free audit.`,
-    's-subj': `<b>${biz}</b> — how many calls went to voicemail this week?`,
+// ── SCRIPTS ────────────────────────────────────────────────────────────────────
+function updateScripts(){
+  const rep=document.getElementById('p-rep').value.trim()||'[Your Name]';
+  const pros=document.getElementById('p-pros').value.trim()||'[Name]';
+  const biz=document.getElementById('p-biz').value.trim()||'[Business Name]';
+  const s={
+    's-open':`"Hey, is this <b>${pros}</b>? ... Hey ${pros}, my name's <b>${rep}</b> — I work with trade contractors in KC on something specific. I'll keep it short.\n\nI noticed <b>${biz}</b> doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're on a job?"`,
+    's-q':`"How are you handling it when a call comes in while you or your guys are <b>on a job</b>? Like, is there a system for that or does it kind of just go to voicemail?"`,
+    's-vm':`"Yeah that's what most guys tell me. The problem is about 80% of people who hit voicemail just call the next guy on Google — they don't leave a message, they move on.<br><br>What we do is automatically text them back within seconds with a booking link — before they think about calling someone else. Most of our clients recover 3 to 5 jobs a month just from that one thing alone.<br><br>I'm not trying to sell you anything today — I just do a free 10-minute audit where I show you exactly how many calls you're likely losing and what it's costing you monthly. Would that be worth 10 minutes?"`,
+    's-has':`"That's great — what are you using? ... [listen] ... Got it. Does it text people back automatically when a call gets missed, or is it more of a scheduling tool?"`,
+    's-cls':`"Perfect. I can do the audit over the phone — takes about 10 minutes. I just need a few numbers from you and I'll run the math live. What's a good time this week?"`,
+    's-ni':`"Totally fair. Can I just send you a quick link so you can see what it looks like? Takes 30 seconds and if it's not for you, no worries at all."<br><br>Send: <b>mysmartslots.com/subdomain</b>`,
+    's-t1':`Hey <b>${pros}</b>, my name's <b>${rep}</b> — I work with trade contractors in KC helping them recover missed calls and fill their schedule automatically. Noticed <b>${biz}</b> doesn't have a follow-up system on your site.<br><br>Quick question — how are you handling calls that come in while you're on a job?<br><br>Not a sales pitch, just a 10-minute conversation if it's useful.`,
+    's-t2':`Hey ${pros} — did this reach you? Happy to send the short version if easier.`,
+    's-t3':`Last reach out ${pros} — here's what we built for contractors like you: <b>mysmartslots.com/subdomain</b><br><br>If the timing's ever right, just reply and I'll set up a free audit.`,
+    's-subj':`<b>${biz}</b> — how many calls went to voicemail this week?`,
     's-email':`Hey <b>${pros}</b>,<br><br>I came across <b>${biz}</b> while looking at trade contractors in the KC area. Quick observation — you don't have any automated follow-up on your site, which means every call that goes unanswered while you're on a job is probably going to a competitor.<br><br>I run My Smart Slots — we set up automated booking systems for trade contractors. Missed call texts, AI chat booking, appointment reminders, review requests. 24 hours to set up, runs on its own after that.<br><br>Here's what a client page looks like: <b>mysmartslots.com/subdomain</b><br><br>Free 10-minute audit — no pitch, just the math. Worth a quick call?<br><br>${rep}<br>My Smart Slots · 785-329-0202`,
-    's-efu':  `Hey ${pros} — did this land in the right place? Happy to send the short version if easier.`,
+    's-efu':`Hey ${pros} — did this land in the right place? Happy to send the short version if easier.`,
   };
-  Object.entries(s).forEach(([id,html])=>{ const el=document.getElementById(id); if(el) el.innerHTML=html; });
+  Object.entries(s).forEach(([id,html])=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
 }
 
-const objections = [
-  ["I don't have time for this.", "\"Totally get it — that's actually why this exists. It runs itself, you don't touch it. Can I send you the demo link so you can see it when you have 2 minutes?\" → mysmartslots.com/subdomain"],
-  ["I already have someone doing my marketing.", "\"This isn't marketing — it's follow-up automation. It works alongside whatever you have. The missed call text back alone recovers jobs your current setup is probably missing.\""],
-  ["How much does it cost?", "\"Starts at $125 a month. Most clients recover that in the first job. Let me do the free audit first — I want to show you the math before you make any decision.\""],
-  ["I'm not tech savvy.", "\"You don't have to be — we set everything up in 24 hours. You just work the jobs, appointments land in your calendar. Nothing for you to learn.\""],
-  ["Send me some info.", "Send mysmartslots.com + mysmartslots.com/subdomain. Follow up in 2 days: \"Hey, had a chance to look at that? Happy to walk you through it on a quick call.\""],
-  ["I already have voicemail.", "\"Totally — the problem is 80% of people who hit voicemail just call the next guy. They don't leave a message. We text them back in seconds before that happens.\""],
-  ["I'm too busy right now.", "\"Makes sense — busy season is exactly when this pays off most. Can I reach back out in a couple weeks? The audit takes 10 minutes.\""],
-  ["I need to think about it.", "\"Of course — what's the main thing you're unsure about? I want to make sure you have everything you need to decide.\" → Find the real objection behind this one."],
+// ── OBJECTIONS ─────────────────────────────────────────────────────────────────
+const OBJECTIONS=[
+  ["I don't have time for this.","\"Totally get it — that's why this exists. It runs itself, you don't touch it. Can I send you the demo link? Takes 30 seconds to look at.\" → mysmartslots.com/subdomain"],
+  ["I already have someone answering my phones.","\"This isn't replacing them — it's about what happens after hours, on weekends, or when they're on another call. Most shops lose 30–40% of after-hours inquiries. My Smart Slots fills that gap automatically.\""],
+  ["I already have marketing / voicemail.","\"This isn't marketing and it's not voicemail — it's follow-up automation. The missed call text back fires within seconds before the customer even thinks about calling someone else. 80% of people who hit voicemail call the next guy. We stop that.\""],
+  ["How much does it cost?","\"Starts at $125/mo with a one-time $199 setup. Most clients recover that in the first job. Let me do the free audit first — I want to show you the math on your specific numbers before you make any decision. 30-day guarantee too — no improvement, month two is free.\""],
+  ["I'm not tech savvy.","\"You don't have to be — we set everything up in 24 hours. You just work the jobs, appointments land in your calendar. Nothing for you to learn or manage.\""],
+  ["Send me some info.","Send mysmartslots.com + mysmartslots.com/subdomain. Follow up in 2 days: \"Hey, had a chance to look at that? Happy to walk you through it on a quick call.\""],
+  ["I need to think about it.","\"Of course — what's the main thing you're unsure about? I want to make sure you have everything you need.\" → Find the real objection. Then offer the free audit as the low-commitment next step."],
+  ["I'm too busy right now.","\"Busy season is exactly when this pays off most — full schedule but crews still show up to empty addresses, calls go unanswered mid-job. Setup takes 24 hours and requires nothing from you. Could you spare 10 minutes this week for the audit?\""],
 ];
-
-const ol = document.getElementById('obj-list');
-objections.forEach(([q,a])=>{
-  const d=document.createElement('div'); d.className='obj-card';
-  d.innerHTML=`<div class="obj-question" onclick="toggleObj(this)"><span>${q}</span><span class="obj-toggle">+</span></div><div class="obj-answer">${a}</div>`;
+const ol=document.getElementById('obj-list');
+OBJECTIONS.forEach(([q,a])=>{
+  const d=document.createElement('div');d.className='obj-card';
+  d.innerHTML=`<div class="obj-q" onclick="toggleObj(this)"><span>${q}</span><span class="obj-toggle">+</span></div><div class="obj-a">${a}</div>`;
   ol.appendChild(d);
 });
-
-function toggleObj(el) {
-  const a=el.nextElementSibling; a.classList.toggle('open');
+function toggleObj(el){
+  const a=el.nextElementSibling;a.classList.toggle('open');
   el.querySelector('.obj-toggle').textContent=a.classList.contains('open')?'−':'+';
 }
 
-function calcAudit() {
+// ── AUDIT CALC ─────────────────────────────────────────────────────────────────
+function calcAudit(){
   const j=parseFloat(document.getElementById('a-jobs').value)||0;
   const v=parseFloat(document.getElementById('a-val').value)||0;
   const m=parseFloat(document.getElementById('a-miss').value)||0;
   const n=parseFloat(document.getElementById('a-ns').value)||0;
   const f=parseInt(document.getElementById('a-fleet').value)||1;
   const leak=Math.round(m*0.8*v*4+n*v);
-  let plan='Starter — $125/mo', pc='#1455a4', fee=125;
+  let plan='Starter — $125/mo',pc='#1455a4',fee=125;
   if(f>=3){plan='Elite — $375/mo';pc='#1e7a3a';fee=375;}
   else if(f>=2){plan='Pro — $225/mo';pc='#c45c00';fee=225;}
   const roi=fee>0?Math.round(leak/fee):0;
   document.getElementById('audit-result').innerHTML=`
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:6px;">Estimated monthly revenue leak</div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;">Estimated monthly revenue leak</div>
     <div class="audit-big">$${leak.toLocaleString()}</div>
-    <div style="font-size:13px;color:#555;margin-top:4px;">Annual: <strong>$${(leak*12).toLocaleString()}</strong></div>
-    <div style="margin-top:10px;display:inline-block;background:${pc}22;color:${pc};padding:5px 14px;border-radius:20px;font-size:13px;font-weight:700;">Recommended: ${plan}</div>
-    <div style="margin-top:8px;font-size:13px;color:#555;">Pays for itself in roughly <strong>${roi>0?'1/'+roi+' of a job':'—'}</strong></div>`;
+    <div style="font-size:13px;color:var(--gray);margin-top:4px;">Annual: <strong style="color:var(--text);">$${(leak*12).toLocaleString()}</strong></div>
+    <div style="margin-top:10px;display:inline-block;background:${pc}22;color:${pc};padding:5px 14px;border-radius:20px;font-size:13px;font-weight:700;border:1px solid ${pc}44;">Recommended: ${plan}</div>
+    <div style="margin-top:8px;font-size:13px;color:var(--gray);">Pays for itself in roughly <strong style="color:var(--text);">${roi>0?'1/'+roi+' of a job':'—'}</strong></div>`;
 }
 
-function calcComm() {
+// ── COMMISSION ─────────────────────────────────────────────────────────────────
+function calcComm(){
   const s=parseInt(document.getElementById('c-s').value)||0;
   const p=parseInt(document.getElementById('c-p').value)||0;
   const e=parseInt(document.getElementById('c-e').value)||0;
-  const es=s*125*0.30, ep=p*225*0.30, ee=e*375*0.30, tot=es+ep+ee;
+  const es=s*125*0.30,ep=p*225*0.30,ee=e*375*0.30,tot=es+ep+ee;
   document.getElementById('e-s').textContent='$'+es.toFixed(2);
   document.getElementById('e-p').textContent='$'+ep.toFixed(2);
   document.getElementById('e-e').textContent='$'+ee.toFixed(2);
@@ -520,44 +787,62 @@ function calcComm() {
   document.getElementById('c-sub').textContent=`${s+p+e} active client${(s+p+e)!==1?'s':''}`;
 }
 
-async function api(endpoint, body={}) {
+// ── API HELPER ─────────────────────────────────────────────────────────────────
+async function api(endpoint,body={}){
   const r=await fetch(`${API}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,...body})});
   return r.json();
 }
 
-async function loadContacts() {
+// ── CONTACTS ───────────────────────────────────────────────────────────────────
+async function loadContacts(){
   const d=await api('/portal/contacts/get');
   if(d.success){contacts=d.contacts;renderPipeline();renderStats();}
 }
 
-async function addContact() {
+async function addContact(){
   const biz=document.getElementById('t-biz').value.trim();
-  if(!biz) return;
+  if(!biz){toast('Business name required.');return;}
+
+  // Duplicate check
+  const dupCheck=await api('/portal/contacts/get');
+  if(dupCheck.success){
+    const allContacts=dupCheck.contacts;
+    const dup=allContacts.find(c=>c.biz_name.toLowerCase()===biz.toLowerCase()&&c.status!=='prospect');
+    if(dup){
+      toast(`⚠️ ${biz} already exists in ${dup.rep_username}'s pipeline.`,'red');
+      return;
+    }
+  }
+
+  const note=document.getElementById('t-notes').value.trim();
   const d=await api('/portal/contacts',{
-    biz_name:biz, contact_name:document.getElementById('t-owner').value.trim(),
-    phone:document.getElementById('t-phone').value.trim(), trade:document.getElementById('t-trade').value,
-    method:document.getElementById('t-method').value, status:document.getElementById('t-status').value,
-    notes:JSON.stringify(document.getElementById('t-notes').value.trim()?[{date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:document.getElementById('t-notes').value.trim()}]:[]),
+    biz_name:biz,
+    contact_name:document.getElementById('t-owner').value.trim(),
+    phone:document.getElementById('t-phone').value.trim(),
+    trade:document.getElementById('t-trade').value,
+    method:document.getElementById('t-method').value,
+    status:document.getElementById('t-status').value,
+    notes:JSON.stringify(note?[{date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:note}]:[]),
     follow_up_date:document.getElementById('t-fu').value||null,
   });
   if(d.success){
-    contacts.unshift(d.contact); renderPipeline(); renderStats();
+    contacts.unshift(d.contact);renderPipeline();renderStats();
     ['t-biz','t-owner','t-phone','t-notes','t-fu'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('t-status').value='new';
-    const m=document.getElementById('add-msg'); m.textContent='✓ Added'; setTimeout(()=>m.textContent='',2000);
+    const m=document.getElementById('add-msg');m.textContent='✓ Added';setTimeout(()=>m.textContent='',2000);
   }
 }
 
-const scfg = {
-  new:{label:'New',cls:'p-new'}, contacted:{label:'Contacted',cls:'p-contacted'},
-  audit:{label:'Audit Set',cls:'p-audit'}, followup:{label:'Follow-up',cls:'p-followup'},
-  closed:{label:'Closed',cls:'p-closed'}, dead:{label:'Not Interested',cls:'p-dead'},
+const SCFG={
+  new:{label:'New',cls:'p-new'},contacted:{label:'Contacted',cls:'p-contacted'},
+  audit:{label:'Audit Set',cls:'p-audit'},followup:{label:'Follow-up',cls:'p-followup'},
+  closed:{label:'Closed',cls:'p-closed'},dead:{label:'Not Interested',cls:'p-dead'},
 };
 
-function renderPipeline() {
-  const pl=document.getElementById('pipeline'); pl.innerHTML='';
-  Object.entries(scfg).forEach(([status,cfg])=>{
-    const col=document.createElement('div'); col.className=`pipeline-col ${cfg.cls}`;
+function renderPipeline(){
+  const pl=document.getElementById('pipeline');pl.innerHTML='';
+  Object.entries(SCFG).forEach(([status,cfg])=>{
+    const col=document.createElement('div');col.className=`pipeline-col ${cfg.cls}`;
     const items=contacts.filter(c=>c.status===status);
     col.innerHTML=`<div class="pipeline-header">${cfg.label} (${items.length})</div>
       <div class="pipeline-body">${items.map(c=>`
@@ -565,14 +850,14 @@ function renderPipeline() {
           <div class="pc-biz">${c.biz_name}</div>
           <div class="pc-meta">${c.contact_name||'—'} · ${c.trade||'—'}</div>
           ${c.follow_up_date?`<div class="pc-meta" style="color:var(--orange);">📅 ${c.follow_up_date}</div>`:''}
-        </div>`).join('')||'<div style="font-size:11px;color:#aaa;padding:4px;">Empty</div>'}
+        </div>`).join('')||'<div style="font-size:11px;color:var(--gray);padding:4px;">Empty</div>'}
       </div>`;
     pl.appendChild(col);
   });
 }
 
-function renderStats() {
-  const tot=contacts.length, aud=contacts.filter(c=>c.status==='audit').length;
+function renderStats(){
+  const tot=contacts.length,aud=contacts.filter(c=>c.status==='audit').length;
   const cls=contacts.filter(c=>c.status==='closed').length;
   const rate=tot>0?Math.round((cls/tot)*100):0;
   document.getElementById('t-stats').innerHTML=`
@@ -582,42 +867,314 @@ function renderStats() {
     <div class="t-stat"><div class="n">${rate}%</div><div class="l">Close rate</div></div>`;
 }
 
-function openModal(c) {
+// ── MODAL ──────────────────────────────────────────────────────────────────────
+function openModal(c){
   editId=c.id;
   document.getElementById('m-biz').textContent=c.biz_name;
   document.getElementById('m-status').value=c.status||'new';
   document.getElementById('m-fu').value=c.follow_up_date||'';
-  document.getElementById('m-note').value='';
-  let notes=[];
-  try{notes=c.notes?JSON.parse(c.notes):[];}catch(e){notes=c.notes?[{date:'',text:c.notes}]:[]; }
+  document.getElementById('m-phone-edit').value=c.phone||'';
+  document.getElementById('m-trade-edit').value=c.trade||'';
+
+  // Notes
+  let notes=[];try{notes=c.notes?JSON.parse(c.notes):[];}catch(e){notes=[];}
   const log=document.getElementById('m-log');
-  log.innerHTML=notes.length===0?'<div style="color:#aaa;font-size:12px;">No notes yet.</div>'
+  log.innerHTML=notes.length===0?'<div style="color:var(--gray);font-size:12px;">No notes yet.</div>'
     :notes.slice().reverse().map(n=>`<div class="note-entry"><div class="note-date">${n.date||''}</div>${n.text}</div>`).join('');
+  document.getElementById('m-note').value='';
+
+  // Audit form
+  loadAuditForm(c);
+
+  // Onboarding steps
+  renderModalObSteps(c);
+
+  // Reset to details tab
+  switchModalTab('details',document.querySelector('.modal-tab'));
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal(){document.getElementById('modal').classList.remove('open');editId=null;}
+function closeModal(){document.getElementById('modal').classList.remove('open');editId=null;auditOutcome='';}
 
-async function saveModal() {
-  if(!editId) return;
-  const c=contacts.find(x=>x.id===editId);
-  let notes=[]; try{notes=c.notes?JSON.parse(c.notes):[];}catch(e){notes=[];}
-  const nn=document.getElementById('m-note').value.trim();
-  if(nn) notes.push({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:nn});
-  const d=await api('/portal/contacts/update',{
-    id:editId, status:document.getElementById('m-status').value,
-    follow_up_date:document.getElementById('m-fu').value||null, notes:JSON.stringify(notes),
-  });
-  if(d.success){const i=contacts.findIndex(x=>x.id===editId);if(i>-1)contacts[i]=d.contact;renderPipeline();renderStats();closeModal();}
+function switchModalTab(name,el){
+  document.querySelectorAll('.modal-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('mp-'+name).classList.add('active');
+  if(el)el.classList.add('active');
 }
 
-async function deleteModal() {
-  if(!editId||!confirm('Delete this contact?')) return;
+async function saveModal(){
+  if(!editId)return;
+  const c=contacts.find(x=>x.id===editId);
+  let notes=[];try{notes=c.notes?JSON.parse(c.notes):[];}catch(e){notes=[];}
+  const nn=document.getElementById('m-note').value.trim();
+  if(nn)notes.push({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),text:nn});
+
+  // Collect audit form data
+  const auditData=collectAuditForm();
+
+  // Merge audit into notes payload as special key
+  const payload={
+    id:editId,
+    status:document.getElementById('m-status').value,
+    follow_up_date:document.getElementById('m-fu').value||null,
+    phone:document.getElementById('m-phone-edit').value,
+    notes:JSON.stringify(notes),
+    audit:JSON.stringify(auditData),
+  };
+
+  const d=await api('/portal/contacts/update',payload);
+  if(d.success){
+    const i=contacts.findIndex(x=>x.id===editId);
+    if(i>-1)contacts[i]=d.contact;
+    renderPipeline();renderStats();
+    toast('✓ Saved');closeModal();
+  }
+}
+
+async function deleteModal(){
+  if(!editId||!confirm('Delete this contact?'))return;
   const d=await api('/portal/contacts/delete',{id:editId});
   if(d.success){contacts=contacts.filter(x=>x.id!==editId);renderPipeline();renderStats();closeModal();}
 }
 
-async function loadAdmin() {
+// ── AUDIT FORM ─────────────────────────────────────────────────────────────────
+function loadAuditForm(c){
+  let audit={};
+  try{if(c.audit)audit=JSON.parse(c.audit);}catch(e){audit={};}
+  const fields=['jobs','val','missed','followup','calendar','reviews','lastreview','noshows','confirm','reason'];
+  fields.forEach(f=>{const el=document.getElementById('af-'+f);if(el&&audit[f]!==undefined)el.value=audit[f];});
+  ['c1','c2','c3','c4'].forEach(k=>{const el=document.getElementById('af-'+k);if(el)el.checked=!!(audit[k]);});
+  if(audit.plan){document.querySelectorAll('[name="af-plan"]').forEach(r=>{r.checked=r.value===audit.plan;});}
+  if(audit.outcome){setOutcome(audit.outcome,true);}
+  const on=document.getElementById('af-outcome-notes');if(on&&audit.outcome_notes)on.value=audit.outcome_notes;
+  calcAuditForm();
+}
+
+function collectAuditForm(){
+  const getV=id=>{const el=document.getElementById(id);return el?el.value:'';};
+  const getN=id=>{const el=document.getElementById(id);return el?parseFloat(el.value)||0:0;};
+  const getC=id=>{const el=document.getElementById(id);return el?el.checked:false;};
+  const planEl=document.querySelector('[name="af-plan"]:checked');
+  return {
+    jobs:getV('af-jobs'),val:getV('af-val'),missed:getV('af-missed'),
+    followup:getV('af-followup'),calendar:getV('af-calendar'),
+    reviews:getV('af-reviews'),lastreview:getV('af-lastreview'),
+    noshows:getV('af-noshows'),confirm:getV('af-confirm'),
+    c1:getC('af-c1'),c2:getC('af-c2'),c3:getC('af-c3'),c4:getC('af-c4'),
+    plan:planEl?planEl.value:'',reason:getV('af-reason'),
+    outcome:auditOutcome,outcome_notes:getV('af-outcome-notes'),
+  };
+}
+
+function calcAuditForm(){
+  const missed=parseFloat(document.getElementById('af-missed')?.value)||0;
+  const val=parseFloat(document.getElementById('af-val')?.value)||0;
+  const noshows=parseFloat(document.getElementById('af-noshows')?.value)||0;
+  const missedLeak=Math.round(missed*0.8*val*4);
+  const noshowLeak=Math.round(noshows*val);
+  const total=missedLeak+noshowLeak;
+  const fmt=n=>n>0?'$'+n.toLocaleString():'$—';
+  const el1=document.getElementById('am-missed');if(el1)el1.textContent=fmt(missedLeak);
+  const el2=document.getElementById('am-noshows');if(el2)el2.textContent=fmt(noshowLeak);
+  const el3=document.getElementById('am-total');if(el3)el3.textContent=fmt(total);
+}
+
+function setOutcome(val,silent=false){
+  auditOutcome=val;
+  ['closed','followup','notfit'].forEach(v=>{
+    const btn=document.getElementById('ob-'+v);
+    if(btn){btn.className='outcome-btn';if(v===val)btn.classList.add('selected-'+val);}
+  });
+  if(!silent&&val==='closed'){
+    document.getElementById('m-status').value='closed';
+    toast('🎉 Marked as closed!');
+  }
+}
+
+// ── ONBOARDING STEPS ───────────────────────────────────────────────────────────
+const OB_STEPS=[
+  {title:'Audit call completed',desc:'Ran revenue leak calculator live. Recommended a plan.'},
+  {title:'Client said yes',desc:'Stripe payment link sent. $199 setup fee collected.'},
+  {title:'Payment confirmed',desc:'Sent confirmation text: "Got your payment — live within 24 hours."'},
+  {title:'Intake info collected',desc:'Business name, trade, phone, hours, services, calendar type, booking link.'},
+  {title:'System configured',desc:'Owner used setup tool to generate system prompt and subdomain page.'},
+  {title:'End-to-end tested',desc:'Booking flow tested. Email confirmed hitting inbox.'},
+  {title:'Client went live',desc:'Subdomain page sent to client. Chatbot active.'},
+  {title:'Day 14 check-in',desc:'Texted client to check on progress and address any issues.'},
+  {title:'First monthly report sent',desc:'Recap of calls recovered, bookings confirmed, reviews requested.'},
+];
+
+function renderModalObSteps(c){
+  let obData={};
+  try{if(c.ob_steps)obData=JSON.parse(c.ob_steps);}catch(e){obData={};}
+  const container=document.getElementById('modal-ob-steps');
+  container.innerHTML=OB_STEPS.map((step,i)=>{
+    const done=!!(obData[i]);
+    const ts=obData[i]?.ts||'';
+    return `<div class="ob-step ${done?'completed':''}" id="obs-${i}">
+      <div class="ob-step-num">${done?'✓':i+1}</div>
+      <div style="flex:1;">
+        <div class="ob-step-title">${step.title}</div>
+        <div class="ob-step-desc">${step.desc}</div>
+        ${ts?`<div class="ob-step-meta">Completed ${ts}</div>`:''}
+      </div>
+      <button class="btn btn-sm ${done?'btn-ghost':'btn-primary'} ob-step-btn" onclick="toggleObStep(${i},${done})">${done?'Undo':'Mark done'}</button>
+    </div>`;
+  }).join('');
+}
+
+async function toggleObStep(i,wasDone){
+  if(!editId)return;
+  const c=contacts.find(x=>x.id===editId);
+  let obData={};
+  try{if(c.ob_steps)obData=JSON.parse(c.ob_steps);}catch(e){obData={};}
+  if(wasDone){delete obData[i];}
+  else{obData[i]={ts:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};}
+  const d=await api('/portal/contacts/update',{id:editId,ob_steps:JSON.stringify(obData)});
+  if(d.success){
+    const idx=contacts.findIndex(x=>x.id===editId);
+    if(idx>-1)contacts[idx]=d.contact;
+    renderModalObSteps(d.contact);
+    toast(wasDone?'Step unmarked':'✓ Step completed');
+  }
+}
+
+// ── CLIENT SEARCH (ONBOARDING TAB) ────────────────────────────────────────────
+function searchClients(){
+  const q=document.getElementById('client-search').value.toLowerCase();
+  const results=document.getElementById('client-search-results');
+  if(!q){results.innerHTML='<div style="text-align:center;padding:2rem;color:var(--gray);font-size:13px;">Search for a client above.</div>';return;}
+  const filtered=contacts.filter(c=>c.biz_name.toLowerCase().includes(q));
+  if(!filtered.length){results.innerHTML='<div style="text-align:center;padding:1rem;color:var(--gray);font-size:13px;">No contacts found.</div>';return;}
+  results.innerHTML=filtered.map(c=>{
+    let obData={};try{if(c.ob_steps)obData=JSON.parse(c.ob_steps);}catch(e){}
+    const done=Object.keys(obData).length;
+    return `<div class="search-result-card" onclick='openModal(${JSON.stringify(c).replace(/'/g,"&#39;")})'>
+      <div>
+        <div class="src-name">${c.biz_name}</div>
+        <div class="src-meta">${c.trade||'—'} · ${SCFG[c.status]?.label||c.status}</div>
+      </div>
+      <div class="src-step">Step ${done}/${OB_STEPS.length}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── GOALS ──────────────────────────────────────────────────────────────────────
+function todayKey(){return new Date().toISOString().split('T')[0];}
+function monthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function weekStart(){const d=new Date();const day=d.getDay();const diff=d.getDate()-day+(day===0?-6:1);return new Date(d.setDate(diff)).toISOString().split('T')[0];}
+
+function getGoalData(){return JSON.parse(localStorage.getItem(`goals_${currentU}`)||'{}');}
+function saveGoalData(data){localStorage.setItem(`goals_${currentU}`,JSON.stringify(data));}
+function getTargets(){return JSON.parse(localStorage.getItem(`targets_${currentU}`)||JSON.stringify({calls:10,texts:10,emails:5,audits:2,closed:1}));}
+function saveTargets(t){localStorage.setItem(`targets_${currentU}`,JSON.stringify(t));}
+
+function getTodayValues(){
+  const data=getGoalData();
+  const today=todayKey();
+  return data[today]||{calls:0,texts:0,emails:0,audits:0,closed:0};
+}
+
+function initGoals(){renderGoalsGrid();renderWeekSummary();renderMonthSummary();renderTrendTable();}
+
+function renderGoalsGrid(){
+  const vals=getTodayValues();
+  const targets=getTargets();
+  document.getElementById('goals-grid').innerHTML=GOAL_KEYS.map((key,i)=>{
+    const val=vals[key]||0;
+    const target=targets[key]||1;
+    const pct=Math.min(100,Math.round((val/target)*100));
+    const over=val>=target;
+    return `<div class="goal-card">
+      <div class="goal-label">${GOAL_ICONS[i]} ${GOAL_LABELS[i]}</div>
+      <div class="goal-actual">${val}</div>
+      <div class="goal-target">Goal: <input class="goal-set-inp" type="number" value="${target}" min="1" onchange="updateTarget('${key}',this.value)" style="width:44px;"/></div>
+      <div class="goal-bar"><div class="goal-fill ${over?'over':''}" style="width:${pct}%"></div></div>
+      <div class="goal-input-row">
+        <div class="goal-inc" onclick="incGoal('${key}',-1)">−</div>
+        <div style="flex:1;text-align:center;font-size:11px;color:var(--gray);">${pct}%</div>
+        <div class="goal-inc" onclick="incGoal('${key}',1)">+</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function incGoal(key,delta){
+  const data=getGoalData();
+  const today=todayKey();
+  if(!data[today])data[today]={calls:0,texts:0,emails:0,audits:0,closed:0};
+  data[today][key]=Math.max(0,(data[today][key]||0)+delta);
+  saveGoalData(data);
+  renderGoalsGrid();renderWeekSummary();renderMonthSummary();renderTrendTable();
+}
+
+function updateTarget(key,val){
+  const targets=getTargets();
+  targets[key]=Math.max(1,parseInt(val)||1);
+  saveTargets(targets);
+  renderGoalsGrid();
+}
+
+function renderWeekSummary(){
+  const data=getGoalData();
+  const ws=weekStart();
+  const totals={calls:0,texts:0,emails:0,audits:0,closed:0};
+  Object.entries(data).forEach(([date,vals])=>{if(date>=ws)GOAL_KEYS.forEach(k=>totals[k]+=(vals[k]||0));});
+  document.getElementById('week-summary').innerHTML=GOAL_KEYS.map((k,i)=>`
+    <div class="ws-card"><div class="n">${totals[k]}</div><div class="l">${GOAL_LABELS[i]}</div></div>`).join('');
+}
+
+function renderMonthSummary(){
+  const data=getGoalData();
+  const mk=monthKey();
+  const totals={calls:0,texts:0,emails:0,audits:0,closed:0};
+  Object.entries(data).forEach(([date,vals])=>{if(date.startsWith(mk))GOAL_KEYS.forEach(k=>totals[k]+=(vals[k]||0));});
+  document.getElementById('month-summary').innerHTML=GOAL_KEYS.map((k,i)=>`
+    <div class="ws-card"><div class="n">${totals[k]}</div><div class="l">${GOAL_LABELS[i]}</div></div>`).join('');
+}
+
+function renderTrendTable(){
+  const data=getGoalData();
+  const today=todayKey();
+  const dates=Object.keys(data).sort().reverse().slice(0,30);
+  const tbody=document.getElementById('trend-body');
+  if(!dates.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:1rem;">No activity logged yet.</td></tr>';return;}
+  tbody.innerHTML=dates.map(date=>{
+    const v=data[date];
+    const isToday=date===today;
+    const label=isToday?'Today':new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `<tr class="${isToday?'today-row':''}">
+      <td>${label}</td>
+      <td>${v.calls||0}</td><td>${v.texts||0}</td>
+      <td>${v.emails||0}</td><td>${v.audits||0}</td><td>${v.closed||0}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── PROCESS STEPS ─────────────────────────────────────────────────────────────
+const PROCESS_STEPS=[
+  ["Step 1 — Audit call","Run the audit calculator live with the prospect. Show them their monthly revenue leak. Recommend a plan based on fleet size. The number closes itself."],
+  ["Step 2 — They say yes","Send the Stripe payment link immediately — while you're still on the call or right after. Collect the $199 setup fee first. Monthly billing starts after go-live."],
+  ["Step 3 — Payment confirmed","Text or email the client: 'Got your payment — everything will be live within 24 hours. I'll send over a quick form to grab your business details.'"],
+  ["Step 4 — Intake info collected","Get: business name, trade, phone number, hours, services & pricing, calendar type (Google/Outlook/Calendly), booking link if they have one."],
+  ["Step 5 — System configured","Owner uses the internal setup tool at mysmartslots.com/setup to generate the client's custom system prompt and subdomain page."],
+  ["Step 6 — End-to-end tested","Owner tests the full booking flow. Chatbot responds correctly. Booking email hits inbox. Everything confirmed before telling client they're live."],
+  ["Step 7 — Client goes live","Send the client their page link: 'You're live! Here's your booking page: [link]. Share it on your Google profile, Instagram bio, and email signature.'"],
+  ["Step 8 — Day 14 check-in","Text the client: 'Hey [Name], just checking in — how's everything running? Seeing any bookings come through?' Keeps the relationship active."],
+  ["Step 9 — First monthly report","Owner sends a monthly recap showing calls recovered, bookings confirmed, reviews requested, estimated revenue impact. This is what justifies the recurring fee every month."],
+];
+const os=document.getElementById('ob-steps');
+PROCESS_STEPS.forEach(([t,d],i)=>{
+  const el=document.createElement('div');el.className='step-item';
+  el.style.cssText='display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;';
+  el.innerHTML=`<div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+    <div><div style="font-weight:600;font-size:14px;color:var(--white);margin-bottom:3px;">${t}</div><div style="font-size:13.5px;color:var(--gray);line-height:1.6;">${d}</div></div>`;
+  os.appendChild(el);
+});
+
+// ── ADMIN ──────────────────────────────────────────────────────────────────────
+async function loadAdmin(){
   const [sr,lr,cr]=await Promise.all([api('/portal/admin/stats'),api('/portal/admin/logins'),api('/portal/admin/contacts')]);
   if(sr.success){
     document.getElementById('a-stats').innerHTML=`
@@ -631,49 +1188,32 @@ async function loadAdmin() {
         <div><strong>${r}</strong></div><div>${sr.loginCounts[r]||0}</div>
         <div style="font-size:11px;">${sr.lastLogin[r]?new Date(sr.lastLogin[r]).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}</div>
         <div>${sr.contactCounts[r.toLowerCase()]||0}</div>
-        <div style="color:var(--green);font-weight:700;">${sr.closedCounts[r.toLowerCase()]||0}</div>
-      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:#aaa;">No data yet.</div>'}`;
+        <div style="color:var(--accent);font-weight:700;">${sr.closedCounts[r.toLowerCase()]||0}</div>
+      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:var(--gray);">No data yet.</div>'}`;
   }
   if(lr.success){
     document.getElementById('login-tbl').innerHTML=`
       <div class="data-row hdr" style="grid-template-columns:1fr 1fr 1.5fr;"><div>Rep</div><div>Username</div><div>Time</div></div>
       ${lr.logins.slice(0,50).map(l=>`<div class="data-row" style="grid-template-columns:1fr 1fr 1.5fr;">
-        <div><strong>${l.rep_name}</strong></div><div style="color:#888;">${l.username}</div>
-        <div style="font-size:11px;color:#888;">${new Date(l.logged_in_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
-      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:#aaa;">No logins yet.</div>'}`;
+        <div><strong>${l.rep_name}</strong></div><div style="color:var(--gray);">${l.username}</div>
+        <div style="font-size:11px;color:var(--gray);">${new Date(l.logged_in_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:var(--gray);">No logins yet.</div>'}`;
   }
   if(cr.success){
     document.getElementById('all-tbl').innerHTML=`
       <div class="data-row hdr" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr;"><div>Business</div><div>Rep</div><div>Trade</div><div>Status</div><div>Added</div></div>
       ${cr.contacts.map(c=>`<div class="data-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr;">
-        <div><strong>${c.biz_name}</strong>${c.contact_name?`<br><span style="font-size:11px;color:#888;">${c.contact_name}</span>`:''}</div>
+        <div><strong>${c.biz_name}</strong>${c.contact_name?`<br><span style="font-size:11px;color:var(--gray);">${c.contact_name}</span>`:''}</div>
         <div style="font-size:12px;">${c.rep_username}</div>
         <div style="font-size:12px;">${c.trade||'—'}</div>
-        <div style="font-size:12px;font-weight:600;color:${c.status==='closed'?'var(--green)':c.status==='dead'?'var(--red)':'var(--blue)'};">${scfg[c.status]?.label||c.status}</div>
-        <div style="font-size:11px;color:#888;">${new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
-      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:#aaa;">No contacts yet.</div>'}`;
+        <div style="font-size:12px;font-weight:600;color:${c.status==='closed'?'var(--accent)':c.status==='dead'?'var(--red)':'var(--blue2)'};">${SCFG[c.status]?.label||c.status}</div>
+        <div style="font-size:11px;color:var(--gray);">${new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+      </div>`).join('')||'<div style="padding:12px;font-size:13px;color:var(--gray);">No contacts yet.</div>'}`;
   }
 }
 
-const steps=[
-  ["Step 1 — Audit call","Run the audit calculator live. Show them their monthly leak. Recommend a plan."],
-  ["Step 2 — They say yes","Send the Stripe payment link immediately. Collect $199 setup fee first."],
-  ["Step 3 — Payment confirmed","Text: 'Got your payment — everything live within 24 hours.'"],
-  ["Step 4 — Intake","Collect: business name, trade, phone, hours, services, calendar type, booking link."],
-  ["Step 5 — Owner sets up","Owner uses setup tool to generate system prompt and subdomain page."],
-  ["Step 6 — Test","Owner tests booking flow end-to-end. Confirms email hits inbox."],
-  ["Step 7 — Client goes live","Send client their page link. 'You're live! Here's your booking page: [link]'"],
-  ["Step 8 — Day 14 check-in","Text: 'Hey [Name], just checking in — how's everything running?'"],
-  ["Step 9 — Monthly report","Owner sends monthly recap. This is what justifies the recurring fee."],
-];
-const os=document.getElementById('ob-steps');
-steps.forEach(([t,d],i)=>{
-  const el=document.createElement('div'); el.className='step-item';
-  el.innerHTML=`<div class="step-num">${i+1}</div><div><div class="step-title">${t}</div><div class="step-desc">${d}</div></div>`;
-  os.appendChild(el);
-});
-
-updateScripts(); calcAudit(); calcComm();
+// Init
+updateScripts();calcAudit();calcComm();
 </script>
 </body>
 </html>

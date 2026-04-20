@@ -16,10 +16,10 @@ const supabase = createClient(
 // ── USERS ─────────────────────────────────────────────────────────────────────
 // Same users as rep.html — keep these in sync when you add new reps
 const USERS = {
-  "admin":   { password: process.env.ADMIN_PASSWORD || "slots2025",  name: "Owner", isAdmin: true },
-  "orion1":  { password: process.env.REP1_PASSWORD  || "Orion2026$", name: "Orion", isAdmin: false },
-  "rep2":    { password: process.env.REP2_PASSWORD  || "rep2pass",   name: "Rep 2", isAdmin: false },
-  "braden1": { password: process.env.ALEX_PASSWORD  || "Braden2026$",name: "Braden",isAdmin: false },
+  "admin": { password: process.env.ADMIN_PASSWORD || "slots2025", name: "Owner",  isAdmin: true },
+  "rep1":  { password: process.env.REP1_PASSWORD  || "rep1pass",  name: "Rep 1",  isAdmin: false },
+  "rep2":  { password: process.env.REP2_PASSWORD  || "rep2pass",  name: "Rep 2",  isAdmin: false },
+  "alex":  { password: process.env.ALEX_PASSWORD  || "alex2025",  name: "Alex",   isAdmin: false },
 };
 
 // ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
@@ -109,18 +109,18 @@ app.post("/portal/contacts/get", requireAuth, async (req, res) => {
 
 // ── CONTACTS — Update ─────────────────────────────────────────────────────────
 app.post("/portal/contacts/update", requireAuth, async (req, res) => {
-  const { id, status, notes, follow_up_date } = req.body;
+  const { id, status, notes, follow_up_date, audit, ob_steps, phone } = req.body;
   if (!id) return res.status(400).json({ error: "Contact ID required." });
 
-  // Reps can only update their own contacts
-  let query = supabase.from("contacts")
-    .update({
-      status: status || undefined,
-      notes: notes || undefined,
-      follow_up_date: follow_up_date || null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id);
+  const updatePayload = { updated_at: new Date().toISOString() };
+  if (status !== undefined) updatePayload.status = status;
+  if (notes !== undefined) updatePayload.notes = notes;
+  if (follow_up_date !== undefined) updatePayload.follow_up_date = follow_up_date || null;
+  if (audit !== undefined) updatePayload.audit = audit;
+  if (ob_steps !== undefined) updatePayload.ob_steps = ob_steps;
+  if (phone !== undefined) updatePayload.phone = phone;
+
+  let query = supabase.from("contacts").update(updatePayload).eq("id", id);
 
   if (!req.user.isAdmin) {
     query = query.eq("rep_username", req.user.username);
