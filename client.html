@@ -416,13 +416,13 @@ function renderAccount(){
 function renderAutomations(){
   const planKey=(clientData.plan||'pro').toLowerCase();
   const ALL_AUTOMATIONS=[
-    {icon:'📞',label:'Missed Call Text Back',desc:'Customers who miss your line get an auto-text with your booking link within seconds.',plans:['starter','pro','elite']},
+    {icon:'📞',label:'Missed Call Text Back',desc:'Customers who miss your line get an auto-text with your booking link within seconds.',plans:['pro','elite']},
     {icon:'🤖',label:'AI Chat Booking',desc:'Your chatbot answers questions and captures bookings 24/7 on your website.',plans:['starter','pro','elite']},
     {icon:'✅',label:'SMS Booking Confirmations',desc:'Every new booking triggers a confirmation text to the customer automatically.',plans:['starter','pro','elite']},
     {icon:'🔔',label:'Appointment Reminders',desc:'Customers get a reminder text the day before and morning of their appointment.',plans:['starter','pro','elite']},
     {icon:'💬',label:'Live SMS Chat',desc:'Customers can text your business number and get real-time AI responses.',plans:['pro','elite']},
     {icon:'⭐',label:'Post-Job Review Requests',desc:'After a job is marked complete, a review request text goes out automatically.',plans:['pro','elite']},
-    {icon:'🔄',label:'Lead Re-Engagement',desc:'Old leads that went cold get an automated follow-up message to bring them back.',plans:['pro','elite']},
+    {icon:'🔄',label:'Lead Re-Engagement',desc:'Old leads that went cold get an automated follow-up message to bring them back.',plans:['elite']},
     {icon:'📧',label:'Partial Email Replies',desc:'Basic email inquiries get an auto-reply that captures their info and moves them to booking.',plans:['elite']},
     {icon:'📅',label:'Calendar Sync',desc:'All bookings sync directly to your calendar — no manual entry needed.',plans:['starter','pro','elite']},
     {icon:'📊',label:'Monthly Performance Report',desc:'You receive a monthly recap of calls recovered, bookings confirmed, and revenue impact.',plans:['starter','pro','elite']},

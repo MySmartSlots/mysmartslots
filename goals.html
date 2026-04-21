@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Goals & Leaderboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a1a2e;--navy2:#222840;--navy3:#2a3350;
+  --blue:#1455a4;--blue2:#1a6fd4;--accent:#4ade80;
+  --orange:#f39c12;--red:#e74c3c;--green:#4ade80;
+  --purple:#a78bfa;--gold:#f59e0b;
+  --white:#fff;--gray:#8892a4;--border:#2a3348;
+  --card:#1e2640;--card2:#242c44;--text:#e2e8f0;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 20%,rgba(20,85,164,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 85% 70%,rgba(74,222,128,.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:340px;text-align:center;}
+.login-logo{font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+.login-box input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;outline:none;color:var(--white);}
+.login-box input:focus{border-color:var(--blue2);}
+.login-btn{width:100%;padding:11px;background:var(--accent);color:var(--navy);border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;}
+.login-btn:hover{opacity:.88;}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+.topbar{background:rgba(26,26,46,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:15px;font-weight:800;color:var(--white);}
+.topbar-logo span{color:var(--accent);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.rep-badge{background:rgba(255,255,255,.1);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--white);}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.logout-btn:hover{color:var(--white);}
+.refresh-btn{background:var(--card2);border:1px solid var(--border);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.refresh-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+.content{max-width:1000px;margin:0 auto;padding:1.75rem 1rem 5rem;}
+
+/* MRR HERO */
+.mrr-hero{background:linear-gradient(135deg,var(--navy2) 0%,var(--navy3) 100%);border:1px solid var(--border);border-radius:16px;padding:2.25rem 2rem;margin-bottom:1.5rem;text-align:center;position:relative;overflow:hidden;}
+.mrr-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(74,222,128,.07) 0%,transparent 70%);pointer-events:none;}
+.mrr-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);margin-bottom:.5rem;}
+.mrr-number{font-size:68px;font-weight:800;color:var(--white);line-height:1;margin-bottom:.35rem;}
+.mrr-number span{color:var(--accent);}
+.mrr-sub{font-size:14px;color:var(--gray);margin-bottom:1.25rem;}
+.mrr-target-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(243,156,18,.12);border:1px solid rgba(243,156,18,.3);padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;color:var(--orange);margin-bottom:1.25rem;}
+.mrr-bar-wrap{background:var(--border);border-radius:6px;height:14px;max-width:560px;margin:0 auto;overflow:hidden;}
+.mrr-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),#22d3a8);transition:width 1s ease;}
+.mrr-bar-labels{display:flex;justify-content:space-between;max-width:560px;margin:.5rem auto 0;font-size:11px;color:var(--gray);}
+.mrr-pct{font-size:13px;font-weight:700;color:var(--accent);margin-top:.5rem;}
+
+/* MILESTONES */
+.milestones-section{margin-bottom:1.5rem;}
+.milestones-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:.75rem;}
+.milestones-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:700px){.milestones-grid{grid-template-columns:1fr 1fr;}}
+.milestone-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;text-align:center;transition:all .2s;position:relative;overflow:hidden;}
+.milestone-card.hit{background:rgba(74,222,128,.07);border-color:rgba(74,222,128,.3);}
+.milestone-card.active{border-color:var(--orange);background:rgba(243,156,18,.05);}
+.milestone-card.active::after{content:'NEXT';position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--orange);background:rgba(243,156,18,.15);padding:2px 6px;border-radius:10px;}
+.milestone-card.hit::after{content:'✓ HIT';position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--green);background:rgba(74,222,128,.12);padding:2px 6px;border-radius:10px;}
+.ms-icon{font-size:30px;margin-bottom:.6rem;display:block;}
+.ms-mrr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;}
+.milestone-card.hit .ms-mrr{color:var(--green);}
+.milestone-card.active .ms-mrr{color:var(--orange);}
+.ms-reward{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;line-height:1.3;}
+.ms-detail{font-size:11px;color:var(--gray);line-height:1.5;}
+.milestone-card.hit .ms-reward{color:var(--green);}
+.ms-progress{margin-top:.75rem;}
+.ms-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.ms-bar-fill{height:100%;border-radius:2px;background:var(--orange);transition:width .8s ease;}
+.milestone-card.hit .ms-bar-fill{background:var(--green);}
+.ms-bar-pct{font-size:10px;color:var(--gray);margin-top:3px;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:14px;}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:1rem;}
+
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;gap:12px;padding:.8rem 0;border-bottom:1px solid var(--border);}
+.lb-row:last-child{border-bottom:none;padding-bottom:0;}
+.lb-row.is-you{background:rgba(74,222,128,.05);border-radius:8px;padding:.8rem;margin:0 -.75rem;}
+.lb-rank{font-size:20px;font-weight:800;min-width:30px;text-align:center;}
+.lb-rank.r1{color:var(--gold);}
+.lb-rank.r2{color:#9ca3af;}
+.lb-rank.r3{color:#b45309;}
+.lb-rank.rn{color:var(--gray);}
+.lb-info{flex:1;}
+.lb-name{font-size:14px;font-weight:600;color:var(--white);}
+.lb-meta{font-size:11px;color:var(--gray);margin-top:2px;}
+.lb-you-tag{font-size:10px;font-weight:700;color:var(--accent);background:rgba(74,222,128,.12);padding:2px 7px;border-radius:10px;margin-left:6px;}
+.lb-score{text-align:right;}
+.lb-pts{font-size:20px;font-weight:800;color:var(--accent);}
+.lb-pts-label{font-size:10px;color:var(--gray);}
+
+/* MY STATS */
+.my-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;}
+.my-stat{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:.85rem;text-align:center;}
+.my-stat .n{font-size:26px;font-weight:800;color:var(--accent);}
+.my-stat .l{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+.tier-box{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.85rem;}
+.tier-name{font-size:16px;font-weight:800;color:var(--white);margin-bottom:3px;}
+.tier-progress{font-size:12px;color:var(--gray);margin-bottom:.6rem;}
+.tier-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.tier-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .6s;}
+.stat-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:13px;}
+.stat-row:last-child{border-bottom:none;}
+.stat-row .l{color:var(--gray);}
+.stat-row .v{font-weight:700;color:var(--white);}
+.stat-row .v.green{color:var(--green);}
+.stat-row .v.orange{color:var(--orange);}
+
+/* YEAR GOALS */
+.year-grid{display:flex;flex-direction:column;gap:0;}
+.year-row{display:grid;grid-template-columns:80px 100px 80px 1fr 100px;gap:10px;align-items:center;padding:.65rem 0;border-bottom:1px solid var(--border);font-size:13px;}
+.year-row.header{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);}
+.year-row:last-child{border-bottom:none;}
+.year-row.hit-row{opacity:.5;}
+.year-row.current-row{background:rgba(243,156,18,.06);border-radius:8px;padding:.65rem .5rem;margin:0 -.5rem;}
+.year-bar-wrap{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.year-bar-fill{height:100%;background:var(--orange);border-radius:3px;}
+.year-row.hit-row .year-bar-fill{background:var(--green);}
+
+/* ALL REPS */
+.reps-grid{display:flex;flex-direction:column;gap:8px;}
+.rep-row{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;display:grid;grid-template-columns:1fr repeat(4,80px);gap:10px;align-items:center;font-size:13px;}
+.rep-row.header{background:transparent;border:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);padding:.25rem 1rem;}
+.rep-row-name{font-weight:600;color:var(--white);}
+.rep-row-tier{font-size:11px;color:var(--accent);}
+.rep-row-num{text-align:center;font-weight:700;}
+
+.empty{text-align:center;padding:2rem;color:var(--gray);font-size:13px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast-el" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">My Smart<span>Slots</span></div>
+    <div class="login-sub">Goals & Leaderboard<br/>Use your portal username and password.</div>
+    <input type="text" id="username" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="password" placeholder="Password"/>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <p class="login-error" id="login-error">Incorrect username or password.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">My Smart<span>Slots</span> — Goals & Leaderboard</div>
+    <div class="topbar-right">
+      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+      <span class="rep-badge" id="rep-name-display"></span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- MRR HERO -->
+    <div class="mrr-hero">
+      <div class="mrr-eyebrow">Company Monthly Recurring Revenue — Year 1</div>
+      <div class="mrr-number">$<span id="mrr-value">—</span></div>
+      <div class="mrr-sub" id="mrr-sub">Loading...</div>
+      <div class="mrr-target-badge" id="mrr-target-badge">🎯 Loading next target...</div>
+      <div class="mrr-bar-wrap">
+        <div class="mrr-bar-fill" id="mrr-bar" style="width:0%"></div>
+      </div>
+      <div class="mrr-bar-labels">
+        <span id="mrr-bar-start">$0</span>
+        <span id="mrr-bar-end">—</span>
+      </div>
+      <div class="mrr-pct" id="mrr-pct"></div>
+    </div>
+
+    <!-- MILESTONES -->
+    <div class="milestones-section">
+      <div class="milestones-title">Company Incentive Milestones — Once hit, permanently retired</div>
+      <div class="milestones-grid" id="milestones-grid"></div>
+    </div>
+
+    <div class="two-col">
+
+      <!-- LEADERBOARD -->
+      <div class="card">
+        <div class="card-title">🏆 Monthly Leaderboard — <span id="lb-month-label" style="color:var(--orange);font-weight:700;text-transform:none;letter-spacing:0;font-size:11px;"></span></div>
+        <div id="leaderboard-body"><div class="empty">Loading...</div></div>
+        <div style="margin-top:1rem;background:var(--card2);border-radius:8px;padding:.75rem;font-size:12px;color:var(--gray);line-height:1.8;">
+          <strong style="color:var(--text);">Points system:</strong><br/>
+          +3 pts — New close (setup fee collected)<br/>
+          +1 pt — Each active client retained this month<br/>
+          −5 pts — Client churn<br/>
+          <span style="color:var(--orange);">Min. 1 new close required to win the monthly $100 award.</span>
+        </div>
+      </div>
+
+      <!-- MY STATS -->
+      <div class="card">
+        <div class="card-title">📊 My Stats — <span id="my-name-label" style="color:var(--white);font-weight:700;text-transform:none;letter-spacing:0;font-size:11px;"></span></div>
+        <div class="my-stats-grid">
+          <div class="my-stat"><div class="n" id="my-active">—</div><div class="l">Active Clients</div></div>
+          <div class="my-stat"><div class="n" id="my-closed">—</div><div class="l">Total Closed</div></div>
+          <div class="my-stat"><div class="n" id="my-rate">—</div><div class="l">Close Rate</div></div>
+        </div>
+        <div class="tier-box">
+          <div class="tier-name" id="my-tier">—</div>
+          <div class="tier-progress" id="my-tier-sub">—</div>
+          <div class="tier-bar"><div class="tier-bar-fill" id="my-tier-bar" style="width:0%"></div></div>
+        </div>
+        <div class="stat-row"><span class="l">Audits set</span><span class="v orange" id="my-audits">—</span></div>
+        <div class="stat-row"><span class="l">Monthly commission (est.)</span><span class="v green" id="my-commission">—</span></div>
+        <div class="stat-row"><span class="l">Next milestone bonus</span><span class="v" id="my-next-bonus">—</span></div>
+        <div class="stat-row"><span class="l">Monthly points (est.)</span><span class="v" id="my-points">—</span></div>
+      </div>
+
+    </div>
+
+    <!-- YEAR 1 GOALS -->
+    <div class="card">
+      <div class="card-title">📅 Year 1 Company Targets</div>
+      <div class="year-grid" id="year-goals-grid"></div>
+    </div>
+
+    <!-- ALL REPS — admin and reps both see this -->
+    <div class="card">
+      <div class="card-title">👥 Team Overview</div>
+      <div class="reps-grid" id="reps-grid"><div class="empty">Loading...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API="https://mysmartslots-portal.onrender.com";
+let currentU=null,currentP=null,currentName=null,isAdmin=false;
+
+const MILESTONES=[
+  {mrr:5000,  icon:"🍽️", reward:"Team Dinner",        detail:"Full company, owner covers everything. Strategy meeting format."},
+  {mrr:15000, icon:"🏨", reward:"Weekend Trip",        detail:"2 nights away, hotel and all meals covered."},
+  {mrm:30000, mrr:30000, icon:"✈️", reward:"Company Retreat",   detail:"3–4 days, flights covered, one business session per day."},
+  {mrr:50000, icon:"🌴", reward:"Premium Destination", detail:"5 days, full company, international or top-tier domestic."},
+];
+
+const TIERS=[
+  {name:"Rep",           min:0,  max:9,  next:10, nextBonus:"$500 at 10 clients"},
+  {name:"Senior Rep",    min:10, max:24, next:25, nextBonus:"$1,000 at 25 clients"},
+  {name:"Sales Manager", min:25, max:49, next:50, nextBonus:"$2,000 at 50 clients"},
+  {name:"Senior Manager",min:50, max:999,next:null,nextBonus:"Top tier — you made it"},
+];
+
+const YEAR_GOALS=[
+  {period:"Month 1–2", mrr:1125,  clients:5,  note:"Proof of concept"},
+  {period:"Month 3–4", mrr:3375,  clients:15, note:"Cash flow positive"},
+  {period:"Month 6",   mrr:5000,  clients:22, note:"🍽️ Team dinner milestone"},
+  {period:"Month 8",   mrr:7500,  clients:33, note:"First manager emerging"},
+  {period:"Month 10",  mrr:15000, clients:44, note:"🏨 Weekend trip milestone"},
+  {period:"Month 12",  mrr:15000, clients:60, note:"Stretch goal — Year 2 foundation"},
+];
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogin(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  try{
+    const r=await fetch(`${API}/portal/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok){document.getElementById('login-error').style.display='block';return;}
+    currentU=u.toLowerCase();currentP=p;currentName=d.name;isAdmin=d.isAdmin;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('rep-name-display').textContent=d.name;
+    document.getElementById('my-name-label').textContent=d.name;
+    await loadData();
+  }catch(e){document.getElementById('login-error').style.display='block';}
+}
+
+function doLogout(){
+  currentU=null;currentP=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('password').value='';
+}
+
+function toast(msg){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+async function api(endpoint,body={}){
+  const r=await fetch(`${API}${endpoint}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,...body})});
+  return r.json();
+}
+
+async function loadData(){
+  try{
+    const [dashRes,onboardRes]=await Promise.all([
+      api('/portal/admin/dashboard'),
+      api('/portal/onboard/list'),
+    ]);
+    renderAll(dashRes,onboardRes);
+  }catch(e){toast('Could not load data — check connection.');}
+}
+
+function renderAll(dash,onboards){
+  if(!dash.success)return;
+
+  // ── MRR ──────────────────────────────────────────────────────────────────
+  const mrr=dash.mrr||0;
+  document.getElementById('mrr-value').textContent=mrr.toLocaleString();
+  document.getElementById('mrr-sub').textContent=`${dash.activeClients||0} active clients · $${(mrr*12).toLocaleString()} projected annually`;
+
+  // Find active milestone
+  const hitMilestones=MILESTONES.filter(m=>mrr>=m.mrr);
+  const nextMilestone=MILESTONES.find(m=>mrr<m.mrr);
+  const prevMilestone=hitMilestones.length?hitMilestones[hitMilestones.length-1]:null;
+
+  if(nextMilestone){
+    const start=prevMilestone?prevMilestone.mrr:0;
+    const pct=Math.min(100,Math.round(((mrr-start)/(nextMilestone.mrr-start))*100));
+    document.getElementById('mrr-target-badge').textContent=`🎯 Next: ${nextMilestone.icon} ${nextMilestone.reward} at $${nextMilestone.mrr.toLocaleString()}/mo`;
+    document.getElementById('mrr-bar').style.width=pct+'%';
+    document.getElementById('mrr-bar-start').textContent='$'+(start).toLocaleString();
+    document.getElementById('mrr-bar-end').textContent='$'+nextMilestone.mrr.toLocaleString();
+    document.getElementById('mrr-pct').textContent=pct+'% of the way there';
+  } else {
+    document.getElementById('mrr-target-badge').textContent='🎉 All Year 1 milestones hit!';
+    document.getElementById('mrr-bar').style.width='100%';
+    document.getElementById('mrr-pct').textContent='Year 1 complete — time to set Year 2 goals';
+  }
+
+  // ── MILESTONES ────────────────────────────────────────────────────────────
+  document.getElementById('milestones-grid').innerHTML=MILESTONES.map(m=>{
+    const hit=mrr>=m.mrr;
+    const isNext=!hit&&(!prevMilestone||m===nextMilestone);
+    const start=MILESTONES[MILESTONES.indexOf(m)-1]?.mrr||0;
+    const pct=hit?100:Math.min(100,Math.round(((mrr-start)/Math.max(1,m.mrr-start))*100));
+    return `<div class="milestone-card ${hit?'hit':isNext?'active':''}">
+      <span class="ms-icon">${m.icon}</span>
+      <div class="ms-mrr">$${m.mrr.toLocaleString()}/mo</div>
+      <div class="ms-reward">${m.reward}</div>
+      <div class="ms-detail">${m.detail}</div>
+      <div class="ms-progress">
+        <div class="ms-bar"><div class="ms-bar-fill" style="width:${pct}%"></div></div>
+        <div class="ms-bar-pct">${hit?'✓ Achieved':pct+'% there'}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── LEADERBOARD ───────────────────────────────────────────────────────────
+  const now=new Date();
+  document.getElementById('lb-month-label').textContent=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const repStats=dash.repStats||{};
+  const contacts=dash.contacts||[];
+
+  // Calculate points per rep
+  const repPoints=Object.entries(repStats).map(([rep,stats])=>{
+    const closed=stats.closed||0;
+    const active=stats.contacts||0;
+    const pts=(closed*3)+(active*1);
+    return{rep,closed,active,pts,audits:stats.audits||0};
+  }).sort((a,b)=>b.pts-a.pts);
+
+  const rankClasses=['r1','r2','r3'];
+  const rankEmojis=['🥇','🥈','🥉'];
+
+  document.getElementById('leaderboard-body').innerHTML=repPoints.length?repPoints.map((r,i)=>{
+    const isYou=r.rep===currentU;
+    const rankCls=rankClasses[i]||'rn';
+    const rankEmoji=rankEmojis[i]||(i+1);
+    return `<div class="lb-row ${isYou?'is-you':''}">
+      <div class="lb-rank ${rankCls}">${rankEmoji}</div>
+      <div class="lb-info">
+        <div class="lb-name">${r.rep}${isYou?'<span class="lb-you-tag">You</span>':''}</div>
+        <div class="lb-meta">${r.closed} closes · ${r.active} active · ${r.audits} audits</div>
+      </div>
+      <div class="lb-score">
+        <div class="lb-pts">${r.pts}</div>
+        <div class="lb-pts-label">points</div>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">No rep activity yet.</div>';
+
+  // ── MY STATS ──────────────────────────────────────────────────────────────
+  const myStats=repStats[currentU]||{contacts:0,closed:0,audits:0};
+  const myActive=myStats.contacts||0;
+  const myClosed=myStats.closed||0;
+  const myRate=myActive>0?Math.round((myClosed/myActive)*100):0;
+  document.getElementById('my-active').textContent=myActive;
+  document.getElementById('my-closed').textContent=myClosed;
+  document.getElementById('my-rate').textContent=myRate+'%';
+  document.getElementById('my-audits').textContent=myStats.audits||0;
+
+  // Tier
+  const myTier=TIERS.find(t=>myActive>=t.min&&myActive<=t.max)||TIERS[0];
+  document.getElementById('my-tier').textContent=myTier.name;
+  const tierPct=myTier.next?Math.min(100,Math.round((myActive/myTier.next)*100)):100;
+  document.getElementById('my-tier-sub').textContent=myTier.next?`${myActive} of ${myTier.next} clients to next tier`:'Maximum tier achieved';
+  document.getElementById('my-tier-bar').style.width=tierPct+'%';
+
+  // Commission estimate — assume Pro average
+  const myCommEst=(myActive*67.50).toFixed(2);
+  document.getElementById('my-commission').textContent='$'+myCommEst+'/mo (Pro avg)';
+  document.getElementById('my-next-bonus').textContent=myTier.nextBonus;
+
+  // Points
+  const myPts=(myClosed*3)+(myActive*1);
+  document.getElementById('my-points').textContent=myPts+' pts this month (est.)';
+
+  // ── YEAR GOALS ────────────────────────────────────────────────────────────
+  document.getElementById('year-goals-grid').innerHTML=`
+    <div class="year-row header">
+      <div>Period</div><div>MRR Target</div><div>Clients</div><div>Progress</div><div>Status</div>
+    </div>
+    ${YEAR_GOALS.map(g=>{
+      const hit=mrr>=g.mrr;
+      const isCurrent=!hit&&YEAR_GOALS.filter(x=>mrr>=x.mrr).length===YEAR_GOALS.indexOf(g);
+      const pct=Math.min(100,Math.round((mrr/g.mrr)*100));
+      const statusColor=hit?'var(--green)':isCurrent?'var(--orange)':'var(--gray)';
+      const statusText=hit?'✓ Hit':isCurrent?'In Progress':'Upcoming';
+      return `<div class="year-row ${hit?'hit-row':isCurrent?'current-row':''}">
+        <div style="font-size:12px;color:var(--gray);">${g.period}</div>
+        <div style="font-weight:700;color:var(--white);">$${g.mrr.toLocaleString()}</div>
+        <div style="color:var(--gray);">${g.clients}+</div>
+        <div>
+          <div class="year-bar-wrap"><div class="year-bar-fill" style="width:${pct}%"></div></div>
+          <div style="font-size:10px;color:var(--gray);margin-top:2px;">${g.note}</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:${statusColor};text-align:right;">${statusText}</div>
+      </div>`;
+    }).join('')}`;
+
+  // ── TEAM OVERVIEW ─────────────────────────────────────────────────────────
+  const allReps=Object.entries(repStats);
+  document.getElementById('reps-grid').innerHTML=allReps.length?`
+    <div class="rep-row header">
+      <div>Rep</div><div style="text-align:center;">Tier</div><div style="text-align:center;">Clients</div><div style="text-align:center;">Closed</div><div style="text-align:center;">Rate</div>
+    </div>
+    ${allReps.map(([rep,s])=>{
+      const tier=TIERS.find(t=>s.contacts>=t.min&&s.contacts<=t.max)||TIERS[0];
+      const rate=s.contacts>0?Math.round((s.closed/s.contacts)*100):0;
+      const isYou=rep===currentU;
+      return `<div class="rep-row" style="${isYou?'border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.04);':''}">
+        <div>
+          <div class="rep-row-name">${rep}${isYou?' <span style="font-size:10px;color:var(--accent);">(you)</span>':''}</div>
+          <div class="rep-row-tier">${tier.name}</div>
+        </div>
+        <div class="rep-row-num">${s.contacts||0}</div>
+        <div class="rep-row-num" style="color:var(--orange);">${s.closed||0}</div>
+        <div class="rep-row-num" style="color:var(--purple);">${rate}%</div>
+      </div>`;
+    }).join('')}`:'<div class="empty">No rep data yet.</div>';
+}
+
+// ── YEAR GOALS TABLE FIX ──────────────────────────────────────────────────────
+// Re-render year goals correctly with proper current detection
+function renderYearGoals(mrr){
+  let lastHitIdx=-1;
+  YEAR_GOALS.forEach((g,i)=>{if(mrr>=g.mrr)lastHitIdx=i;});
+  const currentIdx=lastHitIdx+1<YEAR_GOALS.length?lastHitIdx+1:-1;
+  document.getElementById('year-goals-grid').innerHTML=`
+    <div class="year-row header">
+      <div>Period</div><div>MRR Target</div><div>Clients</div><div>Progress</div><div>Status</div>
+    </div>
+    ${YEAR_GOALS.map((g,i)=>{
+      const hit=i<=lastHitIdx;
+      const isCurrent=i===currentIdx;
+      const pct=Math.min(100,Math.round((mrr/g.mrr)*100));
+      const statusColor=hit?'var(--green)':isCurrent?'var(--orange)':'var(--gray)';
+      const statusText=hit?'✓ Hit':isCurrent?'In Progress':'Upcoming';
+      return `<div class="year-row ${hit?'hit-row':isCurrent?'current-row':''}">
+        <div style="font-size:12px;color:var(--gray);">${g.period}</div>
+        <div style="font-weight:700;color:var(--white);">$${g.mrr.toLocaleString()}</div>
+        <div style="color:var(--gray);">${g.clients}+</div>
+        <div>
+          <div class="year-bar-wrap"><div class="year-bar-fill" style="width:${pct}%"></div></div>
+          <div style="font-size:10px;color:var(--gray);margin-top:2px;">${g.note}</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:${statusColor};text-align:right;">${statusText}</div>
+      </div>`;
+    }).join('')}`;
+}
+</script>
+</body>
+</html>

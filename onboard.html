@@ -222,13 +222,10 @@ footer p{font-size:12px;color:var(--muted2);}
       <label style="margin-bottom:12px;display:block;">Business Hours <span class="req">*</span></label>
       <div class="hours-grid" id="hours-grid"></div>
       <div class="fg" style="margin-top:1.75rem;">
-        <label>Services You Offer <span class="req">*</span></label>
-        <div class="hint" style="margin-bottom:10px;">Check everything that applies — we'll train the chatbot on these</div>
-        <div class="svc-grid" id="svc-grid"></div>
-        <div class="fg" style="margin-top:1rem;">
-          <label>Other / Custom Services</label>
-          <input type="text" id="services_other" placeholder="e.g. Water heater installation, gas line repair..."/>
-        </div>
+        <label>Your Services &amp; Pricing <span class="req">*</span></label>
+        <div class="hint" style="margin-bottom:12px;">Add each service you offer and its price. We'll train your chatbot on these so it can answer customer questions accurately.</div>
+        <div id="services-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
+        <button type="button" onclick="addServiceRow()" style="background:transparent;border:1px dashed var(--accent);color:var(--accent);border-radius:8px;padding:9px 18px;font-size:13px;font-family:inherit;cursor:pointer;width:100%;">+ Add a Service</button>
       </div>
       <div class="frow" style="margin-top:.5rem;">
         <div class="fg">
@@ -416,20 +413,38 @@ function getHours(){
   return h;
 }
 
-// ── SERVICES GRID ─────────────────────────────────────────────────────────────
-const SERVICES=[
-  ['Emergency Repairs','Urgent same-day calls'],['Scheduled Maintenance','Routine service visits'],
-  ['Free Estimates','On-site or phone quotes'],['Commercial Work','Business/property jobs'],
-  ['Residential Work','Homes & apartments'],['New Installations','Equipment/system installs'],
-  ['Inspections','Safety & compliance checks'],['24/7 Emergency','After-hours availability'],
-  ['Seasonal Service','Spring/fall tune-ups'],
-];
-const sg=document.getElementById('svc-grid');
-SERVICES.forEach(([name,sub])=>{
-  sg.innerHTML+=`<label class="svc-check"><input type="checkbox" value="${name}"/>
-    <div><div class="svc-check-label">${name}</div><div class="svc-check-sub">${sub}</div></div></label>`;
-});
-function getServices(){return[...document.querySelectorAll('#svc-grid input:checked')].map(el=>el.value);}
+// ── SERVICES — Dynamic rows ───────────────────────────────────────────────────
+let serviceRowCount=0;
+function addServiceRow(name='',price=''){
+  serviceRowCount++;
+  const id=serviceRowCount;
+  const row=document.createElement('div');
+  row.id=`svc-row-${id}`;
+  row.style.cssText='display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;';
+  row.innerHTML=`
+    <input type="text" placeholder="Service name (e.g. Drain cleaning)" value="${name}"
+      style="background:var(--dark);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-family:inherit;font-size:14px;color:var(--text);outline:none;"
+      oninput="this.style.borderColor='var(--accent)'" class="svc-name-inp"/>
+    <input type="text" placeholder="Price (e.g. $150–$300)" value="${price}"
+      style="background:var(--dark);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-family:inherit;font-size:14px;color:var(--text);outline:none;width:140px;"
+      oninput="this.style.borderColor='var(--accent)'" class="svc-price-inp"/>
+    <button type="button" onclick="document.getElementById('svc-row-${id}').remove()"
+      style="background:transparent;border:1px solid rgba(232,93,93,.3);color:#E85D5D;border-radius:8px;padding:10px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;">✕</button>`;
+  document.getElementById('services-list').appendChild(row);
+}
+// Start with 3 rows
+addServiceRow();addServiceRow();addServiceRow();
+
+function getServices(){
+  const rows=document.querySelectorAll('#services-list > div');
+  const result=[];
+  rows.forEach(row=>{
+    const name=row.querySelector('.svc-name-inp')?.value.trim();
+    const price=row.querySelector('.svc-price-inp')?.value.trim();
+    if(name)result.push(price?`${name} — ${price}`:name);
+  });
+  return result;
+}
 
 // ── COLOR SWATCHES ────────────────────────────────────────────────────────────
 const SWATCHES=['#E85D5D','#E87820','#E8C05D','#5DE88A','#00C896','#5DA0E8','#8A5DE8','#E85DA0','#1A1A17'];
@@ -465,7 +480,7 @@ function validateStep(step){
   const errs=[];
   const req=(id,label)=>{const el=document.getElementById(id);if(!el||!el.value.trim()){if(el)el.classList.add('error');errs.push(label);}else el.classList.remove('error');};
   if(step===1){req('biz_name','Business Name');req('contact_name','Your Name');req('biz_phone','Business Phone');req('contact_email','Email');req('trade','Trade');req('location','City & State');req('forward_from','Forwarding Number');}
-  if(step===2){if(!document.getElementById('avg_ticket').value){document.getElementById('avg_ticket').classList.add('error');errs.push('Average Ticket');}else document.getElementById('avg_ticket').classList.remove('error');if(!getServices().length)errs.push('At least one service');}
+  if(step===2){if(!document.getElementById('avg_ticket').value){document.getElementById('avg_ticket').classList.add('error');errs.push('Average Ticket');}else document.getElementById('avg_ticket').classList.remove('error');if(!getServices().length)errs.push('At least one service with a name');}
   if(step===3){req('cal_type','Calendar Type');const v=document.getElementById('cal_type').value;if(['calendly','other'].includes(v))req('cal_link','Booking Link');if(['google','outlook'].includes(v))req('cal_email','Calendar Email');}
   const errEl=document.getElementById(`err${step}`);
   if(errs.length){errEl.textContent=`Please fill in: ${errs.join(', ')}`;errEl.style.display='block';return false;}
@@ -510,7 +525,6 @@ function collectData(){
     forward_from:document.getElementById('forward_from').value.trim(),
     hours:getHours(),
     services:getServices(),
-    services_other:document.getElementById('services_other').value.trim(),
     avg_ticket:document.getElementById('avg_ticket').value,
     service_area:document.getElementById('service_area').value.trim(),
     cal_type:document.getElementById('cal_type').value,

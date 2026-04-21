@@ -1,441 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diamond Plumbing Co. — Book Online</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f4f6fb;
-      color: #1a1a2e;
-    }
-
-    /* HEADER */
-    .header {
-      background: #1455a4;
-      color: #fff;
-      padding: 0 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 64px;
-    }
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-    .logo-name {
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.2px;
-    }
-    .header-phone {
-      font-size: 14px;
-      font-weight: 600;
-      color: #fff;
-      text-decoration: none;
-      opacity: 0.92;
-    }
-    .header-phone:hover { opacity: 1; }
-
-    /* HERO */
-    .hero {
-      background: linear-gradient(135deg, #1455a4 0%, #0d3d7a 100%);
-      color: #fff;
-      text-align: center;
-      padding: 4rem 1.5rem 3.5rem;
-    }
-    .hero-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.15);
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      border-radius: 20px;
-      margin-bottom: 1rem;
-    }
-    .hero h1 {
-      font-size: 36px;
-      font-weight: 800;
-      line-height: 1.15;
-      margin-bottom: 0.75rem;
-      letter-spacing: -0.5px;
-    }
-    .hero p {
-      font-size: 16px;
-      opacity: 0.85;
-      max-width: 420px;
-      margin: 0 auto 2rem;
-      line-height: 1.6;
-    }
-    .hero-btns {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .btn-primary {
-      background: #fff;
-      color: #1455a4;
-      font-weight: 700;
-      font-size: 15px;
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: opacity 0.15s;
-    }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-secondary {
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      font-weight: 600;
-      font-size: 15px;
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      border: 1.5px solid rgba(255,255,255,0.35);
-      transition: background 0.15s;
-    }
-    .btn-secondary:hover { background: rgba(255,255,255,0.22); }
-
-    /* TRUST BAR */
-    .trust-bar {
-      background: #fff;
-      border-bottom: 1px solid #e8ecf4;
-      display: flex;
-      justify-content: center;
-      gap: 2.5rem;
-      padding: 1rem 1.5rem;
-      flex-wrap: wrap;
-    }
-    .trust-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #444;
-    }
-    .trust-icon {
-      width: 20px;
-      height: 20px;
-      background: #e8f0fb;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-    }
-
-    /* MAIN CONTENT */
-    .main {
-      max-width: 960px;
-      margin: 2.5rem auto;
-      padding: 0 1.5rem;
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 24px;
-      align-items: start;
-    }
-
-    /* CARDS */
-    .card {
-      background: #fff;
-      border: 1px solid #e8ecf4;
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-bottom: 20px;
-    }
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #1455a4;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-title-icon {
-      width: 22px;
-      height: 22px;
-      background: #e8f0fb;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      flex-shrink: 0;
-    }
-
-    /* SERVICES */
-    .service-list { display: flex; flex-direction: column; gap: 10px; }
-    .service-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 14px;
-      background: #f4f6fb;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .service-name { font-weight: 500; color: #1a1a2e; }
-    .service-price { font-weight: 600; color: #1455a4; font-size: 13px; }
-
-    /* HOURS */
-    .hours-grid { display: flex; flex-direction: column; gap: 6px; }
-    .hours-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13.5px;
-      padding: 4px 0;
-      border-bottom: 1px solid #f0f2f8;
-    }
-    .hours-row:last-child { border-bottom: none; }
-    .hours-day { color: #555; }
-    .hours-time { font-weight: 500; color: #1a1a2e; }
-    .hours-closed { font-weight: 500; color: #bbb; }
-
-    /* CONTACT */
-    .contact-list { display: flex; flex-direction: column; gap: 12px; }
-    .contact-item { display: flex; align-items: center; gap: 12px; font-size: 14px; }
-    .contact-icon {
-      width: 34px; height: 34px;
-      background: #e8f0fb;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; flex-shrink: 0;
-    }
-    .contact-label { font-size: 11px; color: #999; margin-bottom: 1px; }
-    .contact-value { font-weight: 500; color: #1a1a2e; }
-    .contact-value a { color: #1455a4; text-decoration: none; }
-
-    /* SIDEBAR CHAT CARD */
-    .chat-card {
-      background: #fff;
-      border: 1px solid #e8ecf4;
-      border-radius: 14px;
-      overflow: hidden;
-      position: sticky;
-      top: 20px;
-    }
-    .chat-card-header {
-      background: #1455a4;
-      color: #fff;
-      padding: 1rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .chat-avatar {
-      width: 36px; height: 36px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; flex-shrink: 0;
-    }
-    .chat-header-name { font-size: 14px; font-weight: 600; }
-    .chat-header-status { font-size: 11px; opacity: 0.75; margin-top: 1px; display: flex; align-items: center; gap: 5px; }
-    .status-dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; }
-    .chat-card-body { padding: 1.25rem; }
-    .chat-intro { font-size: 13.5px; color: #555; line-height: 1.6; margin-bottom: 1rem; }
-    .chat-open-btn {
-      display: block; width: 100%;
-      background: #1455a4; color: #fff;
-      font-weight: 600; font-size: 14px;
-      padding: 11px; border-radius: 8px;
-      text-align: center; text-decoration: none;
-      border: none; cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .chat-open-btn:hover { opacity: 0.88; }
-    .chat-features { margin-top: 1rem; display: flex; flex-direction: column; gap: 7px; }
-    .chat-feature { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666; }
-    .chat-feature-dot { width: 6px; height: 6px; background: #1455a4; border-radius: 50%; flex-shrink: 0; }
-
-    /* REVIEWS */
-    .review-list { display: flex; flex-direction: column; gap: 14px; }
-    .review-item { padding: 14px; background: #f4f6fb; border-radius: 10px; }
-    .review-stars { color: #f59e0b; font-size: 13px; margin-bottom: 5px; }
-    .review-text { font-size: 13.5px; color: #333; line-height: 1.55; margin-bottom: 8px; }
-    .review-author { font-size: 12px; font-weight: 600; color: #666; }
-
-    /* FOOTER */
-    .footer {
-      background: #fff;
-      border-top: 1px solid #e8ecf4;
-      text-align: center;
-      padding: 1.5rem 1rem;
-      font-size: 12px;
-      color: #aaa;
-      margin-top: 2rem;
-    }
-    .footer a { color: #1455a4; text-decoration: none; }
-
-    @media (max-width: 720px) {
-      .main { grid-template-columns: 1fr; }
-      .chat-card { position: static; }
-      .hero h1 { font-size: 26px; }
-      .trust-bar { gap: 1rem; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Diamond Plumbing Co. — Book Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#1455a4;--accent2:#1a6fd4;--ag:rgba(20,85,164,.1);
+  --dark:#07100D;--dark2:#0a1628;--dark3:#0d1f3c;
+  --b1:rgba(20,85,164,.2);--b2:rgba(255,255,255,.08);
+  --text:#e8eef8;--muted:#7a8fa6;--muted2:#3a4f6a;--green:#4ade80;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--dark2);color:var(--text);min-height:100vh;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+.container{max-width:1000px;margin:0 auto;padding:0 1.5rem;}
+nav{background:rgba(7,10,22,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--b2);padding:.9rem 0;position:sticky;top:0;z-index:100;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+.biz-logo{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--text);}
+.biz-logo span{color:var(--green);}
+.nav-right{display:flex;align-items:center;gap:1rem;}
+.nav-phone{font-size:13px;font-weight:600;color:var(--green);}
+.book-btn{background:var(--accent);color:#fff;padding:9px 20px;border-radius:6px;font-size:13px;font-weight:600;transition:background .15s;}
+.book-btn:hover{background:var(--accent2);}
+.hero{padding:5rem 0 3.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 30% 40%,rgba(20,85,164,.12) 0%,transparent 65%);pointer-events:none;}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.25rem;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+h1{font-family:'Syne',sans-serif;font-size:clamp(34px,5vw,52px);font-weight:800;line-height:1.0;letter-spacing:-.03em;margin-bottom:1.25rem;}
+h1 span{color:var(--green);}
+.hero-sub{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:2rem;max-width:440px;}
+.hero-btns{display:flex;gap:.75rem;flex-wrap:wrap;}
+.btn-p{background:var(--green);color:#040f09;padding:13px 26px;border-radius:7px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;transition:all .2s;}
+.btn-p:hover{background:#22d3a8;transform:translateY(-2px);}
+.btn-g{background:transparent;color:var(--text);border:1px solid var(--b2);padding:13px 22px;border-radius:7px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;transition:all .2s;}
+.btn-g:hover{border-color:var(--green);color:var(--green);}
+.trust-badges{display:flex;flex-wrap:wrap;gap:1.25rem;margin-top:1.75rem;}
+.tb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:500;}
+.tb::before{content:'✓';color:var(--green);font-weight:700;}
+.chat-preview{background:var(--dark3);border:1px solid var(--b1);border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+.chat-bar{background:rgba(20,85,164,.2);border-bottom:1px solid var(--b2);padding:10px 14px;display:flex;align-items:center;gap:8px;}
+.chat-dot{width:9px;height:9px;border-radius:50%;}
+.cd1{background:#e74c3c;}.cd2{background:#f39c12;}.cd3{background:var(--green);}
+.chat-bar-lbl{font-size:11px;color:var(--muted);margin-left:4px;}
+.chat-bar-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);font-weight:600;}
+.chat-msgs{padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--dark2);min-height:260px;}
+.dmsg{max-width:82%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.45;}
+.dmsg.bot{background:var(--dark3);border:1px solid var(--b2);color:var(--text);border-bottom-left-radius:4px;align-self:flex-start;}
+.dmsg.user{background:var(--accent);color:#fff;border-bottom-right-radius:4px;align-self:flex-end;font-weight:500;}
+.demo-typing{display:flex;gap:4px;align-items:center;background:var(--dark3);padding:10px 14px;border-radius:14px;border-bottom-left-radius:4px;border:1px solid var(--b2);align-self:flex-start;}
+.demo-typing span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:bounce 1.2s infinite;}
+.demo-typing span:nth-child(2){animation-delay:.2s;}.demo-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+.chat-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--b2);background:var(--dark3);}
+.chat-input{flex:1;background:var(--dark2);border:1px solid var(--b2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;}
+.chat-input:focus{border-color:var(--green);}
+.chat-send{width:36px;height:36px;border-radius:8px;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-powered{padding:5px 14px;background:rgba(0,0,0,.2);font-size:10px;color:var(--muted2);text-align:center;}
+.chat-powered span{color:var(--green);font-weight:600;}
+.trust-bar{background:rgba(20,85,164,.06);border-top:1px solid var(--b2);border-bottom:1px solid var(--b2);padding:.8rem 0;overflow:hidden;}
+.trust-inner{display:flex;gap:2.5rem;align-items:center;white-space:nowrap;overflow-x:auto;}
+.trust-inner::-webkit-scrollbar{display:none;}
+.ti{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--muted);flex-shrink:0;}
+.ti-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;}
+.eyebrow::before{content:'';width:18px;height:2px;background:var(--green);}
+h2{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.02em;line-height:1.05;}
+.sec-hdr{text-align:center;margin-bottom:3rem;}
+.sec-hdr p{font-size:15px;color:var(--muted);max-width:520px;margin:.75rem auto 0;line-height:1.8;}
+.services-sec{padding:5rem 0;border-top:1px solid var(--b2);}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.svc-card{background:var(--dark3);border:1px solid var(--b2);border-radius:12px;padding:1.5rem 1.25rem;transition:all .2s;}
+.svc-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.svc-icon{font-size:26px;margin-bottom:.75rem;display:block;}
+.svc-card h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:.4rem;}
+.svc-card p{font-size:13px;color:var(--muted);line-height:1.6;}
+.svc-price{font-size:12px;color:var(--green);font-weight:600;margin-top:.5rem;}
+.how-sec{padding:5rem 0;border-top:1px solid var(--b2);background:rgba(7,10,22,.5);}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;}
+.step{text-align:center;padding:1.25rem .75rem;}
+.step-n{width:52px;height:52px;border-radius:50%;background:var(--ag);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--accent2);margin:0 auto 1rem;}
+.step h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:.35rem;}
+.step p{font-size:12px;color:var(--muted);line-height:1.6;}
+.reviews-sec{padding:5rem 0;border-top:1px solid var(--b2);}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.rc{background:var(--dark3);border:1px solid var(--b2);border-radius:12px;padding:1.5rem;}
+.stars{color:#f59e0b;font-size:13px;letter-spacing:2px;margin-bottom:.75rem;}
+.rc-text{font-size:13.5px;color:var(--muted);line-height:1.75;font-style:italic;margin-bottom:1.25rem;}
+.reviewer{display:flex;align-items:center;gap:10px;}
+.rev-av{width:36px;height:36px;border-radius:50%;background:rgba(20,85,164,.2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--green);}
+.rev-name{font-size:13px;font-weight:600;color:var(--text);}
+.rev-sub{font-size:11px;color:var(--muted);}
+.hours-sec{padding:5rem 0;border-top:1px solid var(--b2);}
+.hours-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
+.hours-card{background:var(--dark3);border:1px solid var(--b2);border-radius:14px;overflow:hidden;}
+.hours-hdr{background:rgba(20,85,164,.15);border-bottom:1px solid var(--b2);padding:.85rem 1.25rem;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
+.hours-body{padding:.5rem 0;}
+.day-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.03);}
+.day-row:last-child{border-bottom:none;}
+.day-name{font-size:13px;color:var(--muted);}
+.day-time{font-size:13px;color:var(--text);font-weight:500;}
+.ds{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.ds-open{background:rgba(74,222,128,.1);color:var(--green);}
+.ds-closed{background:rgba(255,255,255,.05);color:var(--muted);}
+.hours-foot{background:rgba(20,85,164,.08);border-top:1px solid var(--b2);padding:.75rem 1.25rem;font-size:12px;color:var(--muted);}
+.cta-sec{padding:5rem 0;border-top:1px solid var(--b2);text-align:center;position:relative;overflow:hidden;}
+.cta-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(20,85,164,.1),transparent 65%);pointer-events:none;}
+.cta-sec h2{margin-bottom:1.25rem;}
+.cta-sec p{font-size:15px;color:var(--muted);max-width:460px;margin:0 auto 2.5rem;line-height:1.8;}
+.cta-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;}
+.contact-sec{background:var(--dark);border-top:1px solid var(--b2);padding:5rem 0;}
+.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:4rem;align-items:start;}
+.ci h3{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:.75rem;}
+.ci p{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;}
+.cdet{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-bottom:.85rem;}
+.cdet-icon{color:var(--green);width:18px;flex-shrink:0;}
+.cf{background:var(--dark3);border:1px solid var(--b2);border-radius:14px;padding:1.75rem;}
+.fg{margin-bottom:1rem;}
+.fg label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--dark2);border:1px solid var(--b2);border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;appearance:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
+.fg textarea{min-height:90px;resize:vertical;}
+.fg select option{background:var(--dark2);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.sub-btn{width:100%;padding:14px;background:var(--green);color:#040f09;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .2s;margin-top:.5rem;}
+.sub-btn:hover{background:#22d3a8;transform:translateY(-1px);}
+footer{border-top:1px solid var(--b2);padding:2rem 0;background:var(--dark);}
+.fi{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.flogo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;}
+.flogo span{color:var(--green);}
+.flinks{display:flex;gap:1.5rem;}
+.flinks a{font-size:12px;color:var(--muted);transition:color .15s;}
+.flinks a:hover{color:var(--text);}
+.powered-bar{background:rgba(20,85,164,.06);border-top:1px solid var(--b2);padding:.6rem 0;text-align:center;font-size:11px;color:var(--muted2);}
+.powered-bar a{color:var(--green);font-weight:600;}
+#cb{position:fixed;bottom:24px;right:24px;z-index:9999;width:54px;height:54px;border-radius:50%;background:var(--green);box-shadow:0 4px 24px rgba(74,222,128,.35);cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;transition:transform .2s;}
+#cb:hover{transform:scale(1.1);}
+.cb-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#e74c3c;border:2px solid var(--dark2);animation:badgePulse 2s infinite;}
+@keyframes badgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.2);}}
+#cw{position:fixed;bottom:90px;right:24px;z-index:9998;width:340px;max-height:500px;background:var(--dark3);border:1px solid var(--b1);border-radius:18px;box-shadow:0 16px 56px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;transform:translateY(16px) scale(.97);opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .2s;}
+#cw.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all;}
+#ch{background:rgba(20,85,164,.2);padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--b2);}
+#ch .av{width:32px;height:32px;border-radius:50%;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+#ch .nm{font-weight:600;font-size:14px;color:var(--text);}
+#ch .st{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px;margin-top:1px;}
+#cc{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;margin-left:auto;}
+#cm{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--dark2);}
+#cm::-webkit-scrollbar{width:3px;}
+#cm::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
+.cmsg{max-width:82%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.45;}
+.cmsg.bot{background:var(--dark3);border:1px solid var(--b2);color:var(--text);border-bottom-left-radius:4px;align-self:flex-start;}
+.cmsg.user{background:var(--accent);color:#fff;border-bottom-right-radius:4px;align-self:flex-end;font-weight:500;}
+.ctyping{display:flex;gap:4px;align-items:center;background:var(--dark3);padding:10px 14px;border-radius:14px;border-bottom-left-radius:4px;border:1px solid var(--b2);align-self:flex-start;}
+.ctyping span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:bounce 1.2s infinite;}
+.ctyping span:nth-child(2){animation-delay:.2s;}.ctyping span:nth-child(3){animation-delay:.4s;}
+#cir{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--b2);background:var(--dark3);}
+#ci{flex:1;border:1px solid var(--b2);border-radius:8px;padding:8px 12px;font-size:13.5px;font-family:inherit;color:var(--text);background:var(--dark2);outline:none;resize:none;max-height:80px;}
+#ci:focus{border-color:var(--green);}
+#cs{width:36px;height:36px;border-radius:8px;flex-shrink:0;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;align-self:flex-end;}
+#cpw{padding:5px 12px;background:rgba(0,0,0,.2);font-size:10px;color:var(--muted2);text-align:center;}
+#cpw span{color:var(--green);font-weight:600;}
+@media(max-width:820px){.hero-grid,.hours-grid,.contact-grid{grid-template-columns:1fr;gap:2rem;}.svc-grid{grid-template-columns:1fr 1fr;}.steps{grid-template-columns:1fr 1fr;}.reviews-grid{grid-template-columns:1fr;}}
+@media(max-width:520px){.svc-grid{grid-template-columns:1fr;}.frow{grid-template-columns:1fr;}#cw{width:calc(100vw - 32px);right:16px;}}
+</style>
 </head>
 <body>
+<nav><div class="container nav-inner"><div class="biz-logo">Diamond<span>Plumbing</span></div><div class="nav-right"><a href="tel:8165550192" class="nav-phone">📞 (816) 555-0192</a><a href="#contact" class="book-btn">Book Online</a></div></div></nav>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-logo">
-      <div class="logo-icon">🔧</div>
-      <span class="logo-name">Diamond Plumbing Co.</span>
-    </div>
-    <a href="tel:8165550192" class="header-phone">(816) 555-0192</a>
-  </div>
-
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-badge">Kansas City's Trusted Plumber</div>
-    <h1>Fast, Reliable Plumbing<br>When You Need It Most</h1>
-    <p>Serving the KC Metro for over 15 years. Licensed, insured, and available for emergencies 24/7.</p>
-    <div class="hero-btns">
-      <a href="#book" class="btn-primary">Book an Appointment</a>
-      <a href="tel:8165550192" class="btn-secondary">Call (816) 555-0192</a>
-    </div>
-  </div>
-
-  <!-- TRUST BAR -->
-  <div class="trust-bar">
-    <div class="trust-item"><div class="trust-icon">⭐</div> 4.9 Google Rating</div>
-    <div class="trust-item"><div class="trust-icon">✓</div> Licensed & Insured</div>
-    <div class="trust-item"><div class="trust-icon">⚡</div> 24/7 Emergency Service</div>
-    <div class="trust-item"><div class="trust-icon">📅</div> Same-Day Appointments</div>
-  </div>
-
-  <!-- MAIN -->
-  <div class="main">
-
-    <!-- LEFT COLUMN -->
-    <div>
-
-      <!-- SERVICES -->
-      <div class="card">
-        <div class="card-title"><div class="card-title-icon">🔧</div> Services & Pricing</div>
-        <div class="service-list">
-          <div class="service-item"><span class="service-name">Drain Cleaning</span><span class="service-price">$150 – $300</span></div>
-          <div class="service-item"><span class="service-name">Water Heater Installation</span><span class="service-price">$800 – $1,200</span></div>
-          <div class="service-item"><span class="service-name">Leak Detection & Repair</span><span class="service-price">$200 – $500</span></div>
-          <div class="service-item"><span class="service-name">Toilet Repair or Replacement</span><span class="service-price">$150 – $400</span></div>
-          <div class="service-item"><span class="service-name">Sump Pump Install</span><span class="service-price">$600 – $1,000</span></div>
-          <div class="service-item"><span class="service-name">Emergency Service Call</span><span class="service-price">From $200</span></div>
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge"><div class="live-dot"></div>Now Booking Online — 24/7</div>
+        <h1>Kansas City's <span>Trusted</span> Plumbing Experts</h1>
+        <p class="hero-sub">Fast, reliable plumbing service across the KC Metro. Book online in seconds or call us — we respond to every inquiry, even after hours.</p>
+        <div class="hero-btns">
+          <a href="#contact" class="btn-p">Book an Appointment →</a>
+          <a href="tel:8165550192" class="btn-g">📞 Call Now</a>
+        </div>
+        <div class="trust-badges">
+          <span class="tb">Licensed & Insured</span>
+          <span class="tb">Same-Day Available</span>
+          <span class="tb">Free Estimates</span>
         </div>
       </div>
-
-      <!-- REVIEWS -->
-      <div class="card">
-        <div class="card-title"><div class="card-title-icon">⭐</div> What Customers Say</div>
-        <div class="review-list">
-          <div class="review-item">
-            <div class="review-stars">★★★★★</div>
-            <div class="review-text">Called at 9pm with a burst pipe and they were at my house within the hour. Fixed it fast and didn't gouge me on the price. These guys are the real deal.</div>
-            <div class="review-author">— Mike T., Overland Park</div>
-          </div>
-          <div class="review-item">
-            <div class="review-stars">★★★★★</div>
-            <div class="review-text">Booked online at midnight, had a confirmation by morning. Technician showed up on time and was super professional. Will use again for sure.</div>
-            <div class="review-author">— Sarah K., Lee's Summit</div>
-          </div>
-          <div class="review-item">
-            <div class="review-stars">★★★★★</div>
-            <div class="review-text">Best plumber in KC. Fair pricing, no surprises on the bill, and they actually clean up after themselves. Five stars all day.</div>
-            <div class="review-author">— James R., Gladstone</div>
-          </div>
-        </div>
+      <div class="chat-preview">
+        <div class="chat-bar"><div class="chat-dot cd1"></div><div class="chat-dot cd2"></div><div class="chat-dot cd3"></div><span class="chat-bar-lbl">Diamond Plumbing — AI Assistant</span><div class="chat-bar-status"><div class="live-dot"></div>Online 24/7</div></div>
+        <div class="chat-msgs" id="demo-msgs"></div>
+        <div class="chat-input-row"><input class="chat-input" id="demo-input" placeholder="Ask anything or book a service..." autocomplete="off"/><button class="chat-send" id="demo-send"><svg viewBox="0 0 24 24" fill="none" stroke="#040f09" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>
+        <div class="chat-powered">Powered by <span>My Smart Slots AI</span> · This is your actual booking assistant</div>
       </div>
-
-    </div>
-
-    <!-- RIGHT SIDEBAR -->
-    <div>
-
-      <!-- CHAT CARD -->
-      <div class="chat-card" id="book">
-        <div class="chat-card-header">
-          <div class="chat-avatar">💬</div>
-          <div>
-            <div class="chat-header-name">Book Online — 24/7</div>
-            <div class="chat-header-status"><span class="status-dot"></span> AI Assistant Online</div>
-          </div>
-        </div>
-        <div class="chat-card-body">
-          <p class="chat-intro">Chat with our booking assistant to schedule service, get a price estimate, or ask a question — any time of day.</p>
-          <button class="chat-open-btn" onclick="document.querySelector('#sms-chat-bubble')?.click()">Start Booking Now</button>
-          <div class="chat-features">
-            <div class="chat-feature"><span class="chat-feature-dot"></span> Get answers instantly</div>
-            <div class="chat-feature"><span class="chat-feature-dot"></span> Book any time — nights & weekends</div>
-            <div class="chat-feature"><span class="chat-feature-dot"></span> Confirmation sent to your phone</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- HOURS -->
-      <div class="card" style="margin-top: 20px;">
-        <div class="card-title"><div class="card-title-icon">🕐</div> Business Hours</div>
-        <div class="hours-grid">
-          <div class="hours-row"><span class="hours-day">Monday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
-          <div class="hours-row"><span class="hours-day">Tuesday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
-          <div class="hours-row"><span class="hours-day">Wednesday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
-          <div class="hours-row"><span class="hours-day">Thursday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
-          <div class="hours-row"><span class="hours-day">Friday</span><span class="hours-time">7:00 AM – 6:00 PM</span></div>
-          <div class="hours-row"><span class="hours-day">Saturday</span><span class="hours-time">8:00 AM – 2:00 PM</span></div>
-          <div class="hours-row"><span class="hours-day">Sunday</span><span class="hours-closed">Emergency Only</span></div>
-        </div>
-      </div>
-
-      <!-- CONTACT -->
-      <div class="card" style="margin-top: 20px;">
-        <div class="card-title"><div class="card-title-icon">📞</div> Contact</div>
-        <div class="contact-list">
-          <div class="contact-item">
-            <div class="contact-icon">📞</div>
-            <div><div class="contact-label">Phone</div><div class="contact-value"><a href="tel:8165550192">(816) 555-0192</a></div></div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon">✉️</div>
-            <div><div class="contact-label">Email</div><div class="contact-value"><a href="mailto:info@diamondplumbing.com">info@diamondplumbing.com</a></div></div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon">📍</div>
-            <div><div class="contact-label">Service Area</div><div class="contact-value">Kansas City Metro</div></div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
+</section>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    © 2026 Diamond Plumbing Co. · Powered by <a href="https://mysmartslots.com" target="_blank">My Smart Slots</a>
+<div class="trust-bar"><div class="container"><div class="trust-inner"><span class="ti"><div class="ti-dot"></div>Missed call? Text back in seconds</span><span class="ti"><div class="ti-dot"></div>Book online 24/7</span><span class="ti"><div class="ti-dot"></div>Automatic appointment reminders</span><span class="ti"><div class="ti-dot"></div>Serving KC Metro 12+ years</span><span class="ti"><div class="ti-dot"></div>200+ 5-star reviews</span></div></div></div>
+
+<section class="services-sec" id="services">
+  <div class="container">
+    <div class="sec-hdr"><div class="eyebrow">What We Do</div><h2>Plumbing Services, Done Right</h2><p>From emergency repairs to full installations. Upfront pricing, no surprises.</p></div>
+    <div class="svc-grid">
+      <div class="svc-card"><span class="svc-icon">🚰</span><h3>Drain Cleaning</h3><p>Slow drains and clogs cleared fast. Most jobs same day.</p><div class="svc-price">Starting at $150</div></div>
+      <div class="svc-card"><span class="svc-icon">🔧</span><h3>Leak Repair</h3><p>Emergency leak repair available. We locate and fix before it becomes a disaster.</p><div class="svc-price">Starting at $200</div></div>
+      <div class="svc-card"><span class="svc-icon">🌡️</span><h3>Water Heater</h3><p>Installation, repair, and replacement for all brands. Tank and tankless.</p><div class="svc-price">Starting at $800</div></div>
+      <div class="svc-card"><span class="svc-icon">🏠</span><h3>Residential Plumbing</h3><p>Complete home plumbing — new installs, remodels, and repairs of any size.</p><div class="svc-price">Free estimate</div></div>
+      <div class="svc-card"><span class="svc-icon">⚡</span><h3>Emergency Service</h3><p>24/7 emergency response for urgent issues. We always answer.</p><div class="svc-price">Call for pricing</div></div>
+      <div class="svc-card"><span class="svc-icon">🔍</span><h3>Inspections</h3><p>Pre-purchase and annual inspections with full written report.</p><div class="svc-price">Starting at $175</div></div>
+    </div>
   </div>
+</section>
 
-  <!-- CHATBOT WIDGET -->
-  <script src="https://mysmartslots-chat.onrender.com/widget.js" data-business="Diamond Plumbing Co." data-api="https://mysmartslots-chat.onrender.com"></script>
+<section class="how-sec">
+  <div class="container">
+    <div class="sec-hdr"><div class="eyebrow">How It Works</div><h2>Book in Under 2 Minutes</h2></div>
+    <div class="steps">
+      <div class="step"><div class="step-n">01</div><h3>Book Online or Call</h3><p>Use our AI chat, the booking form, or call (816) 555-0192.</p></div>
+      <div class="step"><div class="step-n">02</div><h3>Get Confirmed</h3><p>Automatic SMS confirmation with your appointment details.</p></div>
+      <div class="step"><div class="step-n">03</div><h3>We Show Up</h3><p>Licensed plumber arrives on time. No surprise fees.</p></div>
+      <div class="step"><div class="step-n">04</div><h3>Job Done Right</h3><p>Satisfaction guarantee. We're not done until you're happy.</p></div>
+    </div>
+  </div>
+</section>
 
+<section class="reviews-sec">
+  <div class="container">
+    <div class="sec-hdr"><div class="eyebrow">What Customers Say</div><h2>200+ Five-Star Reviews</h2></div>
+    <div class="reviews-grid">
+      <div class="rc"><div class="stars">★★★★★</div><p class="rc-text">"Called at 9pm with a burst pipe and someone answered immediately. They were at my house within the hour. Absolute lifesavers."</p><div class="reviewer"><div class="rev-av">S</div><div><div class="rev-name">Sarah M.</div><div class="rev-sub">Kansas City, MO</div></div></div></div>
+      <div class="rc"><div class="stars">★★★★★</div><p class="rc-text">"Got a text back within seconds after my call went unanswered. Booked right from the link — super easy. Drain is flowing perfectly."</p><div class="reviewer"><div class="rev-av">J</div><div><div class="rev-name">James T.</div><div class="rev-sub">Overland Park, KS</div></div></div></div>
+      <div class="rc"><div class="stars">★★★★★</div><p class="rc-text">"Fair pricing, no BS, showed up when they said they would. This is the only plumber I'll ever call again."</p><div class="reviewer"><div class="rev-av">M</div><div><div class="rev-name">Maria C.</div><div class="rev-sub">Lenexa, KS</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="hours-sec" id="hours">
+  <div class="container">
+    <div class="hours-grid">
+      <div>
+        <div class="eyebrow">Always Available</div>
+        <h2>Hours & Emergency Line</h2>
+        <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-top:1rem;margin-bottom:1.5rem;">Office team available Monday–Friday. For after-hours emergencies, call our direct line — someone always answers.</p>
+        <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:1.25rem;">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:.5rem;">⚡ 24/7 Emergency Line</div>
+          <a href="tel:8165550192" style="font-size:22px;font-weight:800;color:var(--text);font-family:'Syne',sans-serif;">(816) 555-0192</a>
+          <div style="font-size:12px;color:var(--muted);margin-top:.35rem;">We answer every call. Always.</div>
+        </div>
+      </div>
+      <div class="hours-card">
+        <div class="hours-hdr"><div class="live-dot"></div>Business Hours</div>
+        <div class="hours-body">
+          <div class="day-row"><span class="day-name">Monday</span><span class="day-time">7:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+          <div class="day-row"><span class="day-name">Tuesday</span><span class="day-time">7:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+          <div class="day-row"><span class="day-name">Wednesday</span><span class="day-time">7:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+          <div class="day-row"><span class="day-name">Thursday</span><span class="day-time">7:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+          <div class="day-row"><span class="day-name">Friday</span><span class="day-time">7:00 AM – 6:00 PM</span><span class="ds ds-open">Open</span></div>
+          <div class="day-row"><span class="day-name">Saturday</span><span class="day-time">8:00 AM – 2:00 PM</span><span class="ds ds-open">Open</span></div>
+          <div class="day-row"><span class="day-name">Sunday</span><span class="day-time">Emergency Only</span><span class="ds ds-closed">Emergency</span></div>
+        </div>
+        <div class="hours-foot">🤖 AI booking assistant active 24/7 — even when we're closed</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <div class="container" style="position:relative;z-index:1;">
+    <div class="eyebrow" style="justify-content:center;">Ready to Book?</div>
+    <h2>Get Your Plumbing Fixed Today</h2>
+    <p>Book online or call us. We respond to every inquiry 24 hours a day.</p>
+    <div class="cta-btns"><a href="#contact" class="btn-p">Book an Appointment →</a><a href="tel:8165550192" class="btn-g">📞 (816) 555-0192</a></div>
+  </div>
+</section>
+
+<section class="contact-sec" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="ci">
+        <div class="eyebrow">Contact Us</div>
+        <h3>Let's Get It Fixed</h3>
+        <p>Fill out the form and we'll confirm your appointment within minutes. Need immediate help? Call directly.</p>
+        <div class="cdet"><span class="cdet-icon">📞</span><a href="tel:8165550192" style="color:var(--muted);">(816) 555-0192</a></div>
+        <div class="cdet"><span class="cdet-icon">✉️</span><a href="mailto:rick@diamondplumbing.com" style="color:var(--muted);">rick@diamondplumbing.com</a></div>
+        <div class="cdet"><span class="cdet-icon">📍</span><span>Kansas City Metro — 30 mile radius</span></div>
+        <div class="cdet"><span class="cdet-icon">⚡</span><span>Missed call? Text back in seconds automatically</span></div>
+      </div>
+      <div class="cf">
+        <div id="bform">
+          <div class="frow"><div class="fg"><label>First Name</label><input type="text" id="f-first" placeholder="Mike"/></div><div class="fg"><label>Last Name</label><input type="text" id="f-last" placeholder="Johnson"/></div></div>
+          <div class="fg"><label>Phone Number</label><input type="tel" id="f-phone" placeholder="(816) 000-0000"/></div>
+          <div class="fg"><label>Service Needed</label>
+            <select id="f-service"><option value="">Select a service...</option><option>Drain Cleaning — Starting at $150</option><option>Leak Repair — Starting at $200</option><option>Water Heater — Starting at $800</option><option>Residential Plumbing — Free estimate</option><option>Emergency Service — Call for pricing</option><option>Inspection — Starting at $175</option><option>Other</option></select>
+          </div>
+          <div class="fg"><label>Preferred Date & Time</label><input type="text" id="f-time" placeholder="e.g. This Friday afternoon, ASAP"/></div>
+          <div class="fg"><label>Additional Details</label><textarea id="f-notes" placeholder="Describe the issue, address, anything else..."></textarea></div>
+          <button class="sub-btn" onclick="submitBooking()">Request Appointment →</button>
+          <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:.75rem;">We'll confirm within minutes via text or call.</p>
+        </div>
+        <div id="bsuccess" style="display:none;text-align:center;padding:2.5rem 1rem;">
+          <div style="font-size:48px;margin-bottom:1rem;">✓</div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green);margin-bottom:.75rem;">Request Received!</div>
+          <p style="font-size:14px;color:var(--muted);line-height:1.8;">We'll confirm your appointment shortly. For urgent issues call <a href="tel:8165550192" style="color:var(--green);">(816) 555-0192</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer><div class="container"><div class="fi"><div class="flogo">Diamond<span>Plumbing</span></div><div class="flinks"><a href="#services">Services</a><a href="#hours">Hours</a><a href="#contact">Book Now</a><a href="tel:8165550192">(816) 555-0192</a></div><div style="font-size:12px;color:var(--muted2);">© 2026 Diamond Plumbing Co. · Kansas City, MO</div></div></div></footer>
+<div class="powered-bar">Booking automation powered by <a href="https://mysmartslots.com" target="_blank">My Smart Slots</a> — AI-powered scheduling for service businesses</div>
+
+<button id="cb"><svg viewBox="0 0 24 24" fill="none" stroke="#040f09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="cb-badge"></div></button>
+
+<div id="cw">
+  <div id="ch"><div class="av">💬</div><div><div class="nm">Diamond Plumbing</div><div class="st"><div class="live-dot"></div>AI Assistant · Online 24/7</div></div><button id="cc">×</button></div>
+  <div id="cm"></div>
+  <div id="cir"><textarea id="ci" rows="1" placeholder="Ask a question or book..."></textarea><button id="cs"><svg viewBox="0 0 24 24" fill="none" stroke="#040f09" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>
+  <div id="cpw">Powered by <span>My Smart Slots AI</span></div>
+</div>
+
+<script>
+const RU='https://mysmartslots-chat.onrender.com';
+(function(){
+  const me=document.getElementById('demo-msgs'),ie=document.getElementById('demo-input'),sb=document.getElementById('demo-send');
+  if(!me)return;let hist=[];
+  function add(t,r){const el=document.createElement('div');el.className='dmsg '+r;el.textContent=t;me.appendChild(el);me.scrollTop=me.scrollHeight;}
+  function typ(){const el=document.createElement('div');el.className='demo-typing';el.innerHTML='<span></span><span></span><span></span>';me.appendChild(el);me.scrollTop=me.scrollHeight;return el;}
+  setTimeout(()=>add("👋 Hi! I'm the booking assistant for Diamond Plumbing. I can answer questions about services, pricing, or help you schedule. What can I help you with?",'bot'),700);
+  async function send(){const t=ie.value.trim();if(!t)return;ie.value='';add(t,'user');hist.push({role:'user',content:t});const ty=typ();sb.disabled=true;
+    try{const r=await fetch(RU+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist})});const d=await r.json();ty.remove();const rep=d.reply||d.error||'Sorry, try again.';add(rep,'bot');hist.push({role:'assistant',content:rep});}
+    catch{ty.remove();add("Sorry, couldn't connect right now.",'bot');}finally{sb.disabled=false;ie.focus();}}
+  sb.addEventListener('click',send);ie.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
+})();
+(function(){
+  const cb=document.getElementById('cb'),cw=document.getElementById('cw'),cm=document.getElementById('cm'),ci=document.getElementById('ci'),cs=document.getElementById('cs');
+  let hist=[],opened=false;
+  function add(t,r){const el=document.createElement('div');el.className='cmsg '+r;el.textContent=t;cm.appendChild(el);cm.scrollTop=cm.scrollHeight;}
+  function typ(){const el=document.createElement('div');el.className='ctyping';el.innerHTML='<span></span><span></span><span></span>';cm.appendChild(el);cm.scrollTop=cm.scrollHeight;return el;}
+  async function send(){const t=ci.value.trim();if(!t)return;ci.value='';ci.style.height='auto';add(t,'user');hist.push({role:'user',content:t});const ty=typ();cs.disabled=true;
+    try{const r=await fetch(RU+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist})});const d=await r.json();ty.remove();const rep=d.reply||d.error||'Sorry, try again.';add(rep,'bot');hist.push({role:'assistant',content:rep});}
+    catch{ty.remove();add('Sorry, trouble connecting. Try again!','bot');}finally{cs.disabled=false;}}
+  cb.addEventListener('click',()=>{const o=cw.classList.toggle('open');if(o&&!opened){opened=true;const b=cb.querySelector('.cb-badge');if(b)b.remove();setTimeout(()=>add("👋 Hi! How can I help you today? I can answer questions or help book an appointment.",'bot'),300);}if(o)ci.focus();});
+  document.getElementById('cc').addEventListener('click',()=>cw.classList.remove('open'));
+  cs.addEventListener('click',send);
+  ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+  ci.addEventListener('input',()=>{ci.style.height='auto';ci.style.height=Math.min(ci.scrollHeight,80)+'px';});
+})();
+function submitBooking(){
+  const first=document.getElementById('f-first').value.trim();
+  const phone=document.getElementById('f-phone').value.trim();
+  const svc=document.getElementById('f-service').value;
+  if(!first||!phone||!svc){alert('Please fill in your name, phone, and service needed.');return;}
+  document.getElementById('bform').style.display='none';
+  document.getElementById('bsuccess').style.display='block';
+}
+</script>
 </body>
 </html>
