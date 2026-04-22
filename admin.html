@@ -203,6 +203,7 @@ textarea.inp{resize:vertical;min-height:60px;}
     <div class="nav-tab" onclick="switchTab('pipeline',this)">📋 Pipeline</div>
     <div class="nav-tab" onclick="switchTab('reports',this)">📈 Monthly Reports</div>
     <div class="nav-tab" onclick="switchTab('logins',this)">🔑 Login History</div>
+    <div class="nav-tab" onclick="switchTab('data',this)">🗑️ Data Management</div>
   </div>
 
   <div class="content">
@@ -347,21 +348,18 @@ textarea.inp{resize:vertical;min-height:60px;}
       </div>
     </div>
 
-    <!-- LOGIN HISTORY -->
-    <div class="tab-panel" id="tab-logins">
+    <!-- DATA MANAGEMENT -->
+    <div class="tab-panel" id="tab-data">
       <div class="section-head">
-        <h2>Login History</h2>
-        <p>All rep, admin, setup tool, and client portal logins.</p>
+        <h2>Data Management</h2>
+        <p>Selectively wipe contact data by rep. Use this to clear test data before going live. This cannot be undone.</p>
       </div>
-      <div class="card">
-        <div id="logins-table-wrap">
-          <div class="empty"><div class="icon">⏳</div>Loading...</div>
-        </div>
+      <div class="card" id="wipe-cards">
+        <div class="empty"><div class="icon">⏳</div>Loading rep data...</div>
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- end content -->
 
 <!-- CLIENT DETAIL MODAL -->
 <div class="modal-overlay" id="client-modal">
@@ -390,10 +388,31 @@ textarea.inp{resize:vertical;min-height:60px;}
   </div>
 </div>
 
+<!-- WIPE CONFIRM MODAL -->
+<div class="modal-overlay" id="wipe-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>⚠️ Confirm Data Wipe</span>
+      <button class="modal-close" onclick="closeWipeModal()">×</button>
+    </div>
+    <p style="font-size:14px;color:var(--text);margin-bottom:.75rem;">You are about to permanently delete all contacts for:</p>
+    <div style="background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:.85rem 1rem;margin-bottom:1rem;">
+      <strong id="wipe-rep-label" style="font-size:15px;color:var(--red);"></strong>
+      <div id="wipe-count-label" style="font-size:13px;color:var(--gray);margin-top:4px;"></div>
+    </div>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:1.25rem;line-height:1.6;">This will delete all pipeline contacts for this rep from Supabase. <strong style="color:var(--text);">This cannot be undone.</strong> Onboard submissions and client records are not affected.</p>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeWipeModal()">Cancel</button>
+      <button id="wipe-confirm-btn" class="btn" style="flex:1;background:var(--red);color:var(--white);" onclick="executeWipe()">Yes, Delete All Contacts</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const API="https://mysmartslots-portal.onrender.com";
 let currentU=null,currentP=null;
 let dashData=null,selectedClientId=null;
+let wipeTarget=null;
 
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
@@ -431,6 +450,7 @@ function switchTab(name,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if(el)el.classList.add('active');
+  if(name==='data')renderDataManagement();
 }
 
 async function api(endpoint,body={}){
@@ -455,7 +475,6 @@ async function loadDashboard(){
   }catch(e){toast('Failed to load dashboard — check connection.',true);}
 }
 
-// ── OVERVIEW ──────────────────────────────────────────────────────────────────
 function renderOverview(){
   const d=dashData.dash;
   if(!d.success)return;
@@ -471,17 +490,12 @@ function renderOverview(){
   const rate=Math.round((cl/tot)*100);
   document.getElementById('s-rate').textContent=rate+'%';
   document.getElementById('s-rate-sub').textContent=`${cl} closed of ${tot} contacts`;
-
-  // Pipeline bar
   ['new','contacted','audit','followup','closed','dead'].forEach(s=>{
     const el=document.getElementById('p-'+s);
     if(el)el.textContent=d.pipeline?.[s]||0;
   });
-
-  // Rep overview
   const repStats=d.repStats||{};
   const reps=Object.keys(repStats);
-  const loginStats=d.loginStats||{};
   if(!reps.length){document.getElementById('rep-overview-grid').innerHTML='<div class="empty"><div class="icon">👥</div>No reps yet.</div>';return;}
   document.getElementById('rep-overview-grid').innerHTML=reps.map(rep=>{
     const s=repStats[rep];
@@ -500,8 +514,6 @@ function renderOverview(){
       <div class="rep-bar"><div class="rep-fill" style="width:${Math.min(100,rate*3)}%"></div></div>
     </div>`;
   }).join('');
-
-  // Pending onboards
   const submissions=dashData.onboards?.submissions||[];
   const pending=submissions.filter(s=>s.onboard_status==='pending'||!s.onboard_status);
   if(!pending.length){
@@ -519,7 +531,6 @@ function renderOverview(){
   </table>`;
 }
 
-// ── CLIENTS ───────────────────────────────────────────────────────────────────
 function renderClients(){
   const submissions=dashData?.onboards?.submissions||[];
   const search=(document.getElementById('client-search')?.value||'').toLowerCase();
@@ -529,10 +540,7 @@ function renderClients(){
     if(statusFilter&&(s.onboard_status||'pending')!==statusFilter)return false;
     return true;
   });
-  if(!list.length){
-    document.getElementById('clients-table-wrap').innerHTML='<div class="empty"><div class="icon">👥</div>No clients found.</div>';
-    return;
-  }
+  if(!list.length){document.getElementById('clients-table-wrap').innerHTML='<div class="empty"><div class="icon">👥</div>No clients found.</div>';return;}
   const PLAN_MRR={starter:125,pro:225,elite:375};
   document.getElementById('clients-table-wrap').innerHTML=`<table class="data-table">
     <thead><tr><th>Business</th><th>Owner</th><th>Plan</th><th>Trade</th><th>Location</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
@@ -555,7 +563,6 @@ function renderClients(){
   </table>`;
 }
 
-// ── REPS ──────────────────────────────────────────────────────────────────────
 function renderReps(){
   const d=dashData?.dash;
   if(!d?.success)return;
@@ -570,29 +577,15 @@ function renderReps(){
     const repContacts=contacts.filter(c=>c.rep_username===rep).slice(0,5);
     return `<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
-        <div>
-          <div style="font-size:16px;font-weight:700;color:var(--white);">${rep}</div>
-          <div style="font-size:12px;color:var(--gray);">Last login: ${lastLogin?new Date(lastLogin).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Never'}</div>
-        </div>
+        <div><div style="font-size:16px;font-weight:700;color:var(--white);">${rep}</div>
+        <div style="font-size:12px;color:var(--gray);">Last login: ${lastLogin?new Date(lastLogin).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Never'}</div></div>
         <div style="font-size:22px;font-weight:800;color:var(--purple);">${rate}%<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);">close rate</div></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;">
-        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
-          <div style="font-size:20px;font-weight:800;color:var(--text);">${s.contacts}</div>
-          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Contacts</div>
-        </div>
-        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
-          <div style="font-size:20px;font-weight:800;color:var(--accent);">${s.audits}</div>
-          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Audits</div>
-        </div>
-        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
-          <div style="font-size:20px;font-weight:800;color:var(--orange);">${s.closed}</div>
-          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Closed</div>
-        </div>
-        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;">
-          <div style="font-size:20px;font-weight:800;color:var(--blue2);">${s.contacts-s.closed-s.audits>0?s.contacts-s.closed-s.audits:0}</div>
-          <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;">Active</div>
-        </div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;"><div style="font-size:20px;font-weight:800;">${s.contacts}</div><div style="font-size:10px;color:var(--gray);text-transform:uppercase;">Contacts</div></div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--accent);">${s.audits}</div><div style="font-size:10px;color:var(--gray);text-transform:uppercase;">Audits</div></div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--orange);">${s.closed}</div><div style="font-size:10px;color:var(--gray);text-transform:uppercase;">Closed</div></div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--blue2);">${s.contacts-s.closed-s.audits>0?s.contacts-s.closed-s.audits:0}</div><div style="font-size:10px;color:var(--gray);text-transform:uppercase;">Active</div></div>
       </div>
       ${repContacts.length?`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:6px;">Recent Contacts</div>
       ${repContacts.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
@@ -603,32 +596,23 @@ function renderReps(){
   }).join('');
 }
 
-// ── PIPELINE ──────────────────────────────────────────────────────────────────
 function renderPipeline(){
   const contacts=dashData?.dash?.contacts||[];
   const search=(document.getElementById('pipe-search')?.value||'').toLowerCase();
   const statusFilter=document.getElementById('pipe-status-filter')?.value||'';
   const repFilter=document.getElementById('pipe-rep-filter')?.value||'';
-
-  // Populate rep filter
   const repSelect=document.getElementById('pipe-rep-filter');
   if(repSelect&&repSelect.options.length<=1){
     const reps=[...new Set(contacts.map(c=>c.rep_username))];
     reps.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;repSelect.appendChild(o);});
   }
-
   let list=contacts.filter(c=>{
     if(search&&!c.biz_name?.toLowerCase().includes(search))return false;
     if(statusFilter&&c.status!==statusFilter)return false;
     if(repFilter&&c.rep_username!==repFilter)return false;
     return true;
   });
-
-  if(!list.length){
-    document.getElementById('pipeline-table-wrap').innerHTML='<div class="empty"><div class="icon">📋</div>No contacts found.</div>';
-    return;
-  }
-
+  if(!list.length){document.getElementById('pipeline-table-wrap').innerHTML='<div class="empty"><div class="icon">📋</div>No contacts found.</div>';return;}
   document.getElementById('pipeline-table-wrap').innerHTML=`<table class="data-table">
     <thead><tr><th>Business</th><th>Rep</th><th>Trade</th><th>Method</th><th>Status</th><th>Follow-up</th><th>Added</th></tr></thead>
     <tbody>${list.map(c=>`<tr>
@@ -643,7 +627,6 @@ function renderPipeline(){
   </table>`;
 }
 
-// ── LOGINS ────────────────────────────────────────────────────────────────────
 function renderLogins(){
   const logins=dashData?.logins?.logins||[];
   if(!logins.length){document.getElementById('logins-table-wrap').innerHTML='<div class="empty"><div class="icon">🔑</div>No logins yet.</div>';return;}
@@ -663,46 +646,80 @@ function renderLogins(){
   </table>`;
 }
 
-// ── CLIENT MODAL ──────────────────────────────────────────────────────────────
+function renderDataManagement(){
+  const repStats=dashData?.dash?.repStats||{};
+  const reps=Object.keys(repStats);
+  if(!reps.length){
+    document.getElementById('wipe-cards').innerHTML='<div class="empty"><div class="icon">👥</div>No rep data found.</div>';
+    return;
+  }
+  document.getElementById('wipe-cards').innerHTML=reps.map(rep=>{
+    const count=repStats[rep]?.contacts||0;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--card2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--white);">${rep}</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:2px;">${count} contact${count!==1?'s':''} in pipeline</div>
+      </div>
+      <button onclick="confirmWipe('${rep}',${count})" style="background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:var(--red);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;" ${count===0?'disabled':''}>
+        ${count===0?'No data to wipe':'🗑️ Wipe All Contacts'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function confirmWipe(rep,count){
+  wipeTarget=rep;
+  document.getElementById('wipe-rep-label').textContent=rep;
+  document.getElementById('wipe-count-label').textContent=`${count} contact${count!==1?'s':''} will be permanently deleted`;
+  document.getElementById('wipe-modal').classList.add('open');
+}
+
+function closeWipeModal(){
+  document.getElementById('wipe-modal').classList.remove('open');
+  wipeTarget=null;
+}
+
+async function executeWipe(){
+  if(!wipeTarget)return;
+  const btn=document.getElementById('wipe-confirm-btn');
+  btn.textContent='Deleting...';btn.disabled=true;
+  try{
+    const d=await api('/portal/admin/contacts/wipe',{rep_username:wipeTarget});
+    if(d.success){
+      toast(`✓ All contacts for ${wipeTarget} deleted`);
+      closeWipeModal();
+      await loadDashboard();
+    } else {
+      toast('Error: '+(d.error||'Could not wipe data'),true);
+      btn.textContent='Yes, Delete All Contacts';btn.disabled=false;
+    }
+  }catch(e){
+    toast('Connection error',true);
+    btn.textContent='Yes, Delete All Contacts';btn.disabled=false;
+  }
+}
+
 function openClientModal(s){
   selectedClientId=s.id;
   document.getElementById('cm-title').textContent=s.biz_name||'Client Details';
   document.getElementById('cm-status').value=s.onboard_status||'pending';
   document.getElementById('cm-notes').value=s.admin_notes||'';
-  const hours=typeof s.hours==='string'?JSON.parse(s.hours||'{}'):s.hours||{};
   const services=Array.isArray(s.services)?s.services.join(', '):s.services||'—';
   document.getElementById('cm-body').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:1rem;">
       <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Contact</div>
-        <div>${s.contact_name||'—'}</div>
-        <div style="color:var(--accent);">${s.contact_email||'—'}</div>
-        <div>${s.biz_phone||'—'}</div>
+        <div>${s.contact_name||'—'}</div><div style="color:var(--accent);">${s.contact_email||'—'}</div><div>${s.biz_phone||'—'}</div>
       </div>
       <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Plan & Trade</div>
         <div style="color:var(--orange);font-weight:700;">${s.plan_label||s.plan||'—'}</div>
         <div>${s.trade||'—'} · ${s.location||'—'}</div>
       </div>
-      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Calendar</div>
-        <div>${s.cal_type||'—'}</div>
-        ${s.cal_link?`<div style="font-size:11px;color:var(--blue2);">${s.cal_link}</div>`:''}
-        ${s.cal_email?`<div style="font-size:11px;color:var(--blue2);">${s.cal_email}</div>`:''}
-      </div>
-      <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Branding</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div style="width:16px;height:16px;border-radius:50%;background:${s.brand_color||'#00C896'};border:1px solid rgba(255,255,255,.2);flex-shrink:0;"></div>
-          <span>${s.brand_color||'—'}</span>
-        </div>
-        <div style="font-size:11px;color:var(--gray);margin-top:2px;">${s.tone||'—'} · ${s.tagline||'No tagline'}</div>
-      </div>
     </div>
-    <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;margin-bottom:8px;font-size:13px;">
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;font-size:13px;margin-bottom:8px;">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Services</div>
       <div>${services}</div>
-      ${s.services_other?`<div style="color:var(--gray);font-size:12px;margin-top:3px;">+ ${s.services_other}</div>`:''}
     </div>
     ${s.extra_notes?`<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:.75rem;font-size:13px;">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);margin-bottom:4px;">Client Notes</div>
@@ -718,41 +735,23 @@ async function saveClientStatus(){
   const status=document.getElementById('cm-status').value;
   const notes=document.getElementById('cm-notes').value.trim();
   const d=await api('/portal/onboard/update',{id:selectedClientId,onboard_status:status,admin_notes:notes});
-  if(d.success){
-    toast('✓ Status updated');
-    await loadDashboard();
-    closeClientModal();
-  } else {
-    toast('Failed to update: '+(d.error||'unknown error'),true);
-  }
+  if(d.success){toast('✓ Status updated');await loadDashboard();closeClientModal();}
+  else{toast('Failed to update: '+(d.error||'unknown error'),true);}
 }
 
-// ── REPORT BUILDER ────────────────────────────────────────────────────────────
 function populateReportClients(){
   const submissions=dashData?.onboards?.submissions||[];
-  const active=submissions.filter(s=>s.onboard_status==='active'||s.contact_email);
   const sel=document.getElementById('report-client');
   sel.innerHTML='<option value="">Select client...</option>';
-  active.forEach(s=>{
+  submissions.forEach(s=>{
     const o=document.createElement('option');
     o.value=s.contact_email;
     o.textContent=`${s.biz_name} (${s.contact_email})`;
     sel.appendChild(o);
   });
-  // Set default month to current
   const now=new Date();
   document.getElementById('report-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  loadSavedReports();
-}
-
-async function loadSavedReports(){
-  // Show reports for all clients - pull from each active client
-  const submissions=dashData?.onboards?.submissions||[];
-  const emails=submissions.map(s=>s.contact_email).filter(Boolean);
-  if(!emails.length){document.getElementById('reports-list').innerHTML='<div class="empty"><div class="icon">📈</div>No active clients yet.</div>';return;}
-
-  // For now show a message to select client - full report list requires per-client fetch
-  document.getElementById('reports-list').innerHTML=`<div style="font-size:13px;color:var(--gray);padding:.5rem 0;">Select a client above to view their report history. Reports are sent to clients via their portal at <strong style="color:var(--text);">mysmartslots.com/client</strong></div>`;
+  document.getElementById('reports-list').innerHTML=`<div style="font-size:13px;color:var(--gray);padding:.5rem 0;">Select a client above to view their report history.</div>`;
 }
 
 async function saveReport(){
@@ -760,8 +759,7 @@ async function saveReport(){
   const month=document.getElementById('report-month').value;
   if(!email||!month){toast('Select a client and month first.',true);return;}
   const d=await api('/portal/admin/report/save',{
-    client_email:email,
-    report_month:month,
+    client_email:email,report_month:month,
     calls_recovered:parseInt(document.getElementById('report-calls').value)||0,
     bookings_confirmed:parseInt(document.getElementById('report-bookings').value)||0,
     reviews_requested:parseInt(document.getElementById('report-reviews').value)||0,
@@ -769,16 +767,11 @@ async function saveReport(){
     notes:document.getElementById('report-notes').value.trim(),
   });
   if(d.success){
-    toast('✓ Report saved — client can view it in their portal');
-    document.getElementById('report-calls').value='';
-    document.getElementById('report-bookings').value='';
-    document.getElementById('report-reviews').value='';
-    document.getElementById('report-revenue').value='';
-    document.getElementById('report-notes').value='';
-  } else {
-    toast('Failed: '+(d.error||'unknown error'),true);
-  }
+    toast('✓ Report saved');
+    ['report-calls','report-bookings','report-reviews','report-revenue','report-notes'].forEach(id=>{document.getElementById(id).value='';});
+  } else {toast('Failed: '+(d.error||'unknown error'),true);}
 }
 </script>
+
 </body>
 </html>

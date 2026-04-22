@@ -16,10 +16,11 @@ const supabase = createClient(
 // ── USERS ─────────────────────────────────────────────────────────────────────
 // Same users as rep.html — keep these in sync when you add new reps
 const USERS = {
-  "admin": { password: process.env.ADMIN_PASSWORD || "slots2025", name: "Owner",  isAdmin: true },
-  "orion1":  { password: process.env.REP1_PASSWORD  || "Orion2026$v ",  name: "Orion",  isAdmin: false },
-  "rep2":  { password: process.env.REP2_PASSWORD  || "rep2pass",  name: "Rep 2",  isAdmin: false },
-  "braden1":  { password: process.env.ALEX_PASSWORD  || "Braden2026$",  name: "Braden",   isAdmin: false },
+  "admin":   { password: process.env.ADMIN_PASSWORD   || "slots2025",   name: "Owner",  isAdmin: true  },
+  "orion1":  { password: process.env.REP1_PASSWORD    || "Orion2026$",  name: "Orion",  isAdmin: false },
+  "braden1": { password: process.env.BRADEN_PASSWORD  || "Braden2026$", name: "Braden", isAdmin: false },
+  "carson1": { password: process.env.CARSON_PASSWORD  || "Carson2026$", name: "Carson", isAdmin: false },
+  "rep2":    { password: process.env.REP2_PASSWORD    || "rep2pass",    name: "Rep 2",  isAdmin: false },
 };
 
 // ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
@@ -369,6 +370,83 @@ app.post("/portal/admin/report/save", requireAuth, requireAdmin, async (req, res
   }, { onConflict: "client_email,report_month" });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
+});
+
+// ── STRIPE — Create Checkout Session ─────────────────────────────────────────
+// Install: npm install stripe  (add to package.json dependencies)
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+
+app.post("/portal/billing/create-checkout", async (req, res) => {
+  const { rep_name, client_name, client_email, plan, billing_type, amount_cents, description, success_url, cancel_url } = req.body;
+  if (!client_email || !amount_cents || !plan) {
+    return res.status(400).json({ error: "client_email, amount_cents, and plan are required." });
+  }
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(500).json({ error: "Stripe not configured. Add STRIPE_SECRET_KEY to Render environment variables." });
+  }
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      customer_email: client_email,
+      line_items: [{
+        price_data: {
+          currency: "usd",
+          unit_amount: amount_cents,
+          product_data: {
+            name: `My Smart Slots — ${description || plan}`,
+            description: `Setup fee + first month · ${plan} Plan · Sold by ${rep_name || "My Smart Slots"}`,
+          },
+        },
+        quantity: 1,
+      }],
+      metadata: {
+        rep_name: rep_name || "",
+        client_name: client_name || "",
+        plan,
+        billing_type: billing_type || "monthly",
+      },
+      success_url: success_url || `https://mysmartslots.com/financial?success=true&plan=${encodeURIComponent(plan)}&email=${encodeURIComponent(client_email)}`,
+      cancel_url: cancel_url || "https://mysmartslots.com/financial?cancelled=true",
+    });
+
+    // Log the sale to Supabase
+    await supabase.from("sales").insert({
+      rep_name: rep_name || "Unknown",
+      client_name: client_name || "",
+      client_email: client_email.toLowerCase(),
+      plan,
+      billing_type: billing_type || "monthly",
+      amount_cents,
+      stripe_session_id: session.id,
+      status: "pending_payment",
+      created_at: new Date().toISOString(),
+    }).catch(e => console.error("Sales log error:", e));
+
+    res.json({ success: true, url: session.url, session_id: session.id });
+  } catch (e) {
+    console.error("Stripe error:", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── BILLING — Get sales log (admin only) ──────────────────────────────────────
+app.post("/portal/billing/sales", requireAuth, requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from("sales").select("*").order("created_at", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, sales: data || [] });
+});
+
+// ── ADMIN — Delete all contacts for a specific rep ────────────────────────────
+app.post("/portal/admin/contacts/wipe", requireAuth, requireAdmin, async (req, res) => {
+  const { rep_username } = req.body;
+  if (!rep_username) return res.status(400).json({ error: "rep_username required." });
+  const { error } = await supabase
+    .from("contacts").delete().eq("rep_username", rep_username);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, wiped: rep_username });
 });
 
 const PORT = process.env.PORT || 3001;

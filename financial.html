@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Client Billing</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#00C896;--accent-dark:#009e78;--accent-light:#e6faf5;
+  --navy:#1a1a2e;--white:#fff;--gray-bg:#f5f7fb;--gray-border:#e4e8f0;
+  --gray-text:#6b7280;--dark-text:#111827;--orange:#f39c12;--red:#e74c3c;
+  --green:#16a34a;--blue:#1455a4;--shadow:0 1px 3px rgba(0,0,0,.08);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--gray-bg);color:var(--dark-text);min-height:100vh;}
+
+/* HEADER */
+header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.header-logo{font-size:16px;font-weight:700;color:var(--white);}
+.header-logo span{color:var(--accent);}
+.header-badge{background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+
+/* MAIN */
+.main{max-width:680px;margin:0 auto;padding:2rem 1rem 5rem;}
+
+/* SUCCESS / CANCEL banners */
+.banner{border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;font-size:14px;font-weight:500;}
+.banner.success{background:#ecfdf5;border:1px solid #a7f3d0;color:var(--green);}
+.banner.cancel{background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem;box-shadow:var(--shadow);}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-dark);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--gray-border);}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);}
+.inp{padding:11px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--dark-text);outline:none;transition:border-color .2s;width:100%;}
+.inp:focus{border-color:var(--accent);background:var(--white);}
+.inp option{background:var(--white);}
+
+/* PLAN CARDS */
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem;}
+@media(max-width:520px){.plan-grid{grid-template-columns:1fr;}}
+.plan-card{border:2px solid var(--gray-border);border-radius:12px;padding:1.1rem;cursor:pointer;transition:all .15s;text-align:center;}
+.plan-card:hover{border-color:var(--accent);}
+.plan-card.selected{border-color:var(--accent);background:var(--accent-light);}
+.plan-name{font-size:14px;font-weight:700;color:var(--dark-text);margin-bottom:4px;}
+.plan-price{font-size:22px;font-weight:800;color:var(--accent-dark);}
+.plan-price span{font-size:13px;font-weight:400;color:var(--gray-text);}
+.plan-desc{font-size:11px;color:var(--gray-text);margin-top:4px;line-height:1.5;}
+
+/* BILLING TOGGLE */
+.billing-toggle{display:flex;gap:8px;margin-bottom:1.25rem;}
+.billing-opt{flex:1;padding:10px;border:2px solid var(--gray-border);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s;}
+.billing-opt:hover{border-color:var(--accent);}
+.billing-opt.selected{border-color:var(--accent);background:var(--accent-light);}
+.billing-opt .label{font-size:13px;font-weight:600;color:var(--dark-text);}
+.billing-opt .sublabel{font-size:11px;color:var(--gray-text);margin-top:2px;}
+.billing-opt.selected .sublabel{color:var(--accent-dark);}
+
+/* BILL SUMMARY */
+.bill-summary{background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;}
+.bill-row{display:flex;justify-content:space-between;font-size:13px;padding:.4rem 0;border-bottom:1px solid var(--gray-border);}
+.bill-row:last-child{border-bottom:none;font-weight:700;font-size:15px;color:var(--dark-text);}
+.bill-row .label{color:var(--gray-text);}
+.bill-row .val{font-weight:600;color:var(--dark-text);}
+.bill-row.total .val{color:var(--accent-dark);font-size:18px;}
+.bill-comm{background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:8px;padding:.65rem 1rem;font-size:12px;color:var(--accent-dark);font-weight:600;margin-bottom:1.25rem;}
+
+/* CHECKOUT BTN */
+.checkout-btn{width:100%;padding:15px;background:var(--accent);color:var(--white);border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.checkout-btn:hover{background:var(--accent-dark);}
+.checkout-btn:disabled{opacity:.5;cursor:not-allowed;}
+.checkout-btn .stripe-badge{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+
+/* SUCCESS MESSAGE */
+.success-card{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:14px;padding:1.75rem;margin-bottom:1.25rem;display:none;}
+.success-card h3{font-size:18px;font-weight:700;color:var(--green);margin-bottom:.75rem;}
+.success-card p{font-size:13px;color:#065f46;line-height:1.7;margin-bottom:1rem;}
+.copy-box{background:var(--white);border:1px solid #a7f3d0;border-radius:10px;padding:1rem 1.25rem;font-size:13px;color:var(--dark-text);line-height:1.8;white-space:pre-wrap;word-break:break-word;margin-bottom:.75rem;}
+.copy-btn{background:var(--green);color:var(--white);border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.copy-btn:hover{opacity:.88;}
+.new-sale-btn{background:transparent;border:1px solid #a7f3d0;color:var(--green);border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-left:8px;}
+
+/* STRIPE NOTE */
+.stripe-note{text-align:center;font-size:12px;color:var(--gray-text);margin-top:.75rem;line-height:1.6;}
+.stripe-note a{color:var(--blue);}
+
+/* SETUP NOTE */
+.setup-note{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:1rem 1.25rem;font-size:13px;color:#78350f;line-height:1.7;margin-bottom:1.25rem;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:var(--white);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast-el" class="toast"></div>
+
+<header>
+  <div class="header-logo">My Smart<span>Slots</span></div>
+  <div class="header-badge">💳 Client Billing</div>
+</header>
+
+<div class="main">
+
+  <!-- SUCCESS / CANCEL banners from Stripe redirect -->
+  <div id="success-banner" class="banner success" style="display:none;">
+    ✓ Payment received! Send the client their onboard link below.
+  </div>
+  <div id="cancel-banner" class="banner cancel" style="display:none;">
+    ✕ Payment was cancelled. You can try again below.
+  </div>
+
+  <!-- POST-PAYMENT SUCCESS MESSAGE -->
+  <div class="success-card" id="post-payment-card">
+    <h3>✓ Payment Link Generated!</h3>
+    <p>The client will be redirected to Stripe to pay. Once they complete payment, send them this message so they know the next step:</p>
+    <div class="copy-box" id="copy-message"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="copy-btn" onclick="copyMessage()">📋 Copy Message</button>
+      <button class="new-sale-btn" onclick="resetForm()">+ New Sale</button>
+    </div>
+  </div>
+
+  <!-- STRIPE NOT CONFIGURED WARNING -->
+  <div class="setup-note" id="stripe-warning" style="display:none;">
+    ⚠️ <strong>Stripe not configured yet.</strong> Add your <code>STRIPE_SECRET_KEY</code> to Render environment variables to enable live payments. <a href="https://dashboard.stripe.com/apikeys" target="_blank" style="color:var(--orange);">Get your key →</a>
+  </div>
+
+  <!-- REP & CLIENT INFO -->
+  <div class="card">
+    <div class="card-title">📋 Sale Details</div>
+    <div class="form-grid">
+      <div class="fg">
+        <label>Closing Rep <span style="color:var(--red);">*</span></label>
+        <select class="inp" id="rep-select" onchange="updateCommission()">
+          <option value="">Select rep...</option>
+          <option value="Orion">Orion</option>
+          <option value="Braden">Braden</option>
+          <option value="Carson">Carson</option>
+          <option value="Rep 2">Rep 2</option>
+          <option value="Owner">Admin / Owner</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Client Business Name <span style="color:var(--red);">*</span></label>
+        <input class="inp" type="text" id="client-biz" placeholder="Diamond Plumbing Co." oninput="updateBill()"/>
+      </div>
+      <div class="fg">
+        <label>Client Name <span style="color:var(--red);">*</span></label>
+        <input class="inp" type="text" id="client-name" placeholder="Rick Johnson"/>
+      </div>
+      <div class="fg">
+        <label>Client Email <span style="color:var(--red);">*</span></label>
+        <input class="inp" type="email" id="client-email" placeholder="rick@business.com"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAN SELECTOR -->
+  <div class="card">
+    <div class="card-title">📦 Select Plan</div>
+    <div class="plan-grid">
+      <div class="plan-card" id="plan-starter" onclick="selectPlan('starter')">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$125<span>/mo</span></div>
+        <div class="plan-desc">Core automation — AI chat, confirmations, reminders</div>
+      </div>
+      <div class="plan-card selected" id="plan-pro" onclick="selectPlan('pro')">
+        <div class="plan-name">Pro ⭐</div>
+        <div class="plan-price">$225<span>/mo</span></div>
+        <div class="plan-desc">Full automation — adds missed call text back, live SMS, reviews</div>
+      </div>
+      <div class="plan-card" id="plan-elite" onclick="selectPlan('elite')">
+        <div class="plan-name">Elite</div>
+        <div class="plan-price">$375<span>/mo</span></div>
+        <div class="plan-desc">Total pipeline — adds re-engagement, email replies, strategy review</div>
+      </div>
+    </div>
+
+    <!-- BILLING TYPE -->
+    <div class="card-title" style="margin-top:.25rem;">💳 Billing Type</div>
+    <div class="billing-toggle">
+      <div class="billing-opt selected" id="billing-monthly" onclick="selectBilling('monthly')">
+        <div class="label">Monthly</div>
+        <div class="sublabel">Pay month to month</div>
+      </div>
+      <div class="billing-opt" id="billing-annual" onclick="selectBilling('annual')">
+        <div class="label">Annual</div>
+        <div class="sublabel">2 months free — save big</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BILL SUMMARY -->
+  <div class="card">
+    <div class="card-title">🧾 Bill Summary</div>
+    <div class="bill-summary">
+      <div class="bill-row"><span class="label">Plan</span><span class="val" id="bs-plan">Pro — $225/mo</span></div>
+      <div class="bill-row"><span class="label">Billing</span><span class="val" id="bs-billing">Monthly</span></div>
+      <div class="bill-row"><span class="label">Setup Fee (one-time)</span><span class="val">$199.00</span></div>
+      <div class="bill-row"><span class="label" id="bs-period-label">First Month</span><span class="val" id="bs-period-amt">$225.00</span></div>
+      <div class="bill-row total"><span class="label">Total Due Today</span><span class="val" id="bs-total">$424.00</span></div>
+    </div>
+    <div class="bill-comm" id="bill-comm">
+      💰 Rep earns: <strong id="comm-amount">$67.50/mo recurring</strong> + $50 setup bonus on this account
+    </div>
+
+    <button class="checkout-btn" id="checkout-btn" onclick="createCheckout()">
+      <span>Send to Stripe Checkout</span>
+      <span class="stripe-badge">🔒 Stripe</span>
+    </button>
+    <p class="stripe-note">Client will be redirected to a secure Stripe payment page. After payment, they'll receive a link to complete their onboard form. No card data touches our servers.</p>
+  </div>
+
+</div>
+
+<script>
+const API="https://mysmartslots-portal.onrender.com";
+
+const PLANS={
+  starter:{monthly:125,annual:1250,label:"Starter",comm_monthly:37.50,comm_annual:312.50},
+  pro:    {monthly:225,annual:2250,label:"Pro",    comm_monthly:67.50,comm_annual:562.50},
+  elite:  {monthly:375,annual:3750,label:"Elite",  comm_monthly:112.50,comm_annual:937.50},
+};
+
+let selectedPlan='pro';
+let selectedBilling='monthly';
+
+// ── CHECK URL PARAMS ──────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('success')==='true'){
+    document.getElementById('success-banner').style.display='block';
+    // Show the onboard message if we have plan/email
+    const plan=params.get('plan');
+    const email=params.get('email');
+    if(plan&&email){
+      showPostPaymentMessage(plan,email,'','');
+    }
+  }
+  if(params.get('cancelled')==='true'){
+    document.getElementById('cancel-banner').style.display='block';
+  }
+  updateBill();
+});
+
+// ── PLAN / BILLING SELECTION ──────────────────────────────────────────────────
+function selectPlan(plan){
+  selectedPlan=plan;
+  document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('plan-'+plan).classList.add('selected');
+  updateBill();
+}
+
+function selectBilling(type){
+  selectedBilling=type;
+  document.querySelectorAll('.billing-opt').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('billing-'+type).classList.add('selected');
+  updateBill();
+}
+
+function updateBill(){
+  const p=PLANS[selectedPlan];
+  const isAnnual=selectedBilling==='annual';
+  const planAmt=isAnnual?p.annual:p.monthly;
+  const total=planAmt+199;
+  const comm=isAnnual?p.comm_annual:p.comm_monthly;
+  const commLabel=isAnnual?'annual recurring':'monthly recurring';
+
+  document.getElementById('bs-plan').textContent=`${p.label} — $${isAnnual?p.annual.toLocaleString()+'/yr':'$'+p.monthly+'/mo'}`;
+  document.getElementById('bs-billing').textContent=isAnnual?'Annual (2 months free)':'Monthly';
+  document.getElementById('bs-period-label').textContent=isAnnual?'Annual Payment':'First Month';
+  document.getElementById('bs-period-amt').textContent='$'+planAmt.toLocaleString()+'.00';
+  document.getElementById('bs-total').textContent='$'+total.toLocaleString()+'.00';
+  document.getElementById('comm-amount').textContent=`$${comm.toFixed(2)}/${isAnnual?'yr':'mo'} ${commLabel}`;
+}
+
+function updateCommission(){updateBill();}
+
+// ── CREATE CHECKOUT ───────────────────────────────────────────────────────────
+async function createCheckout(){
+  const rep=document.getElementById('rep-select').value;
+  const biz=document.getElementById('client-biz').value.trim();
+  const name=document.getElementById('client-name').value.trim();
+  const email=document.getElementById('client-email').value.trim();
+
+  if(!rep){toast('Select the closing rep first.');return;}
+  if(!biz){toast('Enter the client business name.');return;}
+  if(!name){toast('Enter the client name.');return;}
+  if(!email||!email.includes('@')){toast('Enter a valid client email.');return;}
+
+  const btn=document.getElementById('checkout-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span>Creating payment link...</span>';
+
+  const p=PLANS[selectedPlan];
+  const isAnnual=selectedBilling==='annual';
+  const planAmt=isAnnual?p.annual:p.monthly;
+  const totalCents=(planAmt+199)*100;
+  const description=`${p.label} Plan — ${isAnnual?'Annual':'Monthly'} + Setup Fee`;
+
+  try{
+    const r=await fetch(`${API}/portal/billing/create-checkout`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        rep_name:rep,
+        client_name:name,
+        client_email:email,
+        plan:selectedPlan,
+        billing_type:selectedBilling,
+        amount_cents:totalCents,
+        description,
+        success_url:`https://mysmartslots.com/financial?success=true&plan=${encodeURIComponent(selectedPlan)}&email=${encodeURIComponent(email)}&rep=${encodeURIComponent(rep)}&biz=${encodeURIComponent(biz)}`,
+        cancel_url:'https://mysmartslots.com/financial?cancelled=true',
+      })
+    });
+    const d=await r.json();
+
+    if(d.error&&d.error.includes('Stripe not configured')){
+      document.getElementById('stripe-warning').style.display='block';
+      btn.disabled=false;
+      btn.innerHTML='<span>Send to Stripe Checkout</span><span class="stripe-badge">🔒 Stripe</span>';
+      // Still show the message for demo purposes
+      showPostPaymentMessage(selectedPlan,email,name,rep);
+      return;
+    }
+
+    if(!d.success||!d.url){
+      toast('Error: '+(d.error||'Could not create checkout session.'),true);
+      btn.disabled=false;
+      btn.innerHTML='<span>Send to Stripe Checkout</span><span class="stripe-badge">🔒 Stripe</span>';
+      return;
+    }
+
+    // Show the rep what message to send, then open Stripe
+    showPostPaymentMessage(selectedPlan,email,name,rep);
+    setTimeout(()=>window.open(d.url,'_blank'),800);
+
+  }catch(e){
+    toast('Connection error — check internet and try again.',true);
+    btn.disabled=false;
+    btn.innerHTML='<span>Send to Stripe Checkout</span><span class="stripe-badge">🔒 Stripe</span>';
+  }
+}
+
+function showPostPaymentMessage(plan,email,name,rep){
+  const p=PLANS[plan]||PLANS.pro;
+  const isAnnual=selectedBilling==='annual';
+  const onboardUrl=`https://mysmartslots.com/onboard?plan=${plan}`;
+  const planLabel=`${p.label} (${isAnnual?'Annual':'Monthly'})`;
+
+  const msg=`Hi ${name||'there'}! 👋
+
+Payment confirmed — welcome to My Smart Slots ${planLabel}!
+
+Your next step is to fill out your quick onboard form. It takes about 5 minutes and gives us everything we need to get your automations live within 24 hours.
+
+👉 Your onboard link:
+${onboardUrl}
+
+Once you complete the form, we'll reach out within 24 hours to confirm everything is live.
+
+Questions? Call or text 785-329-0202 or email hello@mysmartslots.com.
+
+— ${rep||'The My Smart Slots Team'}`;
+
+  document.getElementById('copy-message').textContent=msg;
+  document.getElementById('post-payment-card').style.display='block';
+  document.getElementById('post-payment-card').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('checkout-btn').innerHTML='<span>✓ Payment Link Created</span>';
+}
+
+function copyMessage(){
+  const text=document.getElementById('copy-message').textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('✓ Message copied to clipboard!'));
+}
+
+function resetForm(){
+  document.getElementById('post-payment-card').style.display='none';
+  document.getElementById('client-biz').value='';
+  document.getElementById('client-name').value='';
+  document.getElementById('client-email').value='';
+  document.getElementById('rep-select').value='';
+  selectPlan('pro');
+  selectBilling('monthly');
+  const btn=document.getElementById('checkout-btn');
+  btn.disabled=false;
+  btn.innerHTML='<span>Send to Stripe Checkout</span><span class="stripe-badge">🔒 Stripe</span>';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toast(msg,err=false){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;
+  t.style.background=err?'var(--red)':'var(--navy)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
