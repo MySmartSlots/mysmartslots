@@ -6,9 +6,9 @@
     "start": "node portal-server.js",
     "dev": "node --watch portal-server.js"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "cors": "^2.8.5",
-    "express": "^4.18.2"
-  }
+"dependencies": {
+  "express": "^4.18.2",
+  "@supabase/supabase-js": "^2.0.0",
+  "stripe": "^14.0.0"
+}
 }
