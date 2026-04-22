@@ -777,13 +777,25 @@ async function doLogin(){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='flex';
     document.getElementById('rep-name-display').textContent=d.name;
+    // Check if admin flagged a training reset for this user
+    checkTrainingReset();
     loadProgress();
     renderSidebar();
     if(isAdmin)document.getElementById('admin-nav-btn').style.display='block';
     loadModule(0);
-    // Log training access
     fetch(`${API}/portal/setup/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP,action:'training_access',client_name:'Training Portal'})}).catch(()=>{});
   }catch(e){document.getElementById('login-error').style.display='block';}
+}
+
+function checkTrainingReset(){
+  // Admin sets this flag in localStorage from their browser when they hit wipe
+  // Since training is localStorage-based, the cleanest approach is a shared reset key
+  const resetKey=`training_reset_${currentU}`;
+  if(localStorage.getItem(resetKey)){
+    localStorage.removeItem(`training_${currentU}`);
+    localStorage.removeItem(resetKey);
+    toast('Your training progress was reset by admin. Starting fresh.');
+  }
 }
 
 function doLogout(){

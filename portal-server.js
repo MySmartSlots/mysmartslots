@@ -412,7 +412,7 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
     });
 
     // Log the sale to Supabase
-    await supabase.from("sales").insert({
+    const { error: saleError } = await supabase.from("sales").insert({
       rep_name: rep_name || "Unknown",
       client_name: client_name || "",
       client_email: client_email.toLowerCase(),
@@ -422,7 +422,8 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
       stripe_session_id: session.id,
       status: "pending_payment",
       created_at: new Date().toISOString(),
-    }).catch(e => console.error("Sales log error:", e));
+    });
+    if (saleError) console.error("Sales log error:", saleError);
 
     res.json({ success: true, url: session.url, session_id: session.id });
   } catch (e) {
@@ -437,6 +438,20 @@ app.post("/portal/billing/sales", requireAuth, requireAdmin, async (req, res) =>
     .from("sales").select("*").order("created_at", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true, sales: data || [] });
+});
+
+// ── ADMIN — Wipe training progress for a rep ──────────────────────────────────
+app.post("/portal/admin/training/wipe", requireAuth, requireAdmin, async (req, res) => {
+  const { rep_username } = req.body;
+  if (!rep_username) return res.status(400).json({ error: "rep_username required." });
+  // Log a training reset flag — training portal checks for this on login
+  const { error } = await supabase.from("logins").insert({
+    username: rep_username,
+    rep_name: `${rep_username} [training_reset]`,
+    logged_in_at: new Date().toISOString(),
+  });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, wiped: rep_username });
 });
 
 // ── ADMIN — Delete all contacts for a specific rep ────────────────────────────

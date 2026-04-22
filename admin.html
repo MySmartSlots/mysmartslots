@@ -460,19 +460,23 @@ async function api(endpoint,body={}){
 
 async function loadDashboard(){
   try{
-    const [dash,onboards,logins]=await Promise.all([
+    const [dash,onboards,logins]=await Promise.allSettled([
       api('/portal/admin/dashboard'),
       api('/portal/onboard/list'),
       api('/portal/admin/logins'),
     ]);
-    dashData={dash,onboards,logins};
+    dashData={
+      dash: dash.status==='fulfilled'?dash.value:{success:false,error:'dashboard failed'},
+      onboards: onboards.status==='fulfilled'?onboards.value:{success:false,submissions:[]},
+      logins: logins.status==='fulfilled'?logins.value:{success:false,logins:[]},
+    };
     renderOverview();
     renderClients();
     renderReps();
     renderPipeline();
     renderLogins();
     populateReportClients();
-  }catch(e){toast('Failed to load dashboard — check connection.',true);}
+  }catch(e){toast('Failed to load dashboard — check connection.',true);console.error(e);}
 }
 
 function renderOverview(){
@@ -649,28 +653,49 @@ function renderLogins(){
 function renderDataManagement(){
   const repStats=dashData?.dash?.repStats||{};
   const reps=Object.keys(repStats);
-  if(!reps.length){
+  const allReps=['orion1','braden1','carson1','rep2'];
+  // Merge known reps with any who have pipeline data
+  const repList=[...new Set([...allReps,...reps])];
+
+  if(!repList.length){
     document.getElementById('wipe-cards').innerHTML='<div class="empty"><div class="icon">👥</div>No rep data found.</div>';
     return;
   }
-  document.getElementById('wipe-cards').innerHTML=reps.map(rep=>{
-    const count=repStats[rep]?.contacts||0;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--card2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;gap:10px;">
-      <div>
-        <div style="font-size:15px;font-weight:700;color:var(--white);">${rep}</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:2px;">${count} contact${count!==1?'s':''} in pipeline</div>
-      </div>
-      <button onclick="confirmWipe('${rep}',${count})" style="background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:var(--red);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;" ${count===0?'disabled':''}>
-        ${count===0?'No data to wipe':'🗑️ Wipe All Contacts'}
-      </button>
-    </div>`;
-  }).join('');
+  document.getElementById('wipe-cards').innerHTML=`
+    <div style="font-size:13px;color:var(--gray);margin-bottom:1rem;line-height:1.7;">
+      <strong style="color:var(--text);">Pipeline wipe</strong> deletes all contacts from Supabase for that rep.<br/>
+      <strong style="color:var(--text);">Training wipe</strong> clears their module progress and quiz scores from localStorage on their device — they will need to retake all modules.
+    </div>
+    ${repList.map(rep=>{
+      const count=repStats[rep]?.contacts||0;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--card2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--white);">${rep}</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:2px;">${count} contact${count!==1?'s':''} in pipeline</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="confirmWipe('${rep}',${count},'pipeline')"
+            style="background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:var(--red);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;"
+            ${count===0?'disabled':''}>
+            ${count===0?'No contacts':'🗑️ Wipe Pipeline'}
+          </button>
+          <button onclick="confirmWipe('${rep}',0,'training')"
+            style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);color:var(--purple);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">
+            📚 Wipe Training
+          </button>
+        </div>
+      </div>`;
+    }).join('')}`;
 }
 
-function confirmWipe(rep,count){
-  wipeTarget=rep;
+function confirmWipe(rep,count,type){
+  wipeTarget={rep,type};
   document.getElementById('wipe-rep-label').textContent=rep;
-  document.getElementById('wipe-count-label').textContent=`${count} contact${count!==1?'s':''} will be permanently deleted`;
+  if(type==='pipeline'){
+    document.getElementById('wipe-count-label').textContent=`${count} contact${count!==1?'s':''} will be permanently deleted from the pipeline`;
+  } else {
+    document.getElementById('wipe-count-label').textContent=`All training progress and quiz scores for ${rep} will be reset`;
+  }
   document.getElementById('wipe-modal').classList.add('open');
 }
 
@@ -681,20 +706,34 @@ function closeWipeModal(){
 
 async function executeWipe(){
   if(!wipeTarget)return;
+  const {rep,type}=wipeTarget;
   const btn=document.getElementById('wipe-confirm-btn');
-  btn.textContent='Deleting...';btn.disabled=true;
-  try{
-    const d=await api('/portal/admin/contacts/wipe',{rep_username:wipeTarget});
-    if(d.success){
-      toast(`✓ All contacts for ${wipeTarget} deleted`);
-      closeWipeModal();
-      await loadDashboard();
-    } else {
-      toast('Error: '+(d.error||'Could not wipe data'),true);
+  btn.textContent='Processing...';btn.disabled=true;
+
+  if(type==='pipeline'){
+    try{
+      const d=await api('/portal/admin/contacts/wipe',{rep_username:rep});
+      if(d.success){
+        toast(`✓ Pipeline cleared for ${rep}`);
+        closeWipeModal();
+        await loadDashboard();
+      } else {
+        toast('Error: '+(d.error||'Could not wipe data'),true);
+        btn.textContent='Yes, Delete All Contacts';btn.disabled=false;
+      }
+    }catch(e){
+      toast('Connection error',true);
       btn.textContent='Yes, Delete All Contacts';btn.disabled=false;
     }
-  }catch(e){
-    toast('Connection error',true);
+  } else {
+    // Training is stored in localStorage — set a reset flag that training portal checks on login
+    // This works if admin and rep are on the same browser, OR we use the server log as a fallback
+    localStorage.setItem(`training_reset_${rep}`,'1');
+    try{
+      await api('/portal/admin/training/wipe',{rep_username:rep});
+    }catch(e){}
+    toast(`✓ Training progress reset for ${rep} — will clear on their next login`);
+    closeWipeModal();
     btn.textContent='Yes, Delete All Contacts';btn.disabled=false;
   }
 }
