@@ -417,7 +417,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.25rem 0;}
 
     <!-- STEP 2: Fit Checker -->
     <div class="modal-step" id="ms-1">
-      <div style="font-size:13px;color:var(--gray);margin-bottom:1rem;">Answer these questions about <strong style="color:var(--white);" id="fit-biz-name">this business</strong> to score their fit.</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:1rem;">Research <strong style="color:var(--white);" id="fit-biz-name">this business</strong> on Google, their website, and social media before answering. Everything below can be verified before you call.</div>
       <div class="fit-grid" id="modal-fit-questions"></div>
       <div class="score-result-inline" id="modal-score-result">
         <div class="score-big-sm" id="modal-score-num">—</div>
@@ -717,28 +717,59 @@ function nextModalStep(n){
 }
 
 const FIT_QUESTIONS=[
-  {id:'phone',text:'Do they rely on phone calls to get new customers?',yes:3,no:0,maybe:1},
-  {id:'missed',text:'Do they miss calls when out on jobs?',yes:3,no:0,maybe:2},
-  {id:'noshows',text:'Have they had no-shows or unconfirmed appointments?',yes:3,no:0,maybe:1},
-  {id:'reviews',text:'Are they trying to get more Google reviews?',yes:2,no:0,maybe:1},
-  {id:'staff',text:'Do they have limited or no office/admin staff?',yes:3,no:0,maybe:1},
-  {id:'growth',text:'Are they actively trying to grow or fill their schedule?',yes:2,no:0,maybe:1},
-  {id:'tech',text:'Are they open to using new tools / tech?',yes:2,no:-1,maybe:1},
-  {id:'budget',text:'Can they likely afford $125–$375/mo for automation?',yes:2,no:-2,maybe:1},
-  {id:'booking',text:'Do customers book appointments (vs. walk-in only)?',yes:3,no:-1,maybe:1},
-  {id:'volume',text:'Do they get 10+ customer inquiries/calls per week?',yes:2,no:0,maybe:1},
+  {id:'reviews_count',  text:'Google reviews — how many?',          yes:3,no:0,maybe:1,
+   opts:['50+ reviews','10–49 reviews','Under 10 reviews','No Google listing'],
+   vals:['yes','maybe','no','no']},
+  {id:'reviews_rating', text:'Google rating?',                       yes:3,no:-1,maybe:1,
+   opts:['4.0 stars or higher','3.0–3.9 stars','Under 3.0 stars','No rating'],
+   vals:['yes','maybe','no','no']},
+  {id:'has_website',    text:'Do they have a website?',              yes:2,no:1,maybe:0,
+   opts:['Yes','No'],
+   vals:['yes','no']},
+  {id:'website_quality',text:'Website quality?',                     yes:2,no:0,maybe:1,
+   opts:['Modern & professional','Outdated but functional','Very poor / barely works','No website'],
+   vals:['yes','maybe','no','no']},
+  {id:'has_chatbot',    text:'Do they have a chatbot or live chat?', yes:-1,no:3,maybe:1,
+   opts:['Yes — chatbot visible','No chatbot','Can\'t tell'],
+   vals:['no','yes','maybe']},
+  {id:'booking_online', text:'Can customers book online?',           yes:-1,no:3,maybe:1,
+   opts:['Yes — online booking visible','No online booking','Can\'t tell'],
+   vals:['no','yes','maybe']},
+  {id:'google_biz',     text:'Google Business profile claimed?',     yes:1,no:3,maybe:2,
+   opts:['Yes — fully set up','Claimed but incomplete','Not claimed / no profile'],
+   vals:['yes','maybe','no']},
+  {id:'social_media',   text:'Active social media presence?',        yes:1,no:2,maybe:1,
+   opts:['Active (posts in last 30 days)','Has pages but inactive','No social presence'],
+   vals:['yes','maybe','no']},
+  {id:'hours_listed',   text:'Hours clearly listed online?',         yes:1,no:2,maybe:1,
+   opts:['Yes — clear hours listed','Partial / inconsistent','No hours listed'],
+   vals:['yes','maybe','no']},
+  {id:'phone_prominent',text:'Is their phone number easy to find?',  yes:0,no:3,maybe:1,
+   opts:['Yes — prominent on site & Google','Hard to find','No phone listed'],
+   vals:['yes','no','maybe']},
+  {id:'reviews_recent', text:'Recent negative reviews mentioning missed calls / no response?', yes:3,no:0,maybe:1,
+   opts:['Yes — complaints about not calling back','No negative patterns','Can\'t tell'],
+   vals:['yes','no','maybe']},
+  {id:'appointment_biz',text:'Is this clearly an appointment-based business?', yes:3,no:-2,maybe:1,
+   opts:['Yes — clearly books appointments','Probably — service-based','Unclear / walk-in only'],
+   vals:['yes','maybe','no']},
 ];
 
 function renderFitQuestionsModal(){
   document.getElementById('modal-fit-questions').innerHTML=FIT_QUESTIONS.map(q=>`
     <div class="fit-question">
       <div class="fq-label">${q.text}</div>
-      <div class="fq-options">
-        <button class="fq-btn" onclick="setFitAnswer('${q.id}','yes',this)">✓ Yes</button>
-        <button class="fq-btn" onclick="setFitAnswer('${q.id}','maybe',this)">~ Maybe</button>
-        <button class="fq-btn" onclick="setFitAnswer('${q.id}','no',this)">✗ No</button>
+      <div class="fq-options" style="flex-wrap:wrap;gap:6px;">
+        ${q.opts.map((opt,i)=>`<button class="fq-btn" onclick="setFitAnswerMulti('${q.id}','${q.vals[i]}',${i},this)">${opt}</button>`).join('')}
       </div>
     </div>`).join('');
+}
+
+function setFitAnswerMulti(id,val,idx,btn){
+  fitAnswers[id]=val;
+  btn.parentElement.querySelectorAll('.fq-btn').forEach(b=>{b.className='fq-btn';});
+  const colorMap={yes:'sel-yes',no:'sel-no',maybe:'sel-maybe'};
+  btn.classList.add(colorMap[val]||'sel-maybe');
 }
 
 function setFitAnswer(id,val,btn){
@@ -749,7 +780,11 @@ function setFitAnswer(id,val,btn){
 
 function calcModalFit(){
   let score=0;
-  FIT_QUESTIONS.forEach(q=>{const a=fitAnswers[q.id];if(!a)return;score+=a==='yes'?q.yes:a==='no'?q.no:q.maybe;});
+  FIT_QUESTIONS.forEach(q=>{
+    const a=fitAnswers[q.id];
+    if(!a)return;
+    score+=a==='yes'?q.yes:a==='no'?q.no:q.maybe;
+  });
   const max=FIT_QUESTIONS.reduce((a,q)=>a+q.yes,0);
   modalFitScore=Math.max(0,Math.min(100,Math.round((score/max)*100)));
   const res=document.getElementById('modal-score-result');

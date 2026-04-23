@@ -101,9 +101,20 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
 <body>
 <div id="toast-el" class="toast"></div>
 
+<!-- TEST MODE BANNER -->
+<div id="test-mode-banner" style="display:none;background:#7c3aed;color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:600;">
+  🧪 TEST MODE — Stripe will use test cards. No real charges will occur.
+</div>
+
 <header>
   <div class="header-logo">My Smart<span>Slots</span></div>
-  <div class="header-badge">💳 Client Billing</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;">
+      <input type="checkbox" id="test-mode-toggle" onchange="toggleTestMode()" style="width:auto;cursor:pointer;accent-color:#a78bfa;"/>
+      Test Mode
+    </label>
+    <div class="header-badge">💳 Client Billing</div>
+  </div>
 </header>
 
 <div class="main">
@@ -137,15 +148,16 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
     <div class="card-title">📋 Sale Details</div>
     <div class="form-grid">
       <div class="fg">
-        <label>Closing Rep <span style="color:var(--red);">*</span></label>
-        <select class="inp" id="rep-select" onchange="updateCommission()">
-          <option value="">Select rep...</option>
+        <label>Closing Account Manager <span style="color:var(--red);">*</span></label>
+        <select class="inp" id="rep-select" onchange="updateRepEmail()">
+          <option value="">Select Account Manager...</option>
           <option value="Orion">Orion</option>
           <option value="Braden">Braden</option>
           <option value="Carson">Carson</option>
           <option value="Rep 2">Rep 2</option>
           <option value="Owner">Admin / Owner</option>
         </select>
+        <div id="rep-email-display" style="font-size:12px;color:var(--accent-dark);margin-top:5px;font-weight:600;display:none;"></div>
       </div>
       <div class="fg">
         <label>Client Business Name <span style="color:var(--red);">*</span></label>
@@ -179,7 +191,7 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
       <div class="plan-card" id="plan-elite" onclick="selectPlan('elite')">
         <div class="plan-name">Elite</div>
         <div class="plan-price">$375<span>/mo</span></div>
-        <div class="plan-desc">Total pipeline — adds re-engagement, email replies, strategy review</div>
+        <div class="plan-desc">Total pipeline — adds re-engagement, email replies, status updates</div>
       </div>
     </div>
 
@@ -188,11 +200,72 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
     <div class="billing-toggle">
       <div class="billing-opt selected" id="billing-monthly" onclick="selectBilling('monthly')">
         <div class="label">Monthly</div>
-        <div class="sublabel">Pay month to month</div>
+        <div class="sublabel">Pay month to month — no commitment</div>
       </div>
       <div class="billing-opt" id="billing-annual" onclick="selectBilling('annual')">
-        <div class="label">Annual</div>
-        <div class="sublabel">2 months free — save big</div>
+        <div class="label">Annual ⭐</div>
+        <div class="sublabel">2 months free — 12-month commitment · Higher commission</div>
+      </div>
+    </div>
+
+    <!-- CUSTOM SETUP FEE -->
+    <div class="card-title" style="margin-top:.25rem;">🔧 Setup Fee</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:.5rem;">
+      <div class="billing-opt selected" id="setup-standard" onclick="selectSetupFee(199)" style="flex:1;min-width:140px;">
+        <div class="label">Standard — $199</div>
+        <div class="sublabel">Default setup fee</div>
+      </div>
+      <div class="billing-opt" id="setup-promo" onclick="selectSetupFee(99)" style="flex:1;min-width:140px;">
+        <div class="label">Promo — $99</div>
+        <div class="sublabel">Minimum — first few sales only</div>
+      </div>
+      <div class="billing-opt" id="setup-custom" onclick="selectSetupFee('custom')" style="flex:1;min-width:140px;">
+        <div class="label">Custom</div>
+        <div class="sublabel">Enter your own amount</div>
+      </div>
+    </div>
+    <div id="custom-setup-wrap" style="display:none;margin-bottom:.75rem;">
+      <input class="inp" type="number" id="custom-setup-input" placeholder="Enter amount ($99 minimum)" min="99" max="499" oninput="updateBill()" style="max-width:240px;"/>
+    </div>
+
+    <!-- WEB DESIGN ADD-ON -->
+    <div class="card-title" style="margin-top:.25rem;">🌐 Web Design Add-On (Optional)</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div class="billing-opt" id="web-none" onclick="selectWebDesign('none')" style="flex:1;min-width:140px;">
+        <div class="label">No Website</div>
+        <div class="sublabel">Automation only</div>
+      </div>
+      <div class="billing-opt" id="web-standard" onclick="selectWebDesign('standard')" style="flex:1;min-width:140px;">
+        <div class="label">Standard — $997</div>
+        <div class="sublabel">5-page site + chatbot installed</div>
+      </div>
+      <div class="billing-opt" id="web-premium" onclick="selectWebDesign('premium')" style="flex:1;min-width:140px;">
+        <div class="label">Premium — $1,497</div>
+        <div class="sublabel">Larger build + SEO setup</div>
+      </div>
+      <div class="billing-opt" id="web-custom" onclick="selectWebDesign('custom')" style="flex:1;min-width:140px;">
+        <div class="label">Custom Quote</div>
+        <div class="sublabel">Enter agreed amount</div>
+      </div>
+    </div>
+    <div id="custom-web-wrap" style="display:none;margin-top:.75rem;">
+      <input class="inp" type="number" id="custom-web-input" placeholder="Enter custom web design amount" min="0" oninput="updateBill()" style="max-width:240px;"/>
+    </div>
+  </div>
+      <div class="plan-card" id="plan-starter" onclick="selectPlan('starter')">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$125<span>/mo</span></div>
+        <div class="plan-desc">Core automation — AI chat, confirmations, reminders</div>
+      </div>
+      <div class="plan-card selected" id="plan-pro" onclick="selectPlan('pro')">
+        <div class="plan-name">Pro ⭐</div>
+        <div class="plan-price">$225<span>/mo</span></div>
+        <div class="plan-desc">Full automation — adds missed call text back, live SMS, reviews</div>
+      </div>
+      <div class="plan-card" id="plan-elite" onclick="selectPlan('elite')">
+        <div class="plan-name">Elite</div>
+        <div class="plan-price">$375<span>/mo</span></div>
+        <div class="plan-desc">Total pipeline — adds re-engagement, email replies, strategy review</div>
       </div>
     </div>
   </div>
@@ -203,7 +276,8 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
     <div class="bill-summary">
       <div class="bill-row"><span class="label">Plan</span><span class="val" id="bs-plan">Pro — $225/mo</span></div>
       <div class="bill-row"><span class="label">Billing</span><span class="val" id="bs-billing">Monthly</span></div>
-      <div class="bill-row"><span class="label">Setup Fee (one-time)</span><span class="val">$199.00</span></div>
+      <div class="bill-row"><span class="label">Setup Fee</span><span class="val">$<span id="bs-setup">199</span>.00</span></div>
+      <div class="bill-row" id="bs-web-row" style="display:none;"><span class="label">Web Design</span><span class="val" id="bs-web-amt">$0.00</span></div>
       <div class="bill-row"><span class="label" id="bs-period-label">First Month</span><span class="val" id="bs-period-amt">$225.00</span></div>
       <div class="bill-row total"><span class="label">Total Due Today</span><span class="val" id="bs-total">$424.00</span></div>
     </div>
@@ -223,14 +297,65 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
 <script>
 const API="https://mysmartslots-portal.onrender.com";
 
+const REP_EMAILS={
+  'Orion':   'orion@mysmartslots.com',
+  'Braden':  'braden@mysmartslots.com',
+  'Carson':  'carson@mysmartslots.com',
+  'Rep 2':   'rep2@mysmartslots.com',
+  'Owner':   'hello@mysmartslots.com',
+};
+
 const PLANS={
   starter:{monthly:125,annual:1250,label:"Starter",comm_monthly:37.50,comm_annual:312.50},
   pro:    {monthly:225,annual:2250,label:"Pro",    comm_monthly:67.50,comm_annual:562.50},
   elite:  {monthly:375,annual:3750,label:"Elite",  comm_monthly:112.50,comm_annual:937.50},
 };
 
+const WEB_PRICES={none:0,standard:997,premium:1497,custom:0};
+
 let selectedPlan='pro';
 let selectedBilling='monthly';
+let selectedSetupFee=199;
+let selectedWebDesign='none';
+let isTestMode=false;
+
+function toggleTestMode(){
+  isTestMode=document.getElementById('test-mode-toggle').checked;
+  document.getElementById('test-mode-banner').style.display=isTestMode?'block':'none';
+}
+
+function updateRepEmail(){
+  const rep=document.getElementById('rep-select').value;
+  const emailEl=document.getElementById('rep-email-display');
+  if(rep&&REP_EMAILS[rep]){
+    emailEl.textContent='📧 '+REP_EMAILS[rep];
+    emailEl.style.display='block';
+  } else {
+    emailEl.style.display='none';
+  }
+  updateBill();
+}
+
+function selectSetupFee(val){
+  selectedSetupFee=val==='custom'?199:val;
+  document.querySelectorAll('[id^="setup-"]').forEach(el=>el.classList.remove('selected'));
+  if(val===199)document.getElementById('setup-standard').classList.add('selected');
+  else if(val===99)document.getElementById('setup-promo').classList.add('selected');
+  else document.getElementById('setup-custom').classList.add('selected');
+  document.getElementById('custom-setup-wrap').style.display=val==='custom'?'block':'none';
+  updateBill();
+}
+
+function selectWebDesign(val){
+  selectedWebDesign=val;
+  document.querySelectorAll('[id^="web-"]').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('web-'+val).classList.add('selected');
+  document.getElementById('custom-web-wrap').style.display=val==='custom'?'block':'none';
+  updateBill();
+}
+
+// Initialize web design selection
+document.getElementById('web-none').classList.add('selected');
 
 // ── CHECK URL PARAMS ──────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{
@@ -250,7 +375,51 @@ window.addEventListener('load',()=>{
   updateBill();
 });
 
-// ── PLAN / BILLING SELECTION ──────────────────────────────────────────────────
+function updateBill(){
+  const p=PLANS[selectedPlan];
+  const isAnnual=selectedBilling==='annual';
+  const planAmt=isAnnual?p.annual:p.monthly;
+
+  // Setup fee
+  let setupFee=selectedSetupFee;
+  if(selectedSetupFee==='custom'||typeof selectedSetupFee==='string'){
+    setupFee=parseInt(document.getElementById('custom-setup-input')?.value)||199;
+    setupFee=Math.max(99,setupFee);
+  }
+
+  // Web design
+  let webAmt=0;
+  if(selectedWebDesign==='custom'){
+    webAmt=parseInt(document.getElementById('custom-web-input')?.value)||0;
+  } else {
+    webAmt=WEB_PRICES[selectedWebDesign]||0;
+  }
+
+  const total=planAmt+setupFee+webAmt;
+  const comm=isAnnual?p.comm_annual:p.comm_monthly;
+  const commLabel=isAnnual?'annual recurring':'monthly recurring';
+
+  document.getElementById('bs-plan').textContent=`${p.label} — ${isAnnual?'$'+p.annual.toLocaleString()+'/yr':'$'+p.monthly+'/mo'}`;
+  document.getElementById('bs-billing').textContent=isAnnual?'Annual (2 months free — 12-month commitment)':'Monthly';
+  document.getElementById('bs-period-label').textContent=isAnnual?'Annual Payment':'First Month';
+  document.getElementById('bs-period-amt').textContent='$'+planAmt.toLocaleString()+'.00';
+
+  // Update setup fee row
+  const setupEl=document.getElementById('bs-setup');
+  if(setupEl) setupEl.textContent='$'+setupFee.toFixed(2);
+
+  // Web design row
+  const webRowEl=document.getElementById('bs-web-row');
+  const webAmtEl=document.getElementById('bs-web-amt');
+  if(webRowEl) webRowEl.style.display=webAmt>0?'flex':'none';
+  if(webAmtEl) webAmtEl.textContent='$'+webAmt.toLocaleString()+'.00';
+
+  document.getElementById('bs-total').textContent='$'+total.toLocaleString()+'.00';
+  document.getElementById('comm-amount').textContent=`$${comm.toFixed(2)}/${isAnnual?'yr':'mo'} ${commLabel}`;
+}
+
+function updateCommission(){updateRepEmail();}
+
 function selectPlan(plan){
   selectedPlan=plan;
   document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
@@ -260,37 +429,18 @@ function selectPlan(plan){
 
 function selectBilling(type){
   selectedBilling=type;
-  document.querySelectorAll('.billing-opt').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.billing-opt[id^="billing-"]').forEach(c=>c.classList.remove('selected'));
   document.getElementById('billing-'+type).classList.add('selected');
   updateBill();
 }
 
-function updateBill(){
-  const p=PLANS[selectedPlan];
-  const isAnnual=selectedBilling==='annual';
-  const planAmt=isAnnual?p.annual:p.monthly;
-  const total=planAmt+199;
-  const comm=isAnnual?p.comm_annual:p.comm_monthly;
-  const commLabel=isAnnual?'annual recurring':'monthly recurring';
-
-  document.getElementById('bs-plan').textContent=`${p.label} — $${isAnnual?p.annual.toLocaleString()+'/yr':'$'+p.monthly+'/mo'}`;
-  document.getElementById('bs-billing').textContent=isAnnual?'Annual (2 months free)':'Monthly';
-  document.getElementById('bs-period-label').textContent=isAnnual?'Annual Payment':'First Month';
-  document.getElementById('bs-period-amt').textContent='$'+planAmt.toLocaleString()+'.00';
-  document.getElementById('bs-total').textContent='$'+total.toLocaleString()+'.00';
-  document.getElementById('comm-amount').textContent=`$${comm.toFixed(2)}/${isAnnual?'yr':'mo'} ${commLabel}`;
-}
-
-function updateCommission(){updateBill();}
-
-// ── CREATE CHECKOUT ───────────────────────────────────────────────────────────
 async function createCheckout(){
   const rep=document.getElementById('rep-select').value;
   const biz=document.getElementById('client-biz').value.trim();
   const name=document.getElementById('client-name').value.trim();
   const email=document.getElementById('client-email').value.trim();
 
-  if(!rep){toast('Select the closing rep first.');return;}
+  if(!rep){toast('Select the closing Account Manager first.');return;}
   if(!biz){toast('Enter the client business name.');return;}
   if(!name){toast('Enter the client name.');return;}
   if(!email||!email.includes('@')){toast('Enter a valid client email.');return;}
@@ -302,8 +452,25 @@ async function createCheckout(){
   const p=PLANS[selectedPlan];
   const isAnnual=selectedBilling==='annual';
   const planAmt=isAnnual?p.annual:p.monthly;
-  const totalCents=(planAmt+199)*100;
-  const description=`${p.label} Plan — ${isAnnual?'Annual':'Monthly'} + Setup Fee`;
+
+  // Setup fee
+  let setupFee=selectedSetupFee;
+  if(typeof selectedSetupFee==='string'){
+    setupFee=Math.max(99,parseInt(document.getElementById('custom-setup-input')?.value)||199);
+  }
+
+  // Web design
+  let webAmt=0;
+  if(selectedWebDesign==='custom'){
+    webAmt=parseInt(document.getElementById('custom-web-input')?.value)||0;
+  } else {
+    webAmt=WEB_PRICES[selectedWebDesign]||0;
+  }
+
+  const totalCents=(planAmt+setupFee+webAmt)*100;
+  const repEmail=REP_EMAILS[rep]||'hello@mysmartslots.com';
+  const webLabel=selectedWebDesign!=='none'?` + Web Design ($${webAmt.toLocaleString()})`:'';
+  const description=`${p.label} Plan — ${isAnnual?'Annual':'Monthly'} + Setup Fee ($${setupFee})${webLabel}`;
 
   try{
     const r=await fetch(`${API}/portal/billing/create-checkout`,{
@@ -311,12 +478,14 @@ async function createCheckout(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         rep_name:rep,
+        rep_email:repEmail,
         client_name:name,
         client_email:email,
         plan:selectedPlan,
         billing_type:selectedBilling,
         amount_cents:totalCents,
         description,
+        test_mode:isTestMode,
         success_url:`https://mysmartslots.com/financial?success=true&plan=${encodeURIComponent(selectedPlan)}&email=${encodeURIComponent(email)}&rep=${encodeURIComponent(rep)}&biz=${encodeURIComponent(biz)}`,
         cancel_url:'https://mysmartslots.com/financial?cancelled=true',
       })
@@ -327,8 +496,7 @@ async function createCheckout(){
       document.getElementById('stripe-warning').style.display='block';
       btn.disabled=false;
       btn.innerHTML='<span>Send to Stripe Checkout</span><span class="stripe-badge">🔒 Stripe</span>';
-      // Still show the message for demo purposes
-      showPostPaymentMessage(selectedPlan,email,name,rep);
+      showPostPaymentMessage(selectedPlan,email,name,rep,repEmail,setupFee,webAmt);
       return;
     }
 
@@ -339,8 +507,7 @@ async function createCheckout(){
       return;
     }
 
-    // Show the rep what message to send, then open Stripe
-    showPostPaymentMessage(selectedPlan,email,name,rep);
+    showPostPaymentMessage(selectedPlan,email,name,rep,repEmail,setupFee,webAmt);
     setTimeout(()=>window.open(d.url,'_blank'),800);
 
   }catch(e){
@@ -350,11 +517,13 @@ async function createCheckout(){
   }
 }
 
-function showPostPaymentMessage(plan,email,name,rep){
+function showPostPaymentMessage(plan,email,name,rep,repEmail,setupFee,webAmt){
   const p=PLANS[plan]||PLANS.pro;
   const isAnnual=selectedBilling==='annual';
   const onboardUrl=`https://mysmartslots.com/onboard?plan=${plan}`;
-  const planLabel=`${p.label} (${isAnnual?'Annual':'Monthly'})`;
+  const planLabel=`${p.label} (${isAnnual?'Annual — 12-month commitment':'Monthly'})`;
+  const webLine=webAmt>0?`\n\nYour website build ($${webAmt.toLocaleString()}) is also included. We'll be in touch separately about the design process.`:'';
+  const repDisplay=repEmail||'hello@mysmartslots.com';
 
   const msg=`Hi ${name||'there'}! 👋
 
@@ -363,13 +532,15 @@ Payment confirmed — welcome to My Smart Slots ${planLabel}!
 Your next step is to fill out your quick onboard form. It takes about 5 minutes and gives us everything we need to get your automations live within 24 hours.
 
 👉 Your onboard link:
-${onboardUrl}
+${onboardUrl}${webLine}
 
-Once you complete the form, we'll reach out within 24 hours to confirm everything is live.
+Once you complete the form we'll reach out within 24 hours to confirm everything is live.
 
-Questions? Call or text 785-329-0202 or email hello@mysmartslots.com.
+Questions? Call or text 785-329-0202 or reply to this message.
 
-— ${rep||'The My Smart Slots Team'}`;
+— ${rep||'The My Smart Slots Team'}
+${repDisplay}
+mysmartslots.com`;
 
   document.getElementById('copy-message').textContent=msg;
   document.getElementById('post-payment-card').style.display='block';
@@ -388,8 +559,11 @@ function resetForm(){
   document.getElementById('client-name').value='';
   document.getElementById('client-email').value='';
   document.getElementById('rep-select').value='';
+  document.getElementById('rep-email-display').style.display='none';
   selectPlan('pro');
   selectBilling('monthly');
+  selectSetupFee(199);
+  selectWebDesign('none');
   const btn=document.getElementById('checkout-btn');
   btn.disabled=false;
   btn.innerHTML='<span>Send to Stripe Checkout</span><span class="stripe-badge">🔒 Stripe</span>';
