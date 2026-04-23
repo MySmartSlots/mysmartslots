@@ -359,7 +359,7 @@ function renderAll(dash,onboards){
       <div class="ms-detail">${m.detail}</div>
       <div class="ms-progress">
         <div class="ms-bar"><div class="ms-bar-fill" style="width:${pct}%"></div></div>
-        <div class="ms-bar-pct">${hit?'✓ Achieved':pct+'% there'}</div>
+        <div class="ms-bar-pct">${hit?'✓ Achieved':mrr===0?'Not started yet':pct+'% there'}</div>
       </div>
     </div>`;
   }).join('');

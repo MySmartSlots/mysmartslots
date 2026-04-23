@@ -780,13 +780,19 @@ function setFitAnswer(id,val,btn){
 
 function calcModalFit(){
   let score=0;
+  let answered=0;
   FIT_QUESTIONS.forEach(q=>{
     const a=fitAnswers[q.id];
     if(!a)return;
+    answered++;
     score+=a==='yes'?q.yes:a==='no'?q.no:q.maybe;
   });
-  const max=FIT_QUESTIONS.reduce((a,q)=>a+q.yes,0);
-  modalFitScore=Math.max(0,Math.min(100,Math.round((score/max)*100)));
+  if(answered===0){toast('Answer at least a few questions first.');return;}
+  // Max is sum of best possible answer per question
+  const max=FIT_QUESTIONS.reduce((a,q)=>a+Math.max(q.yes,q.no,q.maybe),0);
+  const min=FIT_QUESTIONS.reduce((a,q)=>a+Math.min(q.yes,q.no,q.maybe),0);
+  // Normalize score to 0-100 range
+  modalFitScore=Math.max(0,Math.min(100,Math.round(((score-min)/(max-min))*100)));
   const res=document.getElementById('modal-score-result');
   const num=document.getElementById('modal-score-num');
   const lbl=document.getElementById('modal-score-label');

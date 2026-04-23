@@ -226,7 +226,7 @@ const MODULES=[
 That's it. If you can say that clearly and confidently, you can open a conversation with anyone.`
       },
       {
-        title:"The 10 Automations We Sell",
+        title:"The 11 Automations We Sell",
         body:`Every plan includes some combination of these. Know them cold — customers will ask.
 
 <ul>
@@ -238,6 +238,7 @@ That's it. If you can say that clearly and confidently, you can open a conversat
 <li><strong>Post-Job Review Requests</strong> — After a completed job, an auto-text asks for a Google review at exactly the right moment.</li>
 <li><strong>Lead Re-Engagement</strong> — Old cold leads get an automated follow-up sequence to bring them back.</li>
 <li><strong>Partial Email Replies</strong> — Email inquiries get an instant auto-reply that captures info and moves toward booking.</li>
+<li><strong>Job Status Update Texts</strong> — For repair shops, HVAC, and service businesses — tech updates a status and the customer gets an automatic text. Eliminates "where's my car?" calls. Elite only.</li>
 <li><strong>Calendar Sync</strong> — Bookings go directly to their Google, Outlook, or Calendly calendar.</li>
 <li><strong>Monthly Report</strong> — Client gets a monthly recap of calls recovered, bookings confirmed, reviews requested, revenue impact.</li>
 </ul>`
@@ -291,10 +292,10 @@ The common thread: <strong>they book appointments, they get calls, and missed ca
         explanation:"Always be upfront about the $199 setup fee. Hiding it creates distrust. Frame it as: 'One-time fee, we have everything live within 24 hours of receiving it.'"
       },
       {
-        q:"Which of these is NOT one of our 10 automations?",
+        q:"Which of these is NOT one of our 11 automations?",
         options:["Appointment Reminders","Social Media Posting","Post-Job Review Requests","Lead Re-Engagement"],
         correct:1,
-        explanation:"We don't do social media posting. Know our exact 10 automations so you never overpromise."
+        explanation:"We don't do social media posting. Know our exact 11 automations so you never overpromise."
       }
     ]
   },
@@ -395,7 +396,7 @@ You don't need all 7. But the more boxes they check, the easier the close.`
 
 <div class="highlight"><strong>Your goal on the first call / text / email is NOT to sell the product. It is to book a 10-minute audit call.</strong></div>
 
-That's it. One goal. If you go into a cold call trying to explain all 10 automations and get them to say yes on the spot, you will fail every time.
+That's it. One goal. If you go into a cold call trying to explain all 11 automations and get them to say yes on the spot, you will fail every time.
 
 The script is simple:
 <div class="script-box">"I noticed [Business Name] doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're with a customer?
@@ -425,7 +426,7 @@ Then stop talking. Let them respond.`
     quiz:[
       {
         q:"What is your ONLY goal on the first cold call?",
-        options:["Explain all 10 automations","Close them on a plan","Book a 10-minute audit call","Get their email address"],
+        options:["Explain all 11 automations","Close them on a plan","Book a 10-minute audit call","Get their email address"],
         correct:2,
         explanation:"One goal: book the audit. Everything else — demos, pricing, features — comes on the audit call. Trying to sell on the first call almost always fails."
       },
@@ -848,7 +849,7 @@ function renderSidebar(){
     const p=progress[i];
     const completed=p?.completed;
     const score=p?.score;
-    const locked=i>0&&!progress[i-1]?.completed;
+    const locked=!isAdmin&&i>0&&!progress[i-1]?.completed;
     let cls='module-item';
     if(i===currentModule)cls+=' active';
     if(completed)cls+=' completed';
@@ -871,6 +872,8 @@ function renderSidebar(){
 }
 
 function tryLoadModule(i){
+  // Admins can access any module freely
+  if(isAdmin){loadModule(i);return;}
   if(i>0&&!progress[i-1]?.completed){
     toast('Complete the previous module first.');return;
   }

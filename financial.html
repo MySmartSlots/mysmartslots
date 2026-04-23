@@ -337,7 +337,7 @@ function updateRepEmail(){
 }
 
 function selectSetupFee(val){
-  selectedSetupFee=val==='custom'?199:val;
+  selectedSetupFee=val; // keep 'custom' as string, 199 or 99 as numbers
   document.querySelectorAll('[id^="setup-"]').forEach(el=>el.classList.remove('selected'));
   if(val===199)document.getElementById('setup-standard').classList.add('selected');
   else if(val===99)document.getElementById('setup-promo').classList.add('selected');

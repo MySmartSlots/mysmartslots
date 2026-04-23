@@ -465,18 +465,30 @@ async function loadDashboard(){
       api('/portal/onboard/list'),
       api('/portal/admin/logins'),
     ]);
-    dashData={
-      dash: dash.status==='fulfilled'?dash.value:{success:false,error:'dashboard failed'},
-      onboards: onboards.status==='fulfilled'?onboards.value:{success:false,submissions:[]},
-      logins: logins.status==='fulfilled'?logins.value:{success:false,logins:[]},
-    };
+    // Log any failures to help debug
+    if(dash.status==='rejected')console.error('Dashboard failed:',dash.reason);
+    if(onboards.status==='rejected')console.error('Onboards failed:',onboards.reason);
+    if(logins.status==='rejected')console.error('Logins failed:',logins.reason);
+
+    const dashVal=dash.status==='fulfilled'?dash.value:{success:false,mrr:0,activeClients:0,pendingOnboards:0,totalContacts:0,pipeline:{},repStats:{},recentLogins:[],contacts:[]};
+    const onboardVal=onboards.status==='fulfilled'?onboards.value:{success:false,submissions:[]};
+    const loginsVal=logins.status==='fulfilled'?logins.value:{success:false,logins:[]};
+
+    // Show partial failure warnings
+    if(dash.status==='rejected'||!dashVal.success) toast('Dashboard data partial — check Render logs',true);
+    if(loginsVal.logins?.length===0&&logins.status==='fulfilled') console.log('Logins endpoint returned empty array');
+
+    dashData={dash:dashVal,onboards:onboardVal,logins:loginsVal};
     renderOverview();
     renderClients();
     renderReps();
     renderPipeline();
     renderLogins();
     populateReportClients();
-  }catch(e){toast('Failed to load dashboard — check connection.',true);console.error(e);}
+  }catch(e){
+    toast('Failed to load dashboard — check connection.',true);
+    console.error('Dashboard load error:',e);
+  }
 }
 
 function renderOverview(){
