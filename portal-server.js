@@ -378,7 +378,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 app.post("/portal/billing/create-checkout", async (req, res) => {
-  const { rep_name, client_name, client_email, plan, billing_type, amount_cents, description, success_url, cancel_url } = req.body;
+  const { rep_name, rep_email, client_name, client_email, plan, billing_type, amount_cents, description, success_url, cancel_url, test_mode } = req.body;
   if (!client_email || !amount_cents || !plan) {
     return res.status(400).json({ error: "client_email, amount_cents, and plan are required." });
   }
@@ -396,16 +396,18 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
           unit_amount: amount_cents,
           product_data: {
             name: `My Smart Slots — ${description || plan}`,
-            description: `Setup fee + first month · ${plan} Plan · Sold by ${rep_name || "My Smart Slots"}`,
+            description: `${plan} Plan · Sold by ${rep_name || "My Smart Slots"} · ${rep_email || "hello@mysmartslots.com"}`,
           },
         },
         quantity: 1,
       }],
       metadata: {
         rep_name: rep_name || "",
+        rep_email: rep_email || "hello@mysmartslots.com",
         client_name: client_name || "",
         plan,
         billing_type: billing_type || "monthly",
+        test_mode: test_mode ? "true" : "false",
       },
       success_url: success_url || `https://mysmartslots.com/financial?success=true&plan=${encodeURIComponent(plan)}&email=${encodeURIComponent(client_email)}`,
       cancel_url: cancel_url || "https://mysmartslots.com/financial?cancelled=true",
@@ -414,6 +416,7 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
     // Log the sale to Supabase
     const { error: saleError } = await supabase.from("sales").insert({
       rep_name: rep_name || "Unknown",
+      rep_email: rep_email || "hello@mysmartslots.com",
       client_name: client_name || "",
       client_email: client_email.toLowerCase(),
       plan,
@@ -421,6 +424,7 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
       amount_cents,
       stripe_session_id: session.id,
       status: "pending_payment",
+      test_mode: test_mode || false,
       created_at: new Date().toISOString(),
     });
     if (saleError) console.error("Sales log error:", saleError);
