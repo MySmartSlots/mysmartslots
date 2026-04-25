@@ -106,7 +106,32 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
   🧪 TEST MODE — Stripe will use test cards. No real charges will occur.
 </div>
 
-<header>
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--gray-bg);position:relative;z-index:10;">
+  <div style="background:var(--white);border:1px solid var(--gray-border);border-radius:16px;padding:2.5rem 2rem;width:340px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08);">
+    <div style="font-size:20px;font-weight:700;color:#111827;margin-bottom:4px;">My Smart<span style="color:var(--accent);">Slots</span></div>
+    <div style="font-size:13px;color:var(--gray-text);margin-bottom:1.5rem;">Billing Portal — Account Manager Login</div>
+    <input type="text" id="login-username" placeholder="Username" autocomplete="off"
+      style="width:100%;padding:11px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;font-family:inherit;color:#111827;outline:none;margin-bottom:10px;"/>
+    <input type="password" id="login-password" placeholder="Password"
+      style="width:100%;padding:11px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;font-family:inherit;color:#111827;outline:none;margin-bottom:12px;"/>
+    <button onclick="doFinancialLogin()" style="width:100%;padding:13px;background:var(--accent);color:var(--white);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">Sign In</button>
+    <div id="login-error" style="color:var(--red);font-size:13px;margin-top:8px;display:none;">Incorrect username or password.</div>
+  </div>
+</div>
+
+<header id="main-header" style="display:none;">
+  <div class="header-logo">My Smart<span>Slots</span></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="header-name" style="font-size:13px;color:rgba(255,255,255,.7);"></span>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;">
+      <input type="checkbox" id="test-mode-toggle" onchange="toggleTestMode()" style="width:auto;cursor:pointer;accent-color:#a78bfa;"/>
+      Test Mode
+    </label>
+    <div class="header-badge">💳 Client Billing</div>
+    <button onclick="doFinancialLogout()" style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;">Sign Out</button>
+  </div>
+</header>
   <div class="header-logo">My Smart<span>Slots</span></div>
   <div style="display:flex;align-items:center;gap:12px;">
     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;">
@@ -117,7 +142,7 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
   </div>
 </header>
 
-<div class="main">
+<div class="main" id="main-content" style="display:none;">
 
   <!-- SUCCESS / CANCEL banners from Stripe redirect -->
   <div id="success-banner" class="banner success" style="display:none;">
@@ -305,6 +330,7 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
 
 <script>
 const API="https://mysmartslots-portal.onrender.com";
+let currentU=null,currentP=null,currentName=null;
 
 const REP_EMAILS={
   'Orion':   'orion@mysmartslots.com',
@@ -313,6 +339,38 @@ const REP_EMAILS={
   'Rep 2':   'rep2@mysmartslots.com',
   'Owner':   'hello@mysmartslots.com',
 };
+
+// Map username to rep name for auto-selecting dropdown
+const USERNAME_TO_REP={
+  'orion1':'Orion','braden1':'Braden','carson1':'Carson','rep2':'Rep 2','admin':'Owner'
+};
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none') doFinancialLogin();
+});
+
+async function doFinancialLogin(){
+  const u=document.getElementById('login-username').value.trim();
+  const p=document.getElementById('login-password').value;
+  try{
+    const r=await fetch(`${API}/portal/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok){document.getElementById('login-error').style.display='block';return;}
+    currentU=u.toLowerCase();currentP=p;currentName=d.name;
+    // Hide login, show app
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('main-header').style.display='flex';
+    document.getElementById('main-content').style.display='block';
+    document.getElementById('header-name').textContent=d.name;
+    // Auto-select this rep in the dropdown
+    const repName=USERNAME_TO_REP[currentU];
+    if(repName){
+      document.getElementById('rep-select').value=repName;
+      updateRepEmail();
+    }
+    updateBill();
+  }catch(e){document.getElementById('login-error').style.display='block';}
+}
 
 const PLANS={
   starter:{monthly:125,annual:1250,label:"Starter",comm_monthly:37.50,comm_annual:312.50},
@@ -327,6 +385,15 @@ let selectedBilling='monthly';
 let selectedSetupFee=199;
 let selectedWebDesign='none';
 let isTestMode=false;
+
+function doFinancialLogout(){
+  currentU=null;currentP=null;currentName=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('main-header').style.display='none';
+  document.getElementById('main-content').style.display='none';
+  document.getElementById('login-password').value='';
+  document.getElementById('login-error').style.display='none';
+}
 
 function toggleTestMode(){
   isTestMode=document.getElementById('test-mode-toggle').checked;
@@ -354,23 +421,30 @@ async function loadRepPipeline(rep){
   const sel=document.getElementById('pipeline-contact-select');
   sel.innerHTML='<option value="">Loading pipeline...</option>';
   try{
-    // Use the rep's stored contacts from prospector localStorage or fetch from server
-    // Try to get from server if we have credentials, otherwise show manual entry hint
-    sel.innerHTML='<option value="">Select from pipeline (optional)...</option>';
-    // We don't have auth on financial page so pull from localStorage prospector data
-    const stored=localStorage.getItem('repProspects_'+rep.toLowerCase())||localStorage.getItem('repProspects');
-    if(stored){
-      const prospects=JSON.parse(stored);
-      const relevant=prospects.filter(p=>p.status!=='closed'&&p.status!=='dead');
-      if(relevant.length){
-        sel.innerHTML='<option value="">Select a contact to auto-fill...</option>'+
-          relevant.map(p=>`<option value='${JSON.stringify({name:p.contact_name||p.name,biz:p.biz_name||p.name,phone:p.phone||''})}'>${p.biz_name||p.name} ${p.contact_name?'— '+p.contact_name:''}</option>`).join('');
-        return;
-      }
+    const r=await fetch(`${API}/portal/contacts/get`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:currentU,password:currentP})
+    });
+    const d=await r.json();
+    if(!d.success||!d.contacts?.length){
+      sel.innerHTML='<option value="">No pipeline contacts — fill in manually</option>';
+      return;
     }
-    sel.innerHTML='<option value="">No pipeline contacts found — fill in manually</option>';
+    // Filter to active contacts only (not closed or dead)
+    const active=d.contacts.filter(c=>c.status!=='closed'&&c.status!=='dead'&&c.status!=='not_interested');
+    if(!active.length){
+      sel.innerHTML='<option value="">No active contacts in pipeline</option>';
+      return;
+    }
+    sel.innerHTML='<option value="">Select a contact to auto-fill...</option>'+
+      active.map(c=>{
+        const label=`${c.biz_name}${c.contact_name?' — '+c.contact_name:''}`;
+        const val=JSON.stringify({biz:c.biz_name,name:c.contact_name||'',phone:c.phone||''});
+        return `<option value='${val.replace(/'/g,"&#39;")}'>${label}</option>`;
+      }).join('');
   }catch(e){
-    sel.innerHTML='<option value="">Fill in manually below</option>';
+    sel.innerHTML='<option value="">Could not load pipeline — fill in manually</option>';
   }
 }
 
