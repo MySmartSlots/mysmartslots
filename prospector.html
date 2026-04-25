@@ -788,19 +788,35 @@ function calcModalFit(){
     score+=a==='yes'?q.yes:a==='no'?q.no:q.maybe;
   });
   if(answered===0){toast('Answer at least a few questions first.');return;}
-  // Max is sum of best possible answer per question
+
+  // Calculate max possible and min possible scores
   const max=FIT_QUESTIONS.reduce((a,q)=>a+Math.max(q.yes,q.no,q.maybe),0);
   const min=FIT_QUESTIONS.reduce((a,q)=>a+Math.min(q.yes,q.no,q.maybe),0);
-  // Normalize score to 0-100 range
-  modalFitScore=Math.max(0,Math.min(100,Math.round(((score-min)/(max-min))*100)));
+
+  // Scale score to 0-100 range
+  const range=max-min;
+  modalFitScore=range>0?Math.max(0,Math.min(100,Math.round(((score-min)/range)*100))):50;
+
   const res=document.getElementById('modal-score-result');
   const num=document.getElementById('modal-score-num');
   const lbl=document.getElementById('modal-score-label');
   const sub=document.getElementById('modal-score-sub');
+
+  if(!res||!num||!lbl||!sub)return;
+
   num.textContent=modalFitScore+'%';
-  if(modalFitScore>=70){num.style.color='var(--green)';lbl.textContent='🔥 Strong Fit';sub.textContent='Move on this one. Lead with the audit.';}
-  else if(modalFitScore>=45){num.style.color='var(--orange)';lbl.textContent='⚡ Warm Fit';sub.textContent='Worth pursuing. Offer the free audit first.';}
-  else{num.style.color='var(--red)';lbl.textContent='❄️ Low Fit';sub.textContent='Proceed carefully. Don\'t over-invest follow-up.';}
+  num.style.color=modalFitScore>=70?'var(--green)':modalFitScore>=45?'var(--orange)':'var(--red)';
+
+  if(modalFitScore>=70){
+    lbl.textContent='🔥 Strong Fit';
+    sub.textContent=`Move on this one. Answered ${answered}/${FIT_QUESTIONS.length} questions.`;
+  } else if(modalFitScore>=45){
+    lbl.textContent='⚡ Warm Fit';
+    sub.textContent=`Worth pursuing. Answered ${answered}/${FIT_QUESTIONS.length} questions.`;
+  } else {
+    lbl.textContent='❄️ Low Fit';
+    sub.textContent=`Proceed carefully. Answered ${answered}/${FIT_QUESTIONS.length} questions.`;
+  }
   res.classList.add('show');
 }
 

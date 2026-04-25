@@ -382,11 +382,16 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
   if (!client_email || !amount_cents || !plan) {
     return res.status(400).json({ error: "client_email, amount_cents, and plan are required." });
   }
-  if (!process.env.STRIPE_SECRET_KEY) {
+  // Use test key if test_mode is true, otherwise use live key
+  const stripeKey = test_mode && process.env.STRIPE_TEST_KEY
+    ? process.env.STRIPE_TEST_KEY
+    : process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) {
     return res.status(500).json({ error: "Stripe not configured. Add STRIPE_SECRET_KEY to Render environment variables." });
   }
+  const stripeInstance = new Stripe(stripeKey);
   try {
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeInstance.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       customer_email: client_email,

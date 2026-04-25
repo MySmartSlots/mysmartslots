@@ -159,6 +159,15 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
         </select>
         <div id="rep-email-display" style="font-size:12px;color:var(--accent-dark);margin-top:5px;font-weight:600;display:none;"></div>
       </div>
+      <div class="fg" id="pipeline-pull-wrap" style="display:none;grid-column:1/-1;">
+        <label>Pull from Pipeline (Optional)</label>
+        <div style="display:flex;gap:8px;">
+          <select class="inp" id="pipeline-contact-select" style="flex:1;">
+            <option value="">Select a contact to auto-fill...</option>
+          </select>
+          <button type="button" onclick="fillFromPipeline()" style="background:var(--accent);color:var(--white);border:none;border-radius:10px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;">Auto-Fill →</button>
+        </div>
+      </div>
       <div class="fg">
         <label>Client Business Name <span style="color:var(--red);">*</span></label>
         <input class="inp" type="text" id="client-biz" placeholder="Diamond Plumbing Co." oninput="updateBill()"/>
@@ -327,13 +336,53 @@ function toggleTestMode(){
 function updateRepEmail(){
   const rep=document.getElementById('rep-select').value;
   const emailEl=document.getElementById('rep-email-display');
+  const pipelineWrap=document.getElementById('pipeline-pull-wrap');
   if(rep&&REP_EMAILS[rep]){
     emailEl.textContent='📧 '+REP_EMAILS[rep];
     emailEl.style.display='block';
+    // Load their pipeline contacts
+    loadRepPipeline(rep);
+    pipelineWrap.style.display='block';
   } else {
     emailEl.style.display='none';
+    pipelineWrap.style.display='none';
   }
   updateBill();
+}
+
+async function loadRepPipeline(rep){
+  const sel=document.getElementById('pipeline-contact-select');
+  sel.innerHTML='<option value="">Loading pipeline...</option>';
+  try{
+    // Use the rep's stored contacts from prospector localStorage or fetch from server
+    // Try to get from server if we have credentials, otherwise show manual entry hint
+    sel.innerHTML='<option value="">Select from pipeline (optional)...</option>';
+    // We don't have auth on financial page so pull from localStorage prospector data
+    const stored=localStorage.getItem('repProspects_'+rep.toLowerCase())||localStorage.getItem('repProspects');
+    if(stored){
+      const prospects=JSON.parse(stored);
+      const relevant=prospects.filter(p=>p.status!=='closed'&&p.status!=='dead');
+      if(relevant.length){
+        sel.innerHTML='<option value="">Select a contact to auto-fill...</option>'+
+          relevant.map(p=>`<option value='${JSON.stringify({name:p.contact_name||p.name,biz:p.biz_name||p.name,phone:p.phone||''})}'>${p.biz_name||p.name} ${p.contact_name?'— '+p.contact_name:''}</option>`).join('');
+        return;
+      }
+    }
+    sel.innerHTML='<option value="">No pipeline contacts found — fill in manually</option>';
+  }catch(e){
+    sel.innerHTML='<option value="">Fill in manually below</option>';
+  }
+}
+
+function fillFromPipeline(){
+  const sel=document.getElementById('pipeline-contact-select');
+  if(!sel.value)return;
+  try{
+    const data=JSON.parse(sel.value);
+    if(data.biz)document.getElementById('client-biz').value=data.biz;
+    if(data.name)document.getElementById('client-name').value=data.name;
+    toast('✓ Filled from pipeline contact');
+  }catch(e){}
 }
 
 function selectSetupFee(val){
@@ -560,6 +609,7 @@ function resetForm(){
   document.getElementById('client-email').value='';
   document.getElementById('rep-select').value='';
   document.getElementById('rep-email-display').style.display='none';
+  document.getElementById('pipeline-pull-wrap').style.display='none';
   selectPlan('pro');
   selectBilling('monthly');
   selectSetupFee(199);

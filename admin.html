@@ -644,9 +644,11 @@ function renderPipeline(){
 }
 
 function renderLogins(){
+  const el=document.getElementById('logins-table-wrap');
+  if(!el)return;
   const logins=dashData?.logins?.logins||[];
-  if(!logins.length){document.getElementById('logins-table-wrap').innerHTML='<div class="empty"><div class="icon">🔑</div>No logins yet.</div>';return;}
-  document.getElementById('logins-table-wrap').innerHTML=`<table class="data-table">
+  if(!logins.length){el.innerHTML='<div class="empty"><div class="icon">🔑</div>No logins yet.</div>';return;}
+  el.innerHTML=`<table class="data-table">
     <thead><tr><th>Name / Account</th><th>Username</th><th>Type</th><th>Time</th></tr></thead>
     <tbody>${logins.map(l=>{
       const type=l.rep_name.includes('[client]')?'Client':l.rep_name.includes('[setup]')?'Setup Tool':'Rep/Admin';
