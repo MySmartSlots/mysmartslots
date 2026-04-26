@@ -393,29 +393,18 @@ const DROPBOX_SIGN_TEMPLATE_ID = process.env.DROPBOX_SIGN_TEMPLATE_ID || "373a71
 const OWNER_EMAIL = process.env.OWNER_EMAIL || "hello@mysmartslots.com";
 const OWNER_NAME  = "My Smart Slots";
 
-async function sendAgreement({ rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee }) {
+async function sendAgreement({ rep_name, rep_email, client_name, client_email, plan, billing_type }) {
   try {
-    const planLabels = { starter:"Starter — $125/mo", pro:"Pro — $225/mo", elite:"Elite — $375/mo" };
+    const planLabels = { starter:"Starter", pro:"Pro", elite:"Elite" };
     const planLabel  = planLabels[plan] || plan;
-    const billingLabel = billing_type === "annual" ? "Annual (12-month commitment)" : "Monthly";
-    const today = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
 
     const payload = {
       template_ids: [DROPBOX_SIGN_TEMPLATE_ID],
-      subject: `My Smart Slots — Business Services Agreement (${planLabel})`,
-      message: `Hi ${client_name}, please review and sign your My Smart Slots services agreement. Your account manager ${rep_name} has already filled in your plan details. Once signed by all parties you will receive a copy via email.`,
+      subject: `My Smart Slots — Business Services Agreement (${planLabel} Plan)`,
+      message: `Hi ${client_name}, please review and sign your My Smart Slots Business Services Agreement. Your Account Manager ${rep_name} will sign first, then it will come to you, and finally to our owner for countersignature. All parties receive a copy once complete.`,
       signing_options: { draw:true, type:true, upload:true, phone:false, default_type:"type" },
-      field_options: { date_format: "MM/DD/YYYY" },
-      custom_fields: [
-        { name:"plan_selected",    value:planLabel },
-        { name:"billing_type",     value:billingLabel },
-        { name:"agreement_date",   value:today },
-        { name:"account_manager",  value:rep_name },
-        { name:"client_owner_name",value:client_name },
-        { name:"setup_fee",        value:`$${setup_fee || 199}.00` },
-      ],
       signers: [
-        { role:"Account Manager", name:rep_name,    email_address:rep_email,  order:0 },
+        { role:"Account Manager", name:rep_name,    email_address:rep_email,    order:0 },
         { role:"Client",          name:client_name, email_address:client_email, order:1 },
         { role:"Owner",           name:OWNER_NAME,  email_address:OWNER_EMAIL,  order:2 },
       ],
@@ -543,7 +532,6 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
         client_email: client_email.toLowerCase(),
         plan,
         billing_type: billing_type || "monthly",
-        setup_fee:    Math.round(setupFee / 100),
       }).then(r => {
         if (!r.success) console.error("Agreement send failed:", r.error);
       });
