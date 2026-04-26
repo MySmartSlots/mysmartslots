@@ -323,12 +323,12 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
       <span>Send to Stripe Checkout</span>
       <span class="stripe-badge">🔒 Stripe</span>
     </button>
-    <button class="checkout-btn" id="agreement-btn" onclick="sendAgreementOnly()"
+    <button class="checkout-btn" onclick="window.open('/agreement','_blank')"
       style="margin-top:10px;background:var(--navy);border:1.5px solid var(--accent);">
-      <span>Send Agreement Only</span>
-      <span class="stripe-badge" style="background:rgba(0,200,150,.2);">📝 Dropbox Sign</span>
+      <span>Send Agreement Separately</span>
+      <span class="stripe-badge" style="background:rgba(0,200,150,.2);">📝 Agreement</span>
     </button>
-    <p class="stripe-note">When you hit <strong>Send to Stripe Checkout</strong> — the agreement fires to all three parties automatically at the same time. Use <strong>Send Agreement Only</strong> if you need to resend it separately.</p>
+    <p class="stripe-note">Send the agreement first from the Agreement page, then generate the Stripe payment link once the client signs. Client will receive an email automatically when they sign.</p>
   </div>
 
 </div>

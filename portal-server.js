@@ -400,6 +400,7 @@ async function sendAgreement({ rep_name, rep_email, client_name, client_email, p
 
     const payload = {
       template_ids: [DROPBOX_SIGN_TEMPLATE_ID],
+      test_mode: process.env.DROPBOX_SIGN_TEST_MODE === "true" ? 1 : 0,
       subject: `My Smart Slots — Business Services Agreement (${planLabel} Plan)`,
       message: `Hi ${client_name}, please review and sign your My Smart Slots Business Services Agreement. Your Account Manager ${rep_name} will sign first, then it will come to you, and finally to our owner for countersignature. All parties receive a copy once complete.`,
       signing_options: { draw:true, type:true, upload:true, phone:false, default_type:"type" },
@@ -583,6 +584,347 @@ app.post("/portal/admin/contacts/wipe", requireAuth, requireAdmin, async (req, r
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true, wiped: rep_username });
 });
+
+// ── AGREEMENT SYSTEM ─────────────────────────────────────────────────────────
+import crypto from "crypto";
+import nodemailer from "nodemailer";
+import PDFDocument from "pdfkit";
+
+const emailTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER || process.env.OWNER_EMAIL,
+    pass: process.env.GMAIL_PASS,
+  },
+});
+
+// Create agreement and send to client
+app.post("/portal/agreement/create", requireAuth, async (req, res) => {
+  const { rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee } = req.body;
+  if (!client_email || !client_name || !plan) {
+    return res.status(400).json({ error: "client_name, client_email, and plan are required." });
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
+
+  const planLabels = { starter:"Starter — $125/mo", pro:"Pro — $225/mo", elite:"Elite — $375/mo" };
+  const planLabel  = planLabels[plan] || plan;
+  const billingLabel = billing_type === "annual" ? "Annual (12-month commitment)" : "Monthly";
+  const today = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+
+  // Save to Supabase
+  const { error } = await supabase.from("agreements").insert({
+    token,
+    rep_name:      rep_name || "Account Manager",
+    rep_email:     rep_email || "hello@mysmartslots.com",
+    client_name,
+    client_email:  client_email.toLowerCase(),
+    plan,
+    plan_label:    planLabel,
+    billing_type:  billingLabel,
+    setup_fee:     setup_fee || 199,
+    agreement_date: today,
+    status:        "pending",
+    expires_at:    expiresAt,
+    created_at:    new Date().toISOString(),
+  });
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Email client
+  const signUrl = `https://mysmartslots.com/sign?token=${token}`;
+  try {
+    await emailTransporter.sendMail({
+      from: `"My Smart Slots" <${process.env.GMAIL_USER || process.env.OWNER_EMAIL}>`,
+      to: client_email,
+      subject: "My Smart Slots — Please Sign Your Services Agreement",
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+          <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
+            <h1 style="color:#00C896;margin:0;font-size:24px;letter-spacing:2px;">MY SMART SLOTS</h1>
+          </div>
+          <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+            <p style="font-size:16px;color:#111827;">Hi ${client_name},</p>
+            <p style="color:#374151;line-height:1.7;">Your Account Manager <strong>${rep_name}</strong> has prepared your My Smart Slots Business Services Agreement. Please review and sign it at your earliest convenience — your automations will be configured and live within 24 hours of signing and payment.</p>
+            <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:24px 0;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#6b7280;">Plan:</span><strong style="color:#00C896;">${planLabel}</strong></div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#6b7280;">Billing:</span><strong>${billingLabel}</strong></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:#6b7280;">Setup Fee:</span><strong>$${setup_fee || 199}.00 (one-time)</strong></div>
+            </div>
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${signUrl}" style="background:#00C896;color:#fff;padding:16px 40px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">Review & Sign Agreement →</a>
+            </div>
+            <p style="color:#6b7280;font-size:13px;line-height:1.7;">This link expires in 7 days. If you have any questions before signing, contact your Account Manager ${rep_name} at <a href="mailto:${rep_email}" style="color:#00C896;">${rep_email}</a> or call 785-329-0202.</p>
+            <hr style="border:none;border-top:1px solid #e4e8f0;margin:24px 0;"/>
+            <p style="color:#9ca3af;font-size:12px;text-align:center;">My Smart Slots · Clair Group LLC · mysmartslots.com</p>
+          </div>
+        </div>`,
+    });
+  } catch (e) {
+    console.error("Email error:", e.message);
+    // Don't fail — agreement is saved, email can be resent
+  }
+
+  res.json({ success: true, token, sign_url: signUrl });
+});
+
+// Get agreement by token (client-facing, no auth)
+app.post("/portal/agreement/get", async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: "Token required." });
+  const { data, error } = await supabase.from("agreements").select("*").eq("token", token).single();
+  if (error || !data) return res.status(404).json({ error: "Agreement not found or expired." });
+  if (data.status === "signed") return res.json({ success: true, agreement: data, already_signed: true });
+  if (new Date(data.expires_at) < new Date()) return res.status(410).json({ error: "This agreement link has expired. Contact your Account Manager for a new one." });
+  res.json({ success: true, agreement: data });
+});
+
+// Submit signed agreement
+app.post("/portal/agreement/sign", async (req, res) => {
+  const { token, signer_name, signer_title, signature_data, ip_address, agreed } = req.body;
+  if (!token || !signer_name || !signature_data || !agreed) {
+    return res.status(400).json({ error: "Token, name, signature, and agreement are required." });
+  }
+
+  // Get agreement
+  const { data: agreement, error: getErr } = await supabase.from("agreements").select("*").eq("token", token).single();
+  if (getErr || !agreement) return res.status(404).json({ error: "Agreement not found." });
+  if (agreement.status === "signed") return res.status(409).json({ error: "Agreement already signed." });
+
+  const signedAt = new Date().toISOString();
+  const signedDate = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+
+  // Update Supabase
+  const { error: updateErr } = await supabase.from("agreements").update({
+    status:         "signed",
+    signer_name,
+    signer_title:   signer_title || "Owner / Authorized Representative",
+    signature_data,
+    signed_at:      signedAt,
+    signed_ip:      ip_address || "unknown",
+  }).eq("token", token);
+  if (updateErr) return res.status(500).json({ error: updateErr.message });
+
+  // Generate PDF and send emails
+  try {
+    const pdfBuffer = await generateAgreementPDF({ ...agreement, signer_name, signer_title, signature_data, signed_at:signedDate });
+
+    const emailOpts = {
+      from: `"My Smart Slots" <${process.env.GMAIL_USER || process.env.OWNER_EMAIL}>`,
+      attachments: [{ filename:`MySmartSlots_Agreement_${agreement.client_name.replace(/\s+/g,"_")}.pdf`, content:pdfBuffer }],
+    };
+
+    // Email client
+    await emailTransporter.sendMail({ ...emailOpts, to:agreement.client_email, subject:"✓ Signed — My Smart Slots Services Agreement",
+      html:`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ Agreement Signed Successfully</p>
+          <p style="color:#374151;line-height:1.7;">Hi ${agreement.client_name}, thank you for signing. Your fully executed agreement is attached to this email. Keep it for your records.</p>
+          <p style="color:#374151;line-height:1.7;">Your Account Manager <strong>${agreement.rep_name}</strong> will be in touch shortly with your payment link. Once payment is complete your automations will be live within 24 hours.</p>
+          <p style="color:#6b7280;font-size:13px;">Questions? Contact ${agreement.rep_email} or call 785-329-0202.</p>
+        </div></div>`
+    });
+
+    // Email rep
+    await emailTransporter.sendMail({ ...emailOpts, to:agreement.rep_email, subject:`✓ ${agreement.client_name} signed — send payment link now`,
+      html:`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ ${agreement.client_name} just signed their agreement</p>
+          <p style="color:#374151;line-height:1.7;"><strong>Action required:</strong> Log into the billing page and send the payment link now.</p>
+          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+            <div><strong>Client:</strong> ${agreement.client_name} (${agreement.client_email})</div>
+            <div><strong>Plan:</strong> ${agreement.plan_label}</div>
+            <div><strong>Billing:</strong> ${agreement.billing_type}</div>
+            <div><strong>Signed:</strong> ${signedDate}</div>
+          </div>
+          <div style="text-align:center;margin:24px 0;">
+            <a href="https://mysmartslots.com/financial" style="background:#00C896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Send Payment Link →</a>
+          </div>
+          <p style="color:#6b7280;font-size:12px;">The signed agreement PDF is attached for your records.</p>
+        </div></div>`
+    });
+
+    // Email owner
+    await emailTransporter.sendMail({ ...emailOpts, to:OWNER_EMAIL, subject:`New signed agreement — ${agreement.client_name} (${agreement.plan_label})`,
+      html:`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">New Agreement Signed</p>
+          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+            <div><strong>Client:</strong> ${agreement.client_name} (${agreement.client_email})</div>
+            <div><strong>Plan:</strong> ${agreement.plan_label}</div>
+            <div><strong>Billing:</strong> ${agreement.billing_type}</div>
+            <div><strong>Rep:</strong> ${agreement.rep_name} (${agreement.rep_email})</div>
+            <div><strong>Setup Fee:</strong> $${agreement.setup_fee}</div>
+            <div><strong>Signed:</strong> ${signedDate}</div>
+          </div>
+          <p style="color:#6b7280;font-size:12px;">Signed agreement attached. ${agreement.rep_name} has been notified to send the payment link.</p>
+        </div></div>`
+    });
+  } catch (e) {
+    console.error("PDF/email error:", e.message);
+    // Agreement is saved — return success even if email fails
+  }
+
+  res.json({ success: true, message: "Agreement signed. PDF sent to all parties." });
+});
+
+// List agreements (admin)
+app.post("/portal/agreement/list", requireAuth, requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from("agreements").select("*").order("created_at", { ascending:false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success:true, agreements: data || [] });
+});
+
+// Resend agreement email
+app.post("/portal/agreement/resend", requireAuth, async (req, res) => {
+  const { token } = req.body;
+  const { data, error } = await supabase.from("agreements").select("*").eq("token", token).single();
+  if (error || !data) return res.status(404).json({ error: "Agreement not found." });
+  const signUrl = `https://mysmartslots.com/sign?token=${token}`;
+  try {
+    await emailTransporter.sendMail({
+      from: `"My Smart Slots" <${process.env.GMAIL_USER || process.env.OWNER_EMAIL}>`,
+      to: data.client_email,
+      subject: "Reminder — Please Sign Your My Smart Slots Agreement",
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;"><p>Hi ${data.client_name}, this is a reminder to sign your My Smart Slots services agreement.</p><p><a href="${signUrl}" style="background:#00C896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Sign Agreement →</a></p></div>`,
+    });
+    res.json({ success:true });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+// ── PDF GENERATOR ─────────────────────────────────────────────────────────────
+function generateAgreementPDF(agreement) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    const doc = new PDFDocument({ margin:72, size:"LETTER" });
+    doc.on("data", chunk => chunks.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+
+    const GREEN = "#00C896";
+    const NAVY  = "#1A1A2E";
+    const GRAY  = "#6B7280";
+
+    // Header
+    doc.rect(0,0,612,80).fill(NAVY);
+    doc.fillColor(GREEN).fontSize(22).font("Helvetica-Bold").text("MY SMART SLOTS", 72, 25, { align:"center" });
+    doc.fillColor("white").fontSize(11).font("Helvetica").text("Business Services Agreement — Executed Copy", 72, 52, { align:"center" });
+
+    doc.moveDown(3);
+
+    // Cover info box
+    doc.fillColor(NAVY).fontSize(13).font("Helvetica-Bold").text("Agreement Details", 72, 110);
+    doc.moveTo(72,128).lineTo(540,128).stroke(GREEN);
+    doc.moveDown(0.5);
+
+    const details = [
+      ["Client Business Name:", agreement.client_name],
+      ["Client Representative:", agreement.signer_name],
+      ["Plan Selected:", agreement.plan_label],
+      ["Billing Type:", agreement.billing_type],
+      ["Setup Fee:", `$${agreement.setup_fee}.00 (one-time)`],
+      ["Agreement Date:", agreement.agreement_date],
+      ["Account Manager:", agreement.rep_name],
+      ["Signed On:", agreement.signed_at],
+    ];
+
+    details.forEach(([label, value]) => {
+      doc.fillColor(GRAY).fontSize(10).font("Helvetica-Bold").text(label, 72, doc.y, { continued:true, width:180 });
+      doc.fillColor(NAVY).font("Helvetica").text(value || "—");
+    });
+
+    doc.moveDown(1.5);
+    doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke("#E5E7EB");
+    doc.moveDown(1);
+
+    // Agreement text — all sections
+    const sections = [
+      ["1. Parties & Agreement Overview",
+       `This Business Services Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ${agreement.client_name} ("Client"). This Agreement governs your access to and use of My Smart Slots' AI-powered automation services including missed call follow-up, SMS booking confirmations, appointment reminders, AI chat booking, review requests, lead re-engagement, job status updates, calendar sync, and monthly reporting (collectively, the "Services"). By signing this Agreement, the Client agrees to all terms set forth herein.`],
+      ["2. Services & Plan Description",
+       `The Company will provide the Services associated with the ${agreement.plan_label} plan. All plans include: AI Chat Booking, SMS Confirmations, Appointment Reminders, Calendar Sync, Monthly Report, and a Dedicated Account Manager. Pro and Elite plans additionally include Missed Call Text Back, Live SMS Chat, and Post-Job Review Requests. Elite plan additionally includes Lead Re-Engagement, Partial Email Replies, Job Status Update Texts, and Quarterly Strategy Review. Service will be activated within 24 hours of receiving the completed onboard form.`],
+      ["3. Fees, Billing & Payment Terms",
+       `A one-time setup fee of $${agreement.setup_fee}.00 is due at signing. This fee is non-refundable once configuration begins. The Client has selected ${agreement.billing_type} billing at the rate associated with the ${agreement.plan_label} plan.\n\nMonthly subscribers may cancel at any time. Cancellation takes effect at the end of the current billing cycle.\n\nAnnual subscribers commit to a 12-month term. Refund schedule: within 30 days — full refund minus setup fee; days 31–90 — 25% of remaining balance only; day 91 and beyond — no refund, service continues through term end.`],
+      ["4. 30-Day Results Guarantee",
+       `If the Client does not see measurable improvement in the first 30 days of active service, the Company will provide month two at no charge. To invoke this guarantee, the Client must submit a written request to hello@mysmartslots.com within 37 days of service activation.`],
+      ["5. Client Obligations",
+       `The Client agrees to: complete the onboard form within 7 days of payment; provide a valid phone number for SMS configuration; provide calendar access where required; notify the Company of business changes within 5 business days; not use the Services for any unlawful purpose.`],
+      ["6. Intellectual Property",
+       `All software, systems, templates, and automation workflows are the exclusive property of Clair Group LLC. The Client is granted a limited, non-exclusive license to use the Services during the term of this Agreement. The Client retains ownership of all business data and customer information they provide.`],
+      ["7. Limitation of Liability",
+       `The Company's total liability for any claim shall not exceed the total fees paid in the three months preceding the claim. The Company is not liable for indirect, incidental, or consequential damages, or for interruptions caused by third-party providers.`],
+      ["8. Governing Law",
+       `This Agreement is governed by the laws of the State of Kansas. Disputes shall be submitted to binding arbitration in Topeka, Kansas under the rules of the American Arbitration Association.`],
+      ["9. Electronic Signature",
+       `The parties agree that electronic signatures are legally binding under the Electronic Signatures in Global and National Commerce Act (ESIGN) and the Uniform Electronic Transactions Act (UETA). This signed document constitutes a legally enforceable agreement.`],
+    ];
+
+    sections.forEach(([title, body]) => {
+      if (doc.y > 650) doc.addPage();
+      doc.fillColor(NAVY).fontSize(12).font("Helvetica-Bold").text(title, { underline:false });
+      doc.moveDown(0.3);
+      doc.fillColor("#374151").fontSize(10).font("Helvetica").text(body, { lineGap:3 });
+      doc.moveDown(1);
+    });
+
+    // Signature section
+    if (doc.y > 580) doc.addPage();
+    doc.moveDown(1);
+    doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke(GREEN);
+    doc.moveDown(0.5);
+    doc.fillColor(NAVY).fontSize(13).font("Helvetica-Bold").text("10. Signatures");
+    doc.moveDown(0.5);
+
+    // Client signature
+    doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text("Client / Authorized Representative");
+    doc.moveDown(0.3);
+    doc.fillColor(GRAY).fontSize(10).font("Helvetica").text(`Name: ${agreement.signer_name}`);
+    doc.fillColor(GRAY).fontSize(10).text(`Title: ${agreement.signer_title || "Owner / Authorized Representative"}`);
+    doc.fillColor(GRAY).fontSize(10).text(`Date: ${agreement.signed_at}`);
+    doc.fillColor(GRAY).fontSize(10).text(`IP Address: ${agreement.signed_ip || "recorded"}`);
+    doc.moveDown(0.5);
+
+    // Draw signature image if available
+    if (agreement.signature_data && agreement.signature_data.startsWith("data:image")) {
+      try {
+        const base64 = agreement.signature_data.split(",")[1];
+        const imgBuf = Buffer.from(base64, "base64");
+        doc.image(imgBuf, 72, doc.y, { width:200, height:60 });
+        doc.moveDown(4);
+      } catch(e) {
+        doc.fillColor(GREEN).fontSize(11).text("[Signed electronically]");
+        doc.moveDown(1);
+      }
+    } else {
+      doc.fillColor(GREEN).fontSize(11).font("Helvetica-Bold").text("[Signed electronically]");
+      doc.moveDown(1);
+    }
+
+    doc.moveTo(72, doc.y).lineTo(300, doc.y).stroke("#E5E7EB");
+    doc.moveDown(0.3);
+    doc.fillColor(GRAY).fontSize(9).font("Helvetica").text("Client Signature", 72, doc.y);
+    doc.moveDown(1.5);
+
+    // Company signature block
+    doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text("My Smart Slots / Clair Group LLC");
+    doc.moveDown(0.3);
+    doc.fillColor(GRAY).fontSize(10).font("Helvetica").text("Title: Owner / Founder");
+    doc.fillColor(GRAY).fontSize(10).text("Signature: ___________________________");
+    doc.fillColor(GRAY).fontSize(10).text("Date: ___________________________");
+    doc.moveDown(2);
+
+    // Footer
+    doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke("#E5E7EB");
+    doc.moveDown(0.5);
+    doc.fillColor(GRAY).fontSize(9).text("My Smart Slots · Clair Group LLC · 785-329-0202 · hello@mysmartslots.com · mysmartslots.com", { align:"center" });
+    doc.fillColor(GRAY).fontSize(9).text(`Document ID: ${agreement.token?.substring(0,16)}... · Generated: ${new Date().toISOString()}`, { align:"center" });
+
+    doc.end();
+  });
+}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`MySmartSlots portal server running on port ${PORT}`));
