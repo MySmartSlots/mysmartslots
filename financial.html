@@ -633,6 +633,8 @@ async function createCheckout(){
 
     showPostPaymentMessage(selectedPlan,email,name,rep,repEmail,setupFee,webAmt);
     setTimeout(()=>window.open(d.url,'_blank'),800);
+    // Show agreement notification
+    toast('✓ Payment link created · Agreement sent to '+email+' for signature');
 
   }catch(e){
     toast('Connection error — check internet and try again.',true);
@@ -651,16 +653,16 @@ function showPostPaymentMessage(plan,email,name,rep,repEmail,setupFee,webAmt){
 
   const msg=`Hi ${name||'there'}! 👋
 
-Payment confirmed — welcome to My Smart Slots ${planLabel}!
+You'll be receiving two things from us shortly:
 
-Your subscription is now active. You'll be billed automatically ${isAnnual?'annually':'every month'} on the same date — no action needed on your end.
+1. A Business Services Agreement to review and sign electronically — this takes about 2 minutes and can be done on your phone.
 
-Your next step is to fill out your quick onboard form. It takes about 5 minutes and gives us everything we need to get your automations live within 24 hours.
+2. A secure payment link to complete your enrollment in My Smart Slots ${planLabel}.
 
-👉 Your onboard link:
+Your subscription will be active and automations live within 24 hours of completing both steps.
+
+After payment, fill out your quick onboard form here:
 ${onboardUrl}${webLine}
-
-Once you complete the form we'll reach out within 24 hours to confirm everything is live.
 
 Questions? Call or text 785-329-0202 or reply to this message.
 

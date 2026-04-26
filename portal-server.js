@@ -387,6 +387,59 @@ const STRIPE_PRICES = {
   elite_annual:    "price_1TQKSjFHISSP9GxXJRXaZCmB",
 };
 
+// ── DROPBOX SIGN ──────────────────────────────────────────────────────────────
+const DROPBOX_SIGN_API_KEY = process.env.DROPBOX_SIGN_API_KEY || "0b5ce16caa513fb657c04291f0e5e1840e4e5e20539c0e62387f5e9437d6a260";
+const DROPBOX_SIGN_TEMPLATE_ID = process.env.DROPBOX_SIGN_TEMPLATE_ID || "373a711264ee46b59f5a19c53eab7ab4588ddbfc";
+const OWNER_EMAIL = process.env.OWNER_EMAIL || "hello@mysmartslots.com";
+const OWNER_NAME  = "My Smart Slots";
+
+async function sendAgreement({ rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee }) {
+  try {
+    const planLabels = { starter:"Starter — $125/mo", pro:"Pro — $225/mo", elite:"Elite — $375/mo" };
+    const planLabel  = planLabels[plan] || plan;
+    const billingLabel = billing_type === "annual" ? "Annual (12-month commitment)" : "Monthly";
+    const today = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+
+    const payload = {
+      template_ids: [DROPBOX_SIGN_TEMPLATE_ID],
+      subject: `My Smart Slots — Business Services Agreement (${planLabel})`,
+      message: `Hi ${client_name}, please review and sign your My Smart Slots services agreement. Your account manager ${rep_name} has already filled in your plan details. Once signed by all parties you will receive a copy via email.`,
+      signing_options: { draw:true, type:true, upload:true, phone:false, default_type:"type" },
+      field_options: { date_format: "MM/DD/YYYY" },
+      custom_fields: [
+        { name:"plan_selected",    value:planLabel },
+        { name:"billing_type",     value:billingLabel },
+        { name:"agreement_date",   value:today },
+        { name:"account_manager",  value:rep_name },
+        { name:"client_owner_name",value:client_name },
+        { name:"setup_fee",        value:`$${setup_fee || 199}.00` },
+      ],
+      signers: [
+        { role:"Account Manager", name:rep_name,    email_address:rep_email,  order:0 },
+        { role:"Client",          name:client_name, email_address:client_email, order:1 },
+        { role:"Owner",           name:OWNER_NAME,  email_address:OWNER_EMAIL,  order:2 },
+      ],
+    };
+
+    const authHeader = "Basic " + Buffer.from(DROPBOX_SIGN_API_KEY + ":").toString("base64");
+    const response = await fetch("https://api.hellosign.com/v3/signature_request/send_with_template", {
+      method: "POST",
+      headers: { "Authorization": authHeader, "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Dropbox Sign error:", data);
+      return { success: false, error: data?.error?.error_msg || "Dropbox Sign API error" };
+    }
+    console.log("Agreement sent:", data?.signature_request?.signature_request_id);
+    return { success: true, signature_request_id: data?.signature_request?.signature_request_id };
+  } catch (e) {
+    console.error("Dropbox Sign exception:", e.message);
+    return { success: false, error: e.message };
+  }
+}
+
 app.post("/portal/billing/create-checkout", async (req, res) => {
   const { rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee_cents, web_design_cents, description, success_url, cancel_url, test_mode } = req.body;
   if (!client_email || !plan) {
@@ -481,11 +534,34 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
     });
     if (saleError) console.error("Sales log error:", saleError);
 
+    // Send Dropbox Sign agreement (non-blocking — don't fail checkout if this errors)
+    if (!test_mode) {
+      sendAgreement({
+        rep_name:     rep_name || "Account Manager",
+        rep_email:    rep_email || "hello@mysmartslots.com",
+        client_name:  client_name || "",
+        client_email: client_email.toLowerCase(),
+        plan,
+        billing_type: billing_type || "monthly",
+        setup_fee:    Math.round(setupFee / 100),
+      }).then(r => {
+        if (!r.success) console.error("Agreement send failed:", r.error);
+      });
+    }
+
     res.json({ success: true, url: session.url, session_id: session.id });
   } catch (e) {
     console.error("Stripe error:", e);
     res.status(500).json({ error: e.message });
   }
+});
+
+// ── BILLING — Manually send agreement ────────────────────────────────────────
+app.post("/portal/billing/send-agreement", requireAuth, async (req, res) => {
+  const { rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee } = req.body;
+  if (!client_email || !plan) return res.status(400).json({ error: "client_email and plan required." });
+  const result = await sendAgreement({ rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee });
+  res.json(result);
 });
 
 // ── BILLING — Get sales log (admin only) ──────────────────────────────────────
