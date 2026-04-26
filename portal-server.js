@@ -418,7 +418,7 @@ async function sendAgreement({ rep_name, rep_email, client_name, client_email, p
     });
     const data = await response.json();
     if (!response.ok) {
-      console.error("Dropbox Sign error:", data);
+      console.error("Dropbox Sign error:", JSON.stringify(data));
       return { success: false, error: data?.error?.error_msg || "Dropbox Sign API error" };
     }
     console.log("Agreement sent:", data?.signature_request?.signature_request_id);

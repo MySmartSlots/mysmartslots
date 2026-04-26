@@ -323,7 +323,12 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
       <span>Send to Stripe Checkout</span>
       <span class="stripe-badge">🔒 Stripe</span>
     </button>
-    <p class="stripe-note">Client will be redirected to a secure Stripe payment page. After payment, they'll receive a link to complete their onboard form. No card data touches our servers.</p>
+    <button class="checkout-btn" id="agreement-btn" onclick="sendAgreementOnly()"
+      style="margin-top:10px;background:var(--navy);border:1.5px solid var(--accent);">
+      <span>Send Agreement Only</span>
+      <span class="stripe-badge" style="background:rgba(0,200,150,.2);">📝 Dropbox Sign</span>
+    </button>
+    <p class="stripe-note">When you hit <strong>Send to Stripe Checkout</strong> — the agreement fires to all three parties automatically at the same time. Use <strong>Send Agreement Only</strong> if you need to resend it separately.</p>
   </div>
 
 </div>
@@ -385,6 +390,57 @@ let selectedBilling='monthly';
 let selectedSetupFee=199;
 let selectedWebDesign='none';
 let isTestMode=false;
+
+async function sendAgreementOnly(){
+  const rep=document.getElementById('rep-select').value;
+  const name=document.getElementById('client-name').value.trim();
+  const email=document.getElementById('client-email').value.trim();
+  if(!rep){toast('Select the closing Account Manager first.');return;}
+  if(!name){toast('Enter the client name.');return;}
+  if(!email||!email.includes('@')){toast('Enter a valid client email.');return;}
+
+  const btn=document.getElementById('agreement-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span>Sending agreement...</span>';
+
+  const repEmail=REP_EMAILS[rep]||'hello@mysmartslots.com';
+
+  // Setup fee
+  let setupFee=selectedSetupFee;
+  if(typeof selectedSetupFee==='string'){
+    setupFee=Math.max(99,parseInt(document.getElementById('custom-setup-input')?.value)||199);
+  }
+
+  try{
+    const r=await fetch(`${API}/portal/billing/send-agreement`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        username:currentU,password:currentP,
+        rep_name:rep,
+        rep_email:repEmail,
+        client_name:name,
+        client_email:email,
+        plan:selectedPlan,
+        billing_type:selectedBilling,
+        setup_fee:setupFee,
+      })
+    });
+    const d=await r.json();
+    if(d.success){
+      toast('✓ Agreement sent to '+repEmail+', '+email+', and owner');
+      btn.innerHTML='<span>✓ Agreement Sent</span><span class="stripe-badge" style="background:rgba(0,200,150,.2);">📝 Dropbox Sign</span>';
+    } else {
+      toast('Agreement error: '+(d.error||'Unknown error'),true);
+      btn.disabled=false;
+      btn.innerHTML='<span>Send Agreement Only</span><span class="stripe-badge" style="background:rgba(0,200,150,.2);">📝 Dropbox Sign</span>';
+    }
+  }catch(e){
+    toast('Connection error sending agreement',true);
+    btn.disabled=false;
+    btn.innerHTML='<span>Send Agreement Only</span><span class="stripe-badge" style="background:rgba(0,200,150,.2);">📝 Dropbox Sign</span>';
+  }
+}
 
 function doFinancialLogout(){
   currentU=null;currentP=null;currentName=null;
@@ -696,6 +752,8 @@ function resetForm(){
   const btn=document.getElementById('checkout-btn');
   btn.disabled=false;
   btn.innerHTML='<span>Send to Stripe Checkout</span><span class="stripe-badge">🔒 Stripe</span>';
+  const agreementBtn=document.getElementById('agreement-btn');
+  if(agreementBtn){agreementBtn.disabled=false;agreementBtn.innerHTML='<span>Send Agreement Only</span><span class="stripe-badge" style="background:rgba(0,200,150,.2);">📝 Dropbox Sign</span>';}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
