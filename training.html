@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Smart Slots — Rep Training</title>
+<title>My Smart Slots — Account Manager Training</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -211,6 +211,7 @@ let progress={};// {moduleIndex: {completed, score, timeSeconds, attempts}}
 
 // ── MODULES ───────────────────────────────────────────────────────────────────
 const MODULES=[
+  // ── MODULE 1 — WHAT IS MY SMART SLOTS ──────────────────────────────────────
   {
     title:"What Is My Smart Slots?",
     emoji:"🤖",
@@ -218,8 +219,21 @@ const MODULES=[
     readTime:"8 min",
     content:[
       {
+        title:"Your Role — Account Manager",
+        body:`<div class="highlight"><strong>You are an Account Manager for My Smart Slots — not a salesperson.</strong> This distinction matters more than you think.</div>
+
+When you introduce yourself to a prospect, you are a consultant who evaluates businesses and recommends automation solutions. You run a free audit. You solve problems. The numbers close the deal — not your pitch.
+
+You represent Clair Group LLC doing business as My Smart Slots. When asked, you work for My Smart Slots as an Account Manager.
+
+<strong>Never use the word "salesperson" or "sales rep" when talking to prospects or clients.</strong>
+
+The one-line introduction:
+<div class="script-box">"My name is [Your Name] — I'm an Account Manager with My Smart Slots. I work specifically with [industry] businesses in [area] on something pretty specific."</div>`
+      },
+      {
         title:"The One-Line Pitch",
-        body:`My Smart Slots is an AI-powered automation system for local service businesses. We handle missed call follow-up, booking confirmations, appointment reminders, review requests, and lead re-engagement — automatically, 24/7, without the business owner lifting a finger.
+        body:`My Smart Slots is an AI-powered automation system for local service businesses. We handle missed call follow-up, booking confirmations, appointment reminders, review requests, job status updates, and lead re-engagement — automatically, 24/7, without the business owner lifting a finger.
 
 <div class="highlight"><strong>The simplest way to say it:</strong> "We make sure every customer who reaches out to your business gets a response — even when you're on a job, after hours, or on a weekend."</div>
 
@@ -238,7 +252,7 @@ That's it. If you can say that clearly and confidently, you can open a conversat
 <li><strong>Post-Job Review Requests</strong> — After a completed job, an auto-text asks for a Google review at exactly the right moment.</li>
 <li><strong>Lead Re-Engagement</strong> — Old cold leads get an automated follow-up sequence to bring them back.</li>
 <li><strong>Partial Email Replies</strong> — Email inquiries get an instant auto-reply that captures info and moves toward booking.</li>
-<li><strong>Job Status Update Texts</strong> — For repair shops, HVAC, and service businesses — tech updates a status and the customer gets an automatic text. Eliminates "where's my car?" calls. Elite only.</li>
+<li><strong>Job Status Update Texts</strong> — Tech updates a status and the customer gets an automatic text. Eliminates "where's my car?" calls. Elite only.</li>
 <li><strong>Calendar Sync</strong> — Bookings go directly to their Google, Outlook, or Calendly calendar.</li>
 <li><strong>Monthly Report</strong> — Client gets a monthly recap of calls recovered, bookings confirmed, reviews requested, revenue impact.</li>
 </ul>`
@@ -248,15 +262,15 @@ That's it. If you can say that clearly and confidently, you can open a conversat
         body:`<table class="plan-table">
 <thead><tr><th>Plan</th><th>Monthly</th><th>Annual</th><th>Setup Fee</th><th>Best For</th></tr></thead>
 <tbody>
-<tr><td><strong>Starter</strong></td><td>$125/mo</td><td>$1,250/yr</td><td>$199</td><td>Solo / 1–2 employees</td></tr>
-<tr><td><strong>Pro</strong></td><td>$225/mo</td><td>$2,250/yr</td><td>$199</td><td>3–6 employees</td></tr>
-<tr><td><strong>Elite</strong></td><td>$375/mo</td><td>$3,750/yr</td><td>$199</td><td>7+ employees / multi-location</td></tr>
+<tr><td><strong>Starter</strong></td><td>$125/mo</td><td>$1,250/yr</td><td>$99–$199</td><td>Solo / 1–2 employees</td></tr>
+<tr><td><strong>Pro</strong></td><td>$225/mo</td><td>$2,250/yr</td><td>$99–$199</td><td>3–6 employees</td></tr>
+<tr><td><strong>Elite</strong></td><td>$375/mo</td><td>$3,750/yr</td><td>$99–$199</td><td>High-volume / repair shops</td></tr>
 </tbody>
 </table>
 
-<div class="warning"><strong>Important:</strong> The $199 setup fee is collected first — before any monthly billing starts. Never quote just the monthly price without mentioning setup.</div>
+<div class="highlight"><strong>Annual plans = 2 months free.</strong> Always pitch annual first. Your commission is higher, the client saves money, and churn drops dramatically because they've committed to a year.</div>
 
-Every plan has a <strong>30-day guarantee</strong> — no measurable improvement in 30 days, month two is free. No long-term contracts.`
+<div class="warning"><strong>Important:</strong> The setup fee is collected first — before any subscription billing starts. Standard is $199. Promotional is $99 for early clients. Never quote just the monthly price without mentioning setup. Every plan has a <strong>30-day guarantee</strong> — no measurable improvement, month two is free.</div>`
       },
       {
         title:"Who We Sell To",
@@ -264,9 +278,9 @@ Every plan has a <strong>30-day guarantee</strong> — no measurable improvement
 
 <ul>
 <li>Plumbing, HVAC, Electrical, Roofing, General Contracting</li>
-<li>Pest Control, Lawn & Landscaping, Auto Service</li>
+<li>Pest Control, Lawn & Landscaping, Auto Service & Repair Shops</li>
 <li>Hair Salons, Nail Techs, Med Spas, Massage & Wellness</li>
-<li>Dental & Medical offices</li>
+<li>Dental & Medical offices, Real Estate</li>
 </ul>
 
 The common thread: <strong>they book appointments, they get calls, and missed calls cost them real money.</strong> That's all you need.`
@@ -274,22 +288,22 @@ The common thread: <strong>they book appointments, they get calls, and missed ca
     ],
     quiz:[
       {
+        q:"How do you introduce yourself to a prospect?",
+        options:["'Hi I'm a sales rep from My Smart Slots'","'Hi I'm an Account Manager with My Smart Slots'","'Hi I'm from a local tech company'","'Hi I'm a consultant'"],
+        correct:1,
+        explanation:"Always Account Manager — never sales rep or salesperson. This positions you as a consultant who evaluates and recommends, not someone trying to sell."
+      },
+      {
         q:"What is the #1 automation that closes the most deals?",
         options:["Calendar Sync","Missed Call Text Back","Monthly Report","Lead Re-Engagement"],
         correct:1,
-        explanation:"Missed Call Text Back is the single most compelling demo because the pain is immediate and universal — every service business misses calls."
+        explanation:"Missed Call Text Back is the single most compelling automation because the pain is immediate and universal — every service business misses calls."
       },
       {
-        q:"A plumber with 4 employees asks about pricing. What plan do you recommend?",
-        options:["Starter — $125/mo","Pro — $225/mo","Elite — $375/mo","Doesn't matter, let them pick"],
+        q:"A plumber with 4 employees asks about pricing. What plan do you recommend first?",
+        options:["Starter — $125/mo","Pro — $225/mo annual","Elite — $375/mo","Doesn't matter, let them pick"],
         correct:1,
-        explanation:"Pro is the right fit for 3–6 employees. Match the plan to their size — this makes the recommendation feel personalized and knowledgeable."
-      },
-      {
-        q:"A prospect asks 'what's the setup fee?' — what do you say?",
-        options:["There's no setup fee","$199 one-time, collected before monthly billing starts","$199 per month","It depends on the plan"],
-        correct:1,
-        explanation:"Always be upfront about the $199 setup fee. Hiding it creates distrust. Frame it as: 'One-time fee, we have everything live within 24 hours of receiving it.'"
+        explanation:"Pro annual is the right pitch for 3–6 employees. Annual gives them 2 months free and locks in the relationship — always lead with annual."
       },
       {
         q:"Which of these is NOT one of our 11 automations?",
@@ -299,10 +313,12 @@ The common thread: <strong>they book appointments, they get calls, and missed ca
       }
     ]
   },
+
+  // ── MODULE 2 — WHO WE SELL TO ───────────────────────────────────────────────
   {
     title:"Who We Sell To & Why",
     emoji:"🎯",
-    sub:"Ideal customer profile, fit scoring, and red flags to watch for.",
+    sub:"Ideal customer profile, pre-call research, fit scoring, and red flags.",
     readTime:"6 min",
     content:[
       {
@@ -322,55 +338,76 @@ The common thread: <strong>they book appointments, they get calls, and missed ca
 You don't need all 7. But the more boxes they check, the easier the close.`
       },
       {
-        title:"Red Flags — Know When to Walk Away",
-        body:`Not every business is a good fit. These are signs to proceed carefully or skip entirely:
+        title:"Pre-Call Research — The Prospector Tool",
+        body:`Everything you observe about a business BEFORE calling goes into the Prospector fit checker. The new questions are all things you can check from Google, Yelp, and their website — no guessing.
 
+<div class="highlight"><strong>Check these before every call:</strong></div>
 <ul>
-<li><strong>Walk-in only</strong> — If they don't book appointments (like a convenience store), the automations don't make sense.</li>
-<li><strong>Already has a full system</strong> — If they're on GoHighLevel or ServiceTitan and using it well, your pitch is harder. Ask what's missing, don't fight their existing setup.</li>
-<li><strong>Too small</strong> — A solo operator doing 3–4 jobs a week may not generate enough call volume for this to pay off quickly.</li>
-<li><strong>Resistant to technology</strong> — A prospect who says "I don't believe in all this AI stuff" requires extra work. Not impossible, but know your uphill battle.</li>
-<li><strong>Commercial only</strong> — Commercial contractors often have purchasing departments and long sales cycles. Not our sweet spot.</li>
-</ul>`
+<li><strong>Google reviews</strong> — How many? What rating? Do any complaints mention missed calls or no response?</li>
+<li><strong>Website quality</strong> — Do they have one? Is it modern or outdated? Do they have a chatbot or online booking?</li>
+<li><strong>Google Business profile</strong> — Is it claimed and complete? Are hours listed?</li>
+<li><strong>Social media</strong> — Active or dead? Last post date matters.</li>
+<li><strong>Online booking</strong> — If they don't have it, that's a gap we fill.</li>
+</ul>
+
+<div class="warning"><strong>10 minutes of research before a call is worth more than 10 cold calls to the wrong businesses.</strong> Don't skip this step.</div>`
       },
       {
         title:"The Fit Score",
-        body:`In the Prospector tool, every prospect gets a fit score 0–100% based on 10 qualifying questions. Use this as your guide:
+        body:`In the Prospector tool, every prospect gets a fit score 0–100% based on 12 observable questions — all answerable before you call. Use this as your guide:
 
 <ul>
-<li><strong>70%+ (Hot)</strong> — Move on this one. Lead with the audit, be direct.</li>
-<li><strong>45–69% (Warm)</strong> — Worth pursuing. Offer the free audit and let the numbers do the work.</li>
-<li><strong>Under 45% (Cold)</strong> — Proceed carefully. Don't over-invest follow-up time.</li>
-</ul>
+<li><strong>70%+ (Hot 🔥)</strong> — Move on this one immediately. Lead with the audit, be direct.</li>
+<li><strong>45–69% (Warm ⚡)</strong> — Worth pursuing. Offer the free audit and let the numbers do the work.</li>
+<li><strong>Under 45% (Cold ❄️)</strong> — Proceed carefully. Don't over-invest follow-up time.</li>
+</ul>`
+      },
+      {
+        title:"Red Flags — Know When to Walk Away",
+        body:`Not every business is a good fit. These are signs to proceed carefully or skip:
 
-<div class="warning"><strong>Don't skip the fit check.</strong> Calling a cold prospect wastes your time and hurts your confidence. 10 minutes of research before a call is worth more than 10 cold calls to the wrong businesses.</div>`
+<ul>
+<li><strong>Walk-in only</strong> — If they don't book appointments, the automations don't fit.</li>
+<li><strong>Already fully automated</strong> — If they're on GoHighLevel and using it well, your pitch is harder. Ask what's missing.</li>
+<li><strong>Too small</strong> — A solo operator doing 3–4 jobs a week may not generate enough volume.</li>
+<li><strong>Resistant to technology</strong> — Not impossible, but know your uphill battle.</li>
+<li><strong>Commercial only</strong> — Long procurement cycles. Not our sweet spot.</li>
+</ul>`
       }
     ],
     quiz:[
       {
-        q:"A nail salon with 3 chairs and a receptionist who answers phones — what's their fit level likely to be?",
-        options:["Cold — they already have someone answering","Hot — appointment-based, multiple staff, phone-dependent","Warm — too small to matter","Can't determine without more info"],
+        q:"A nail salon with 3 chairs — no website, no chatbot, 47 Google reviews at 4.2 stars. What's their fit level?",
+        options:["Cold — too small","Hot — appointment-based, gap in automation, strong reviews","Warm — hard to tell","Cold — no website means no clients"],
         correct:1,
-        explanation:"Nail salons are a strong fit. They're appointment-based, they get constant call volume, no-shows are common, and review volume directly drives new clients."
+        explanation:"Strong fit. Appointment-based, phone-dependent, no chatbot or online booking means clear gaps we fill. 47 reviews shows real volume. Lead with the audit."
       },
       {
-        q:"A prospect says 'we only do commercial contracts.' What do you do?",
-        options:["Pitch them harder — commercial pays more","Ask what their current follow-up system looks like before deciding","Move on — not our sweet spot","Offer them a discount to close"],
-        correct:1,
-        explanation:"Always ask a question before deciding. Some commercial contractors also do residential work. But if it's purely commercial with long procurement cycles, it's not our best fit."
+        q:"A prospect's Google Business profile isn't claimed. What does this tell you?",
+        options:["They don't need our help","They're too small","They likely have gaps in their online presence — good prospect","They're probably too busy to talk"],
+        correct:2,
+        explanation:"Unclaimed Google profile = they're not actively managing their online presence. This is a buying signal — they need help capturing leads they're missing."
       },
       {
         q:"What fit score range means 'Hot — move on this one'?",
         options:["50% and above","60% and above","70% and above","80% and above"],
         correct:2,
-        explanation:"70%+ is Hot. This means the business shows strong signals across multiple qualifying questions and the audit conversation should be straightforward."
+        explanation:"70%+ is Hot. Strong signals across multiple observable questions. The audit conversation should be straightforward."
+      },
+      {
+        q:"A prospect says they only do commercial contracts. What do you do?",
+        options:["Pitch them harder — commercial pays more","Ask if they do any residential before deciding — then move on if truly commercial only","Move on immediately","Offer a discount for commercial clients"],
+        correct:1,
+        explanation:"Always ask a question before deciding. Some commercial contractors also do residential. But purely commercial with long procurement cycles is not our sweet spot."
       }
     ]
   },
+
+  // ── MODULE 3 — THE FULL SALES PROCESS ──────────────────────────────────────
   {
     title:"The Full Sales Process",
     emoji:"📋",
-    sub:"Every step from first contact to client going live.",
+    sub:"All 10 steps from first contact to client going live.",
     readTime:"10 min",
     content:[
       {
@@ -378,17 +415,19 @@ You don't need all 7. But the more boxes they check, the easier the close.`
         body:`Know this cold. Every client goes through the same path.
 
 <ul>
-<li><strong>Step 1 — Research</strong>: Use the Prospector to research the business. Check their Google reviews, website, fit score.</li>
-<li><strong>Step 2 — Icebreaker</strong>: Pick your icebreaker based on what you observed. Specific always beats generic.</li>
-<li><strong>Step 3 — First contact</strong>: Call, text, email, or walk in. Your goal is ONE thing — book a 10-minute audit call. Nothing else.</li>
-<li><strong>Step 4 — Audit call</strong>: Run the revenue leak calculator live. Show them their number. Recommend a plan based on size.</li>
-<li><strong>Step 5 — They say yes</strong>: Send the Stripe payment link immediately — while you're still on the call if possible.</li>
-<li><strong>Step 6 — Payment confirmed</strong>: You notify the owner. Client gets confirmation: "Live within 24 hours."</li>
-<li><strong>Step 7 — Client fills onboard form</strong>: Send them to mysmartslots.com/onboard?plan=pro (or starter/elite).</li>
-<li><strong>Step 8 — Owner sets up system</strong>: Uses the setup tool to generate their system prompt and subdomain page.</li>
-<li><strong>Step 9 — Go live</strong>: Client gets their link. Chatbot active. Automations running.</li>
-<li><strong>Step 10 — Day 14 check-in</strong>: Text the client to check in. Keeps the relationship warm and catches any issues early.</li>
-</ul>`
+<li><strong>Step 1 — Research</strong>: Use the Prospector. Check Google reviews, website, fit score. Build a list of 50+ before calling.</li>
+<li><strong>Step 2 — Build Pitch</strong>: Use the Prospector pitch builder. Pick your icebreaker based on something specific you observed.</li>
+<li><strong>Step 3 — First Contact</strong>: Call, text, or email. Your ONLY goal — book a 10-minute audit call. Nothing else.</li>
+<li><strong>Step 4 — Audit Call</strong>: Run the revenue leak calculator live. Show them their number. Recommend a plan.</li>
+<li><strong>Step 5 — Send the Agreement</strong>: Go to mysmartslots.com/agreement and send the Business Services Agreement to the client's email. They sign electronically — takes 2 minutes on their phone. You get notified when they sign.</li>
+<li><strong>Step 6 — Send Payment Link</strong>: Once they sign, go to mysmartslots.com/financial and generate the Stripe payment link. Send the copy message to the client immediately.</li>
+<li><strong>Step 7 — Client Fills Onboard Form</strong>: After payment, client gets the onboard link automatically. Follow up same day if they haven't completed it.</li>
+<li><strong>Step 8 — Notify Owner</strong>: Text the owner that payment cleared and onboard is complete. Setup begins — live within 24 hours.</li>
+<li><strong>Step 9 — Go Live</strong>: Automations active. Client confirmed everything is running.</li>
+<li><strong>Step 10 — 14-Day Check-In</strong>: Text the client. Ask how it's going. Builds the relationship and reduces churn.</li>
+</ul>
+
+<div class="warning"><strong>The agreement comes BEFORE payment.</strong> Never collect payment without a signed agreement. The agreement page sends itself — you just need to go to /agreement, fill in the details, and hit send.</div>`
       },
       {
         title:"Your Only Job on the First Contact",
@@ -398,7 +437,6 @@ You don't need all 7. But the more boxes they check, the easier the close.`
 
 That's it. One goal. If you go into a cold call trying to explain all 11 automations and get them to say yes on the spot, you will fail every time.
 
-The script is simple:
 <div class="script-box">"I noticed [Business Name] doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're with a customer?
 
 [They answer]
@@ -418,9 +456,27 @@ Total = What they're losing every month</div>
 
 When someone sees they're losing $4,200/month and you're asking for $225/month, the math closes itself.
 
-<strong>After the number:</strong> "Based on your size I'd recommend the Pro plan at $225/mo. There's a $199 setup fee — we get everything live within 24 hours of receiving that. Want to move forward?"
+<strong>After the number:</strong>
+<div class="script-box">"Based on your size I'd recommend the Pro plan. Annual is $2,250 — that's two months free compared to monthly. Setup fee is $199 one-time, and we're live within 24 hours of your onboard form. Want to move forward?"</div>
 
-Then stop talking. Let them respond.`
+Then stop talking. Let them respond.
+
+<div class="highlight"><strong>Always pitch annual first.</strong> If they push back on annual, offer monthly as the fallback — never lead with it.</div>`
+      },
+      {
+        title:"The Agreement & Payment Flow",
+        body:`Once they say yes, move fast. Here is the exact sequence:
+
+<strong>Step 1 — Send the agreement</strong>
+Open mysmartslots.com/agreement on your phone. Select the client from your pipeline or fill in their info. Select the plan and billing type. Hit "Send Agreement to Client." The client gets an email with a secure link to sign electronically. You'll receive an email the moment they sign.
+
+<strong>Step 2 — Send the payment link</strong>
+When you get the "client signed" notification, open mysmartslots.com/financial. Pull the client from your pipeline. Generate the Stripe checkout link. Copy the message and text or email it to the client immediately.
+
+<strong>Step 3 — Client pays</strong>
+Stripe processes the subscription. Client gets a receipt. You and the owner get notified.
+
+<div class="warning"><strong>You do NOT need to wait for the owner to send the agreement or payment link.</strong> Both /agreement and /financial are yours to use independently. You are in full control of your close.</div>`
       }
     ],
     quiz:[
@@ -428,40 +484,42 @@ Then stop talking. Let them respond.`
         q:"What is your ONLY goal on the first cold call?",
         options:["Explain all 11 automations","Close them on a plan","Book a 10-minute audit call","Get their email address"],
         correct:2,
-        explanation:"One goal: book the audit. Everything else — demos, pricing, features — comes on the audit call. Trying to sell on the first call almost always fails."
+        explanation:"One goal: book the audit. Everything else comes on the audit call. Trying to sell on the first call almost always fails."
       },
       {
-        q:"A prospect has 8 employees, misses about 6 calls a week, and average job is $400. What's their estimated monthly leak from missed calls?",
+        q:"A prospect has 8 employees, misses 6 calls a week, average job is $400. What's their estimated monthly leak from missed calls?",
         options:["$1,920","$7,680","$9,600","$4,800"],
         correct:1,
-        explanation:"6 missed calls × 0.8 (80% conversion) × $400 × 4 weeks = $7,680/month. That number closes the deal — not your pitch."
+        explanation:"6 × 0.8 × $400 × 4 = $7,680/month. That number closes the deal — not your pitch."
       },
       {
-        q:"After the prospect agrees to move forward, what do you do immediately?",
-        options:["Schedule a follow-up call","Send the Stripe payment link right now","Send the onboard form","Email them the pricing PDF"],
-        correct:1,
-        explanation:"Send the payment link immediately — ideally while still on the call. Every minute you wait gives them time to talk themselves out of it."
+        q:"In what order do you send the agreement and payment link?",
+        options:["Payment first, then agreement","Agreement first, then payment link","Both at the same time","Payment first, agreement at onboarding"],
+        correct:0,
+        explanation:"Agreement always comes first. You send it from /agreement. Once they sign you get notified and immediately send the payment link from /financial."
       },
       {
-        q:"A prospect says 'I need to think about it.' What's the best response?",
-        options:["'No problem, I'll follow up next week'","'Of course — what's the main thing you're unsure about?'","'The price goes up next week so I'd decide now'","'Most people say that but then regret waiting'"],
+        q:"A prospect says yes on the audit call. What do you do first?",
+        options:["Call the owner to let them know","Open /agreement and send the client their agreement immediately","Schedule a follow-up to confirm","Send them the pricing page"],
         correct:1,
-        explanation:"Always find the real objection. 'I need to think about it' is almost never the real issue — it's usually price, trust, or timing. Ask the question and you'll find out."
+        explanation:"Open /agreement immediately. Send while you're still on the call or right after. Every minute you wait gives them time to change their mind."
       }
     ]
   },
+
+  // ── MODULE 4 — LIVE CALL SCRIPTS ───────────────────────────────────────────
   {
     title:"Live Call Scripts",
     emoji:"📞",
-    sub:"Word-for-word scripts for cold calls, texts, and emails.",
+    sub:"Word-for-word scripts for cold calls, texts, and follow-ups.",
     readTime:"8 min",
     content:[
       {
         title:"The Cold Call Script — Full Version",
-        body:`<div class="tip">USE THE PERSONALIZER IN /REP BEFORE EVERY CALL — it updates all scripts with the rep name, prospect name, and business name automatically.</div>
+        body:`<div class="tip">USE THE PERSONALIZER IN /REP BEFORE EVERY CALL — it updates all scripts with your name, prospect name, and business name automatically.</div>
 
 <div class="script-box">OPENING:
-"Hey, is this [Owner Name]? ... Hey [Name], my name's [Your Name] — I work with service businesses in the area on something specific. I'll keep it short.
+"Hey, is this [Owner Name]? ... Hey [Name], my name's [Your Name] — I'm an Account Manager with My Smart Slots. I work with service businesses in the area on something specific. I'll keep it short.
 
 I noticed [Business Name] doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're with a customer?"
 
@@ -484,7 +542,7 @@ IF NOT INTERESTED:
       {
         title:"Cold Text Templates",
         body:`<div class="script-box">FIRST TEXT:
-"Hey [Name], my name's [Your Name] — I work with service businesses helping them recover missed calls automatically. Noticed [Business] doesn't have a follow-up system.
+"Hey [Name], my name's [Your Name] — I'm an Account Manager with My Smart Slots. I work with service businesses helping them recover missed calls automatically. Noticed [Business] doesn't have a follow-up system.
 
 Quick question — how are you handling calls that come in while you're with a customer?
 
@@ -498,17 +556,29 @@ FINAL FOLLOW-UP (Day 7):
 
 If timing's ever right, just reply and I'll set up a free audit."</div>
 
-<div class="warning"><strong>Never send more than 3 texts to a prospect who hasn't responded.</strong> After 3 you move them to "Not Interested" in the pipeline and move on.</div>`
+<div class="warning"><strong>Never send more than 3 texts to a prospect who hasn't responded.</strong> After 3 — move them to Not Interested in the pipeline and move on.</div>`
       },
       {
-        title:"Tone — Peer to Peer, Never Pushy",
+        title:"After They Say Yes — The Close Script",
+        body:`Once someone agrees to move forward on the audit call, this is what you say:
+
+<div class="script-box">"Perfect. Here's what happens next — I'm going to send you a quick agreement to your email right now. It's our standard services agreement, takes about 2 minutes to sign on your phone. Once you sign, I'll send you the payment link and we'll have everything live within 24 hours of your onboard form.
+
+What's the best email for you?"</div>
+
+Then hang up, open /agreement, fill in their info, and hit send. That's it. You're done. The system handles the rest.
+
+<div class="highlight"><strong>You are in full control of this process from your phone.</strong> You don't need to call the owner. You don't need to wait. /agreement → they sign → /financial → they pay → done.</div>`
+      },
+      {
+        title:"Tone — Account Manager, Not Salesperson",
         body:`This is the most important thing about how you deliver these scripts.
 
-<strong>You are not a salesperson calling to pitch a product.</strong> You are a peer who noticed something about their business and is offering to show them the math. That's it.
+<strong>You are not a salesperson calling to pitch a product.</strong> You are an Account Manager who noticed something about their business and is offering to show them the math. That's it.
 
 <div class="highlight">
-<strong>Peer-to-peer tone sounds like:</strong> Confident, direct, no hesitation, asking real questions, listening to answers.<br/><br/>
-<strong>Salesperson tone sounds like:</strong> Over-explaining, rushing through features, not pausing, defensive when pushed back on.
+<strong>Account Manager tone:</strong> Confident, direct, no hesitation, asking real questions, listening to answers.<br/><br/>
+<strong>Salesperson tone:</strong> Over-explaining, rushing through features, not pausing, defensive when pushed back on.
 </div>
 
 The script is a guide — not a word-for-word recitation. Know it well enough that you can have a real conversation, not read from a page.`
@@ -519,22 +589,30 @@ The script is a guide — not a word-for-word recitation. Know it well enough th
         q:"A prospect picks up and sounds rushed. What do you do?",
         options:["Launch into the full script immediately","Acknowledge it: 'Hey I'll keep it under 30 seconds' — then ask your one question","Hang up and call back later","Ask if they have time for a 10-minute demo"],
         correct:1,
-        explanation:"Always acknowledge their time. A rushed prospect who feels respected is more likely to engage than one who feels like they're being steamrolled."
+        explanation:"Always acknowledge their time. A rushed prospect who feels respected is more likely to engage than one who feels steamrolled."
+      },
+      {
+        q:"After a prospect says yes on the audit call, what do you ask for?",
+        options:["Their credit card","Their best email address so you can send the agreement","Their physical address","A good time to call back"],
+        correct:1,
+        explanation:"Get their email, open /agreement immediately, and send the agreement. The faster you move the higher your close rate."
       },
       {
         q:"How many follow-up texts should you send to a non-responding prospect?",
         options:["As many as it takes","5 — persistence pays","3 maximum, then move them to Not Interested","1 — if they don't respond once, move on"],
         correct:2,
-        explanation:"3 texts maximum. After that you move them to Not Interested in the pipeline. Continuing to text non-responding prospects wastes time and can get you blocked."
+        explanation:"3 texts maximum. After that move them to Not Interested. Continuing to text non-responding prospects wastes time and damages your reputation."
       },
       {
         q:"What's the correct tone for these calls?",
-        options:["Enthusiastic and high-energy — excitement is contagious","Formal and professional — treat it like a business meeting","Peer-to-peer — confident, direct, like you're talking to someone you already know","Soft and apologetic — you don't want to bother them"],
+        options:["Enthusiastic and high-energy","Formal and professional","Account Manager — confident and direct, like you're talking to a peer","Soft and apologetic"],
         correct:2,
-        explanation:"Peer-to-peer is the sweet spot. Not too corporate, not too salesy. You noticed something about their business and you're offering to help. That's a conversation, not a pitch."
+        explanation:"Account Manager is the sweet spot. Not too corporate, not too salesy. You noticed something about their business and you're offering to help."
       }
     ]
   },
+
+  // ── MODULE 5 — OBJECTION HANDLING ──────────────────────────────────────────
   {
     title:"Objection Handling",
     emoji:"🛡️",
@@ -559,13 +637,13 @@ Your job is to figure out which one and address it — then redirect back to the
       {
         title:"The 8 Most Common Objections",
         body:`<strong>1. "I don't have time for this."</strong>
-<div class="script-box">"Totally get it — that's exactly why this exists. It runs itself, you don't touch it. Can I send you the demo link? Takes 30 seconds to look at." → mysmartslots.com/subdomain</div>
+<div class="script-box">"Totally get it — that's exactly why this exists. It runs itself, you don't touch it. Can I send you the demo link? Takes 30 seconds." → mysmartslots.com/subdomain</div>
 
 <strong>2. "I already have someone answering my phones."</strong>
 <div class="script-box">"This isn't replacing them — it's about what happens after hours, on weekends, or when they're on another call. Most businesses lose 30–40% of after-hours inquiries before anyone can pick up."</div>
 
 <strong>3. "$225 a month is too expensive."</strong>
-<div class="script-box">"Fair to think about it that way. The average missed call in a service business is worth $300–600. If this recovers even one job per month, it's already paid for itself. And there's a 30-day guarantee — no improvement, month two is free. Can I show you the math on your specific numbers?"</div>
+<div class="script-box">"Fair to think about it that way. The average missed call in a service business is worth $300–600. If this recovers even one job per month, it's already paid for itself. There's a 30-day guarantee — no improvement, month two is free. Can I show you the math on your specific numbers?"</div>
 
 <strong>4. "I'm not tech savvy."</strong>
 <div class="script-box">"You don't have to be — we set everything up in 24 hours. You just work the jobs, appointments land in your calendar. Nothing for you to learn."</div>
@@ -574,7 +652,7 @@ Your job is to figure out which one and address it — then redirect back to the
 <div class="script-box">"I appreciate you saying that — what did you try? Most of the time we hear about generic tools that weren't built for your specific business. My Smart Slots is configured specifically for how you work."</div>
 
 <strong>6. "Send me some info."</strong>
-<div class="script-box">Send mysmartslots.com + mysmartslots.com/subdomain. Follow up in 2 days: "Hey, had a chance to look at that? Happy to walk you through it on a quick call."</div>
+<div class="script-box">Send mysmartslots.com and mysmartslots.com/subdomain. Follow up in 2 days: "Hey, had a chance to look at that? Happy to walk you through it on a quick call."</div>
 
 <strong>7. "I need to think about it."</strong>
 <div class="script-box">"Of course — what's the main thing you're unsure about?" → Find the real objection. Always offer the free audit as the low-commitment next step.</div>
@@ -586,155 +664,240 @@ Your job is to figure out which one and address it — then redirect back to the
     quiz:[
       {
         q:"A prospect says '$225/mo is too much.' What's your first move?",
-        options:["Offer them a discount","Acknowledge it, then reframe with the math — one recovered job pays for it","Explain all the features they're getting","Tell them the Starter plan is only $125"],
+        options:["Offer them a discount immediately","Acknowledge it, then reframe — one recovered job pays for the whole month","Explain all the features they're getting","Tell them the Starter plan is only $125"],
         correct:1,
-        explanation:"Always acknowledge first, then reframe. The price objection almost always disappears when you show that one recovered job covers the entire monthly cost."
+        explanation:"Always acknowledge first, then reframe. The price objection disappears when you show that one recovered job covers the entire monthly cost."
       },
       {
         q:"A prospect says 'I already have someone answering phones.' What do you say?",
-        options:["'Then you probably don't need this — have a good day'","'This replaces your receptionist and saves you money'","'This isn't replacing them — it covers after hours, weekends, and overflow that slips through'","'How much are you paying them? We're cheaper'"],
+        options:["'Then you probably don't need this'","'This replaces your receptionist'","'This isn't replacing them — it covers after hours, weekends, and overflow'","'How much are you paying them? We're cheaper'"],
         correct:2,
-        explanation:"This is an additive tool, not a replacement. The objection comes from misunderstanding — clarify that it fills the gaps their person can't cover."
+        explanation:"This is additive, not a replacement. The objection comes from misunderstanding — clarify that it fills the gaps their person can't cover."
       },
       {
         q:"What is the zero-risk next step you always redirect to?",
         options:["A 30-day free trial","The free 10-minute audit","A product demo video","The pricing page"],
         correct:1,
         explanation:"The free audit is your answer to almost every objection. No commitment, no pitch — just math. It's the lowest-friction next step and it lets the numbers do the selling."
+      },
+      {
+        q:"A prospect says 'I tried GoHighLevel and it was too complicated.' What do you say?",
+        options:["'GoHighLevel is a great product actually'","'What specifically didn't work? My Smart Slots is configured specifically for your business type — not a generic platform'","'Yeah GoHighLevel isn't good'","Move on — they've been burned before"],
+        correct:1,
+        explanation:"Ask what went wrong before assuming. Being burned by a generic tool is actually a buying signal — it means they tried to solve the problem. Your job is to show them you're different."
       }
     ]
   },
+
+  // ── MODULE 6 — COMMISSION & GETTING PAID ───────────────────────────────────
   {
     title:"Commission & Getting Paid",
     emoji:"💰",
-    sub:"How commissions work, when you get paid, and how to track your earnings.",
-    readTime:"5 min",
+    sub:"How commissions work, annual vs monthly, milestones, and when you get paid.",
+    readTime:"6 min",
     content:[
       {
         title:"Your Commission Structure",
         body:`<table class="plan-table">
-<thead><tr><th>What</th><th>Your Cut</th><th>When</th></tr></thead>
+<thead><tr><th>Plan</th><th>Monthly Commission</th><th>Annual Commission</th></tr></thead>
 <tbody>
-<tr><td><strong>Monthly recurring</strong></td><td>30% of monthly plan price, every month while they stay</td><td>Last Friday of each month</td></tr>
-<tr><td><strong>Setup fee bonus</strong></td><td>$50 flat per new client closed</td><td>Within 7 business days of payment</td></tr>
+<tr><td><strong>Starter</strong></td><td>$37.50/mo recurring</td><td>$312.50 (paid upfront)</td></tr>
+<tr><td><strong>Pro</strong></td><td>$67.50/mo recurring</td><td>$562.50 (paid upfront)</td></tr>
+<tr><td><strong>Elite</strong></td><td>$112.50/mo recurring</td><td>$937.50 (paid upfront)</td></tr>
 </tbody>
 </table>
 
 <div class="highlight">
-<strong>Monthly recurring breakdown:</strong><br/>
-Starter ($125/mo) → You earn <strong>$37.50/mo</strong> per client<br/>
-Pro ($225/mo) → You earn <strong>$67.50/mo</strong> per client<br/>
-Elite ($375/mo) → You earn <strong>$112.50/mo</strong> per client
-</div>
-
-This is <strong>lifetime recurring</strong> — as long as the client stays, you get paid. A client you close today could be paying you in 3 years.`
+<strong>Plus $50 setup bonus per new client</strong> — paid within 7 business days of the client's first payment clearing.<br/><br/>
+<strong>Payment date:</strong> Last Friday of every month via CashApp or cashier's check.<br/><br/>
+<strong>This is lifetime recurring</strong> — as long as the client stays, you get paid. A client you close today could still be paying you in 3 years.
+</div>`
       },
       {
-        title:"The Math on 5 Clients",
-        body:`This is the target that unlocks real passive income.
+        title:"Why Annual Is Your Best Close",
+        body:`Annual plans are the most important thing to understand about your commission structure.
 
 <div class="highlight">
-<strong>5 Pro clients = $1,125/mo recurring</strong><br/>
-5 Pro clients + setup bonuses = $1,375 in month one<br/><br/>
-10 Pro clients = $2,250/mo recurring<br/>
-20 Pro clients = $4,500/mo recurring
+<strong>Monthly Pro close:</strong> $67.50/mo starting next month<br/>
+<strong>Annual Pro close:</strong> $562.50 paid out this month
 </div>
 
-The compounding effect is real. Every client you close adds to your base. Focus on Pro and Elite — the extra effort per sale is minimal but the monthly difference adds up fast.`
+Annual pays you 8+ months of commission in one shot. The client saves 2 months of service. It's genuinely better for both of you.
+
+<strong>How to pitch annual:</strong>
+<div class="script-box">"Annual is $2,250 — that's two months free compared to paying month-to-month. Most clients go annual because the savings are immediate. Does that make sense for you?"</div>
+
+If they push back: "Totally fine — monthly is $225. No commitment, cancel anytime." Then let them decide.
+
+<div class="warning"><strong>Annual plans have a 12-month commitment.</strong> The client knows this — it's in the agreement they sign. Don't hide it. Frame it as "committing to the savings."</div>`
       },
       {
-        title:"How Payment Works",
+        title:"Milestone Bonuses",
+        body:`Every time you hit a client milestone you earn a cash bonus on top of recurring commission:
+
+<table class="plan-table">
+<thead><tr><th>Milestone</th><th>Bonus</th></tr></thead>
+<tbody>
+<tr><td>First close ever</td><td>$100 cash</td></tr>
+<tr><td>5 active clients</td><td>$250 cash</td></tr>
+<tr><td>10 active clients</td><td>$500 cash + Senior Rep title</td></tr>
+<tr><td>25 active clients</td><td>$1,000 cash + override income begins</td></tr>
+<tr><td>50 active clients</td><td>$2,000 cash + top incentive eligibility</td></tr>
+</tbody>
+</table>
+
+<div class="highlight"><strong>At 25 clients you start earning override income</strong> — 10% of every close your recruited reps make. At 50 clients it goes to 15%. This is how you build income that runs without you on the phone every day.</div>`
+      },
+      {
+        title:"Company Milestones — We Win Together",
+        body:`These are company-wide incentives that everyone earns together:
+
+<table class="plan-table">
+<thead><tr><th>Company MRR</th><th>Reward</th></tr></thead>
+<tbody>
+<tr><td>$5,000/mo</td><td>Full team dinner</td></tr>
+<tr><td>$15,000/mo</td><td>Weekend trip — 2 nights, hotel & meals covered</td></tr>
+<tr><td>$30,000/mo</td><td>Company retreat — 3–4 days, flights covered</td></tr>
+<tr><td>$50,000/mo</td><td>Premium destination — 5 days, international</td></tr>
+</tbody>
+</table>
+
+Every client you close moves the whole team closer to the next milestone. These are permanent — once hit, they never reset.`
+      },
+      {
+        title:"How Payment Works — Step by Step",
         body:`<ul>
-<li><strong>Payment method:</strong> CashApp or cashier's check — your choice</li>
-<li><strong>Payment date:</strong> Last Friday of every month</li>
-<li><strong>Setup bonuses:</strong> Paid within 7 business days of the client's setup fee clearing</li>
-<li><strong>90-day tail:</strong> If you leave, you continue to earn on clients you closed for 90 days after your last day</li>
+<li><strong>Client counts as closed</strong> when their first payment clears through Stripe — not when they verbally agree</li>
+<li><strong>Setup bonus</strong> ($50) paid within 7 business days of payment clearing</li>
+<li><strong>Monthly recurring commission</strong> paid on last Friday of each month</li>
+<li><strong>Milestone bonuses</strong> paid within 7 business days of hitting the milestone</li>
+<li><strong>W-9 required</strong> before your first commission payment — your income is reported as 1099 contractor income</li>
+<li><strong>90-day tail</strong> — if you ever leave, you continue earning on your clients for 90 days after your last day</li>
 </ul>
 
-<div class="warning"><strong>Important:</strong> A client only counts as "closed" once the $199 setup fee is collected. Verbal commitments don't count. Get the payment link sent and collected before celebrating.</div>
-
-Use the Commission Calculator in the Rep Portal (/rep) to see your projected monthly earnings at any client count.`
+<div class="warning"><strong>A verbal yes does not count. Payment is a close.</strong> Don't celebrate until the Stripe payment clears.</div>`
       }
     ],
     quiz:[
       {
-        q:"You close a Pro client. What do you earn in month one total?",
-        options:["$67.50","$117.50","$225.00","$50.00"],
+        q:"You close a Pro client on an annual plan. What do you earn?",
+        options:["$67.50","$562.50 + $50 setup bonus = $612.50","$225.00","$337.50"],
         correct:1,
-        explanation:"$67.50 (30% of $225 monthly) + $50 setup bonus = $117.50 in month one. From month two onward it's $67.50/mo recurring as long as they stay."
+        explanation:"$562.50 annual commission (30% of $2,250) + $50 setup bonus = $612.50 on this one close. That's why you always lead with annual."
       },
       {
         q:"When does a client officially count as 'closed'?",
-        options:["When they verbally agree on the call","When they sign the agreement","When the $199 setup fee is collected","When their first monthly payment clears"],
+        options:["When they verbally agree on the call","When they sign the agreement","When their first Stripe payment clears","When their onboard form is submitted"],
         correct:2,
-        explanation:"Setup fee collected = closed. Don't count anything before that. Payment is the only real commitment."
+        explanation:"First Stripe payment cleared = closed. The agreement is required before payment, but payment is what triggers your commission."
       },
       {
-        q:"What is the '90-day tail' in your commission agreement?",
-        options:["You get a 90-day trial period before commissions start","If you leave, you keep earning on your clients for 90 days","Clients can cancel within 90 days for a refund","You must give 90 days notice before leaving"],
+        q:"What happens to your commission if you leave the company?",
+        options:["You lose all future commissions immediately","You keep earning on your clients for 90 days after your last day","Nothing changes — you keep earning forever","You only keep 50% of recurring for 90 days"],
         correct:1,
-        explanation:"The 90-day tail protects your earnings if you ever leave. Clients you closed continue to generate commission for you for 90 days after your termination date."
+        explanation:"The 90-day tail protects your earnings. Clients you closed continue generating commission for 90 days after termination."
+      },
+      {
+        q:"At what client milestone do override commissions begin?",
+        options:["10 clients","15 clients","25 clients","50 clients"],
+        correct:2,
+        explanation:"At 25 active clients you earn 10% of every close your recruited reps make. At 50 clients it goes to 15%. This is the path to income that doesn't depend on you being on the phone."
       }
     ]
   },
+
+  // ── MODULE 7 — TOOLS WALKTHROUGH ───────────────────────────────────────────
   {
     title:"Tools Walkthrough",
     emoji:"🛠️",
-    sub:"How to use /prospector and /rep to work your pipeline every day.",
-    readTime:"6 min",
+    sub:"Every tool you use daily and how to use them correctly.",
+    readTime:"7 min",
     content:[
       {
-        title:"The Two Tools — Their Purpose",
+        title:"Your Full Tool Stack",
         body:`<div class="highlight">
-<strong>/prospector</strong> — Pre-call tool. Everything that happens BEFORE you pick up the phone.<br/>
-Research a business → score their fit → build your pitch → pick your icebreaker → send to pipeline.
+<strong>mysmartslots.com/prospector</strong> — Pre-call research. Everything BEFORE you pick up the phone.<br/>
+Research → fit check → pitch builder → icebreaker → send to pipeline.
 </div>
 <div class="highlight">
-<strong>/rep</strong> — Active sales tool. Everything that happens DURING and AFTER the call.<br/>
-Live call scripts → audit calculator → pipeline management → onboarding tracker → goals.
+<strong>mysmartslots.com/rep</strong> — Active sales. Everything DURING and AFTER the call.<br/>
+Personalizer → live scripts → audit calculator → pipeline → goals.
 </div>
-
-These two tools cover your entire workflow. Use them in order — Prospector first, then Rep during and after calls.`
+<div class="highlight">
+<strong>mysmartslots.com/agreement</strong> — Send the client agreement. Used AFTER they say yes.<br/>
+Fill in client info → select plan → hit send → client signs electronically → you get notified.
+</div>
+<div class="highlight">
+<strong>mysmartslots.com/financial</strong> — Generate the Stripe payment link. Used AFTER they sign.<br/>
+Pull from pipeline → select plan → generate link → copy message → send to client.
+</div>
+<div class="highlight">
+<strong>mysmartslots.com/goals</strong> — Track company MRR, leaderboard, and your stats.<br/>
+Check weekly. Know where you stand relative to milestones.
+</div>`
       },
       {
         title:"Daily Workflow — What to Do Every Day",
-        body:`<strong>Morning (15–20 min):</strong>
+        body:`<strong>Morning (15–20 min) — Build your list:</strong>
 <ul>
 <li>Log into /prospector</li>
-<li>Set your target city</li>
-<li>Research 5–10 businesses, run fit scores, add the hot ones</li>
-<li>Build pitches and pick icebreakers for your top prospects</li>
-<li>Send qualified ones to /rep pipeline</li>
+<li>Research 10+ businesses in your territory, run fit scores</li>
+<li>Build personalized pitches for your top prospects</li>
+<li>Send 50+ qualified prospects to /rep pipeline before you start calling</li>
 </ul>
 
-<strong>During calls (live):</strong>
+<strong>Calling block (core hours):</strong>
 <ul>
-<li>Open /rep — fill in the personalizer (your name, prospect name, business name)</li>
-<li>Use the Scripts tab for live call guidance</li>
-<li>Use the Audit Calculator to run numbers live on the call</li>
-<li>Update the contact status immediately after every call</li>
+<li>Open /rep — fill in the personalizer before each call</li>
+<li>Use the Scripts tab live on the call</li>
+<li>Use the Audit Calculator to run numbers with them</li>
+<li>Update contact status immediately after every call</li>
+<li>When they say yes — open /agreement immediately and send it</li>
 </ul>
 
 <strong>End of day (5 min):</strong>
 <ul>
-<li>Go to the Goals tab in /rep</li>
-<li>Log your daily activity — calls made, texts sent, emails sent, audits booked, clients closed</li>
-<li>Set follow-up dates for any warm prospects</li>
-</ul>`
+<li>Go to Goals tab in /rep</li>
+<li>Log daily activity — calls, texts, audits booked, closes</li>
+<li>Set follow-up dates for all warm prospects</li>
+</ul>
+
+<div class="warning"><strong>Minimum daily activity in Week 1:</strong> 50 prospects researched, 20 contact attempts. No exceptions.</div>`
+      },
+      {
+        title:"The Agreement & Financial Flow in Practice",
+        body:`This is the full close sequence you execute independently:
+
+<strong>1. They say yes on the audit call</strong>
+"Perfect — I'm going to send you an agreement to your email right now. Takes 2 minutes to sign on your phone."
+
+<strong>2. Open /agreement on your phone</strong>
+Log in with your portal credentials. Their name might already be in your pipeline — select them. Pick the plan and billing type. Hit Send. Takes 60 seconds.
+
+<strong>3. Get notified when they sign</strong>
+You receive an email: "[Client name] just signed — send payment link now." It includes a direct button to /financial.
+
+<strong>4. Open /financial</strong>
+Log in. Pull the client from your pipeline. Plan auto-fills. Generate the Stripe link. Copy the message and send it to the client.
+
+<strong>5. Client pays</strong>
+You get notified. Text the owner. Client receives the onboard form link automatically.
+
+<div class="highlight"><strong>This entire flow happens on your phone in under 5 minutes. You are fully in control of your close.</strong></div>`
       },
       {
         title:"Pipeline Statuses — Use Them Correctly",
         body:`Your pipeline only works if every contact is in the right status. Here's exactly what each one means:
 
 <table class="plan-table">
-<thead><tr><th>Status</th><th>Means</th></tr></thead>
+<thead><tr><th>Status</th><th>Means</th><th>Next Action</th></tr></thead>
 <tbody>
-<tr><td><strong>New</strong></td><td>Added to pipeline, not yet contacted</td></tr>
-<tr><td><strong>Contacted</strong></td><td>At least one reach-out attempt made</td></tr>
-<tr><td><strong>Audit Set</strong></td><td>10-minute audit call is scheduled</td></tr>
-<tr><td><strong>Follow-Up</strong></td><td>Had a conversation, needs follow-up — set a follow-up date</td></tr>
-<tr><td><strong>Closed</strong></td><td>Setup fee collected — they're a paying client</td></tr>
-<tr><td><strong>Not Interested</strong></td><td>Explicitly said no or no response after 3 attempts</td></tr>
+<tr><td><strong>New</strong></td><td>Added, not yet contacted</td><td>Contact within 24 hours</td></tr>
+<tr><td><strong>Contacted</strong></td><td>At least one reach-out attempt</td><td>Set follow-up date</td></tr>
+<tr><td><strong>Audit Set</strong></td><td>10-min audit call scheduled</td><td>Prep the calculator</td></tr>
+<tr><td><strong>Follow-Up</strong></td><td>Had a conversation, needs time</td><td>Always set a specific date</td></tr>
+<tr><td><strong>Closed</strong></td><td>Payment cleared</td><td>Notify owner, send onboard link</td></tr>
+<tr><td><strong>Not Interested</strong></td><td>No after 3 attempts or explicit no</td><td>Move on</td></tr>
 </tbody>
 </table>
 
@@ -743,22 +906,28 @@ These two tools cover your entire workflow. Use them in order — Prospector fir
     ],
     quiz:[
       {
-        q:"You just called a prospect and left a voicemail. What status do you set in the pipeline?",
-        options:["New","Contacted","Follow-Up","Audit Set"],
+        q:"You just closed a client on the audit call. What do you open first?",
+        options:["/financial to send the payment link","/agreement to send the client agreement","/rep to update their pipeline status","Text the owner to let them know"],
         correct:1,
-        explanation:"Contacted means at least one reach-out attempt. A voicemail counts. Set a follow-up date for 2 days from now."
+        explanation:"Agreement first, always. Open /agreement, fill in their info, send it. Payment link comes after they sign. This is the correct order every time."
       },
       {
-        q:"Which tool do you open BEFORE making a call to research a prospect?",
+        q:"Which tool do you use BEFORE making a call to research a prospect?",
         options:["/rep — Scripts tab","/prospector — to research and build the pitch","/admin — to check the pipeline","/setup — to prepare the demo"],
         correct:1,
         explanation:"Prospector is your pre-call research tool. Research → fit score → pitch → icebreaker → then call. Never go into a cold call without knowing something specific about the business."
       },
       {
         q:"A prospect said 'maybe, call me next week.' What do you do in the pipeline?",
-        options:["Leave them as Contacted","Move them to Follow-Up and set a follow-up date for next week","Move them to Not Interested","Move them to Audit Set"],
+        options:["Leave them as Contacted","Move them to Follow-Up and set a specific follow-up date","Move them to Not Interested","Move them to Audit Set"],
         correct:1,
-        explanation:"Follow-Up with a specific date. Never leave a warm prospect without a scheduled next action. If you don't set the date now, they'll fall through the cracks."
+        explanation:"Follow-Up with a specific date. Never leave a warm prospect without a scheduled next action. If you don't set the date now they'll fall through the cracks."
+      },
+      {
+        q:"You send the agreement and the client hasn't signed after 3 hours. What do you do?",
+        options:["Wait — give them a week","Send a quick follow-up text: 'Hey, just checking — did you get the agreement I sent over? Should only take 2 minutes to sign'","Call the owner to follow up for you","Re-send a new agreement"],
+        correct:1,
+        explanation:"Follow up same day with a light touch. Most delays are just the client forgetting or being busy — a quick text almost always gets it done within the hour."
       }
     ]
   }
