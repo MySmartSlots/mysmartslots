@@ -312,7 +312,7 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
       <div class="bill-row"><span class="label">Billing</span><span class="val" id="bs-billing">Monthly</span></div>
       <div class="bill-row"><span class="label">Setup Fee</span><span class="val">$<span id="bs-setup">199</span>.00</span></div>
       <div class="bill-row" id="bs-web-row" style="display:none;"><span class="label">Web Design</span><span class="val" id="bs-web-amt">$0.00</span></div>
-      <div class="bill-row"><span class="label" id="bs-period-label">First Month</span><span class="val" id="bs-period-amt">$225.00</span></div>
+      <div class="bill-row"><span class="label" id="bs-period-label">Monthly Subscription</span><span class="val" id="bs-period-amt">$225.00</span></div>
       <div class="bill-row total"><span class="label">Total Due Today</span><span class="val" id="bs-total">$424.00</span></div>
     </div>
     <div class="bill-comm" id="bill-comm">
@@ -524,7 +524,7 @@ function updateBill(){
 
   document.getElementById('bs-plan').textContent=`${p.label} — ${isAnnual?'$'+p.annual.toLocaleString()+'/yr':'$'+p.monthly+'/mo'}`;
   document.getElementById('bs-billing').textContent=isAnnual?'Annual (2 months free — 12-month commitment)':'Monthly';
-  document.getElementById('bs-period-label').textContent=isAnnual?'Annual Payment':'First Month';
+  document.getElementById('bs-period-label').textContent=isAnnual?'Annual Subscription (auto-renews)':'Monthly Subscription (auto-renews)';
   document.getElementById('bs-period-amt').textContent='$'+planAmt.toLocaleString()+'.00';
 
   // Update setup fee row
@@ -606,7 +606,8 @@ async function createCheckout(){
         client_email:email,
         plan:selectedPlan,
         billing_type:selectedBilling,
-        amount_cents:totalCents,
+        setup_fee_cents:setupFee*100,
+        web_design_cents:webAmt*100,
         description,
         test_mode:isTestMode,
         success_url:`https://mysmartslots.com/financial?success=true&plan=${encodeURIComponent(selectedPlan)}&email=${encodeURIComponent(email)}&rep=${encodeURIComponent(rep)}&biz=${encodeURIComponent(biz)}`,
@@ -651,6 +652,8 @@ function showPostPaymentMessage(plan,email,name,rep,repEmail,setupFee,webAmt){
   const msg=`Hi ${name||'there'}! 👋
 
 Payment confirmed — welcome to My Smart Slots ${planLabel}!
+
+Your subscription is now active. You'll be billed automatically ${isAnnual?'annually':'every month'} on the same date — no action needed on your end.
 
 Your next step is to fill out your quick onboard form. It takes about 5 minutes and gives us everything we need to get your automations live within 24 hours.
 

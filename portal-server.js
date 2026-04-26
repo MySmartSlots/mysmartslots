@@ -377,12 +377,22 @@ app.post("/portal/admin/report/save", requireAuth, requireAdmin, async (req, res
 import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
+// ── Stripe Price IDs ──────────────────────────────────────────────────────────
+const STRIPE_PRICES = {
+  starter_monthly: "price_1TQKLuFHISSP9GxXZtEIMgrd",
+  pro_monthly:     "price_1TQKOyFHISSP9GxXwYgSKIM7",
+  elite_monthly:   "price_1TQKQ8FHISSP9GxXhs3izl53",
+  starter_annual:  "price_1TQKRBFHISSP9GxXX02OhJn0",
+  pro_annual:      "price_1TQKS7FHISSP9GxXYyAbDEUX",
+  elite_annual:    "price_1TQKSjFHISSP9GxXJRXaZCmB",
+};
+
 app.post("/portal/billing/create-checkout", async (req, res) => {
-  const { rep_name, rep_email, client_name, client_email, plan, billing_type, amount_cents, description, success_url, cancel_url, test_mode } = req.body;
-  if (!client_email || !amount_cents || !plan) {
-    return res.status(400).json({ error: "client_email, amount_cents, and plan are required." });
+  const { rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee_cents, web_design_cents, description, success_url, cancel_url, test_mode } = req.body;
+  if (!client_email || !plan) {
+    return res.status(400).json({ error: "client_email and plan are required." });
   }
-  // Use test key if test_mode is true, otherwise use live key
+
   const stripeKey = test_mode && process.env.STRIPE_TEST_KEY
     ? process.env.STRIPE_TEST_KEY
     : process.env.STRIPE_SECRET_KEY;
@@ -390,22 +400,58 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
     return res.status(500).json({ error: "Stripe not configured. Add STRIPE_SECRET_KEY to Render environment variables." });
   }
   const stripeInstance = new Stripe(stripeKey);
+
+  // Get the correct price ID
+  const priceKey = `${plan}_${billing_type || "monthly"}`;
+  const priceId = STRIPE_PRICES[priceKey];
+  if (!priceId) {
+    return res.status(400).json({ error: `No price found for plan: ${priceKey}` });
+  }
+
+  // Build line items — subscription + one-time setup fee + optional web design
+  const setupFee = setup_fee_cents || 19900; // default $199
+  const lineItems = [];
+
+  // One-time setup fee
+  lineItems.push({
+    price_data: {
+      currency: "usd",
+      unit_amount: setupFee,
+      product_data: { name: "My Smart Slots — One-Time Setup Fee" },
+    },
+    quantity: 1,
+  });
+
+  // Optional web design one-time charge
+  if (web_design_cents && web_design_cents > 0) {
+    lineItems.push({
+      price_data: {
+        currency: "usd",
+        unit_amount: web_design_cents,
+        product_data: { name: "My Smart Slots — Website Design & Build" },
+      },
+      quantity: 1,
+    });
+  }
+
+  // Recurring subscription
+  lineItems.push({ price: priceId, quantity: 1 });
+
   try {
     const session = await stripeInstance.checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "payment",
+      mode: "subscription",
       customer_email: client_email,
-      line_items: [{
-        price_data: {
-          currency: "usd",
-          unit_amount: amount_cents,
-          product_data: {
-            name: `My Smart Slots — ${description || plan}`,
-            description: `${plan} Plan · Sold by ${rep_name || "My Smart Slots"} · ${rep_email || "hello@mysmartslots.com"}`,
-          },
+      line_items: lineItems,
+      subscription_data: {
+        metadata: {
+          rep_name: rep_name || "",
+          rep_email: rep_email || "hello@mysmartslots.com",
+          client_name: client_name || "",
+          plan,
+          billing_type: billing_type || "monthly",
         },
-        quantity: 1,
-      }],
+      },
       metadata: {
         rep_name: rep_name || "",
         rep_email: rep_email || "hello@mysmartslots.com",
@@ -419,6 +465,7 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
     });
 
     // Log the sale to Supabase
+    const totalCents = setupFee + (web_design_cents || 0);
     const { error: saleError } = await supabase.from("sales").insert({
       rep_name: rep_name || "Unknown",
       rep_email: rep_email || "hello@mysmartslots.com",
@@ -426,7 +473,7 @@ app.post("/portal/billing/create-checkout", async (req, res) => {
       client_email: client_email.toLowerCase(),
       plan,
       billing_type: billing_type || "monthly",
-      amount_cents,
+      amount_cents: totalCents,
       stripe_session_id: session.id,
       status: "pending_payment",
       test_mode: test_mode || false,
