@@ -593,7 +593,7 @@ import PDFDocument from "pdfkit";
 const emailTransporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.GMAIL_USER || process.env.OWNER_EMAIL,
+    user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS,
   },
 });
@@ -635,7 +635,7 @@ app.post("/portal/agreement/create", requireAuth, async (req, res) => {
   const signUrl = `https://mysmartslots.com/sign?token=${token}`;
   try {
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER || process.env.OWNER_EMAIL}>`,
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
       to: client_email,
       subject: "My Smart Slots — Please Sign Your Services Agreement",
       html: `
@@ -710,7 +710,7 @@ app.post("/portal/agreement/sign", async (req, res) => {
     const pdfBuffer = await generateAgreementPDF({ ...agreement, signer_name, signer_title, signature_data, signed_at:signedDate });
 
     const emailOpts = {
-      from: `"My Smart Slots" <${process.env.GMAIL_USER || process.env.OWNER_EMAIL}>`,
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
       attachments: [{ filename:`MySmartSlots_Agreement_${agreement.client_name.replace(/\s+/g,"_")}.pdf`, content:pdfBuffer }],
     };
 
@@ -786,7 +786,7 @@ app.post("/portal/agreement/resend", requireAuth, async (req, res) => {
   const signUrl = `https://mysmartslots.com/sign?token=${token}`;
   try {
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER || process.env.OWNER_EMAIL}>`,
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
       to: data.client_email,
       subject: "Reminder — Please Sign Your My Smart Slots Agreement",
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;"><p>Hi ${data.client_name}, this is a reminder to sign your My Smart Slots services agreement.</p><p><a href="${signUrl}" style="background:#00C896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Sign Agreement →</a></p></div>`,
