@@ -298,20 +298,36 @@ function populateAgreement(a){
     elite:"Everything in Pro + Lead Re-Engagement, Partial Email Replies, Job Status Update Texts, Quarterly Strategy Review",
   };
 
-  document.getElementById('banner-name').textContent=a.client_name;
-  document.getElementById('banner-rep').textContent=`Account Manager: ${a.rep_name}`;
-  document.getElementById('banner-plan').textContent=`${a.plan_label} · ${a.billing_type}`;
-  document.getElementById('consent-name').textContent=a.client_name;
+  const clientName   = a.client_name   || 'Client';
+  const planLabel    = a.plan_label    || (a.plan ? a.plan.charAt(0).toUpperCase()+a.plan.slice(1) : 'Selected Plan');
+  const billingType  = a.billing_type  || 'Monthly';
+  const setupFee     = a.setup_fee     || 199;
+  const repName      = a.rep_name      || 'Your Account Manager';
+  const plan         = a.plan          || 'pro';
 
-  document.getElementById('doc-details').textContent=`Client: ${a.client_name} · Plan: ${a.plan_label} · Billing: ${a.billing_type} · Setup Fee: $${a.setup_fee} · Date: ${a.agreement_date}`;
+  document.getElementById('banner-name').textContent = clientName;
+  document.getElementById('banner-rep').textContent  = 'Account Manager: ' + repName;
+  document.getElementById('banner-plan').textContent = planLabel + ' · ' + billingType;
+  document.getElementById('consent-name').textContent = clientName;
 
-  document.getElementById('sec1-text').textContent=`This Business Services Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ${a.client_name} ("Client"). This Agreement governs your access to and use of My Smart Slots' AI-powered automation services. By signing this Agreement, the Client agrees to all terms set forth herein.`;
+  document.getElementById('doc-details').textContent =
+    'Client: ' + clientName + ' · Plan: ' + planLabel + ' · Billing: ' + billingType +
+    ' · Setup Fee: $' + setupFee + ' · Date: ' + (a.agreement_date||'');
 
-  document.getElementById('sec2-text').textContent=`The Company will provide the Services associated with the ${a.plan_label} plan. Included automations: ${planDescriptions[a.plan]||planDescriptions.pro}. All plans include a Dedicated Account Manager. Service will be activated within 24 hours of completing the onboard form.`;
+  document.getElementById('sec1-text').textContent =
+    'This Business Services Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ' + clientName + ' ("Client"). ' +
+    'This Agreement governs your access to and use of My Smart Slots\' AI-powered automation services. By signing this Agreement, the Client agrees to all terms set forth herein.';
 
-  document.getElementById('sec3-billing').textContent=`You have selected ${a.billing_type} billing. Setup fee: $${a.setup_fee}.00 (one-time, non-refundable once configuration begins). Monthly subscribers may cancel at any time with notice. Cancellation takes effect at the end of the current billing cycle.`;
+  document.getElementById('sec2-text').textContent =
+    'The Company will provide the Services associated with the ' + planLabel + ' plan. ' +
+    'Included automations: ' + (planDescriptions[plan] || planDescriptions.pro) + '. ' +
+    'All plans include a Dedicated Account Manager. Service will be activated within 24 hours of completing the onboard form.';
 
-  if(a.billing_type.toLowerCase().includes('annual')){
+  document.getElementById('sec3-billing').textContent =
+    'You have selected ' + billingType + ' billing. Setup fee: $' + setupFee + '.00 (one-time, non-refundable once configuration begins). ' +
+    'Monthly subscribers may cancel at any time with notice. Cancellation takes effect at the end of the current billing cycle.';
+
+  if(billingType && billingType.toLowerCase().includes('annual')){
     document.getElementById('sec3-annual').style.display='block';
   }
 }

@@ -60,7 +60,7 @@ canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 
 <div id="loading-screen">
   <div class="spinner"></div>
-  <p style="color:var(--gray-text);font-size:14px;">Loading agreement...</p>
+  <p style="color:var(--gray-text);font-size:14px;">Loading agreement — please wait...</p>
 </div>
 
 <div id="error-screen">
@@ -162,6 +162,9 @@ window.addEventListener('load', async ()=>{
   const token=params.get('token');
   if(!token){showError('No token found in this link.');return;}
 
+  // Wake up server — Render free tier sleeps after inactivity
+  try{ await fetch(`${API}/ping`,{method:'GET'}); }catch(e){}
+
   try{
     const r=await fetch(`${API}/portal/agreement/get-countersign`,{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -187,16 +190,28 @@ function showError(msg){
 }
 
 function populate(a){
-  document.getElementById('d-client').textContent=`${a.client_name} (${a.client_email})`;
-  document.getElementById('d-plan').textContent=a.plan_label;
-  document.getElementById('d-billing').textContent=a.billing_type;
-  document.getElementById('d-fee').textContent=`$${a.setup_fee}.00`;
-  document.getElementById('d-rep').textContent=`${a.rep_name} (${a.rep_email})`;
-  document.getElementById('d-signed').textContent=a.signed_at?new Date(a.signed_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  const clientName  = a.client_name  || '—';
+  const clientEmail = a.client_email || '';
+  const planLabel   = a.plan_label   || (a.plan ? a.plan.charAt(0).toUpperCase()+a.plan.slice(1) : '—');
+  const billingType = a.billing_type || '—';
+  const setupFee    = a.setup_fee    || '—';
+  const repName     = a.rep_name     || '—';
+  const repEmail    = a.rep_email    || '';
+  const signerName  = a.signer_name  || clientName;
+  const signerTitle = a.signer_title || 'Owner / Authorized Representative';
+
+  document.getElementById('d-client').textContent  = clientName + (clientEmail ? ' (' + clientEmail + ')' : '');
+  document.getElementById('d-plan').textContent    = planLabel;
+  document.getElementById('d-billing').textContent = billingType;
+  document.getElementById('d-fee').textContent     = '$' + setupFee + '.00';
+  document.getElementById('d-rep').textContent     = repName + (repEmail ? ' (' + repEmail + ')' : '');
+  document.getElementById('d-signed').textContent  = a.signed_at
+    ? new Date(a.signed_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})
+    : '—';
   if(a.signature_data){
-    document.getElementById('client-sig-img').src=a.signature_data;
+    document.getElementById('client-sig-img').src = a.signature_data;
   }
-  document.getElementById('client-sig-name').textContent=`${a.signer_name} · ${a.signer_title||'Owner / Authorized Representative'}`;
+  document.getElementById('client-sig-name').textContent = signerName + ' · ' + signerTitle;
 }
 
 function initCanvas(){

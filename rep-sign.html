@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Smart Slots — Review & Sign Your Agreement</title>
+<title>My Smart Slots — Review & Sign Agreement</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -13,72 +13,67 @@
   --gray-text:#6b7280;--dark-text:#111827;--red:#e74c3c;--green:#16a34a;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--gray-bg);color:var(--dark-text);min-height:100vh;}
-
-/* STATES */
-#loading-screen,#error-screen,#already-signed,#signed-success{display:none;min-height:100vh;align-items:center;justify-content:center;}
-#loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#loading-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .spinner{width:40px;height:40px;border:4px solid var(--gray-border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:1rem;}
 @keyframes spin{to{transform:rotate(360deg);}}
+#error-screen,#already-signed,#signed-success{display:none;min-height:100vh;align-items:center;justify-content:center;}
 .state-box{background:var(--white);border:1px solid var(--gray-border);border-radius:16px;padding:2.5rem 2rem;max-width:480px;text-align:center;margin:2rem auto;}
 .state-box h2{font-size:20px;font-weight:700;margin-bottom:.75rem;}
 .state-box p{font-size:14px;color:var(--gray-text);line-height:1.7;}
-
-/* HEADER */
 header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
 .header-logo{font-size:16px;font-weight:700;color:#fff;}
 .header-logo span{color:var(--accent);}
 .secure-badge{background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
-
-/* MAIN */
 #app{display:none;}
 .main{max-width:760px;margin:0 auto;padding:2rem 1rem 5rem;}
 
-/* AGREEMENT BANNER */
+/* BANNER */
 .agreement-banner{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .banner-info{display:flex;flex-direction:column;gap:4px;}
-.banner-company{font-size:18px;font-weight:700;color:var(--dark-text);}
+.banner-name{font-size:18px;font-weight:700;color:var(--dark-text);}
 .banner-sub{font-size:13px;color:var(--gray-text);}
-.banner-plan{background:var(--accent-light);border:1px solid rgba(0,200,150,.3);color:var(--accent-dark);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;}
+.banner-type{background:var(--accent-light);border:1px solid rgba(0,200,150,.3);color:var(--accent-dark);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;}
 
-/* AGREEMENT TEXT */
-.agreement-doc{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:2rem;margin-bottom:1.5rem;max-height:500px;overflow-y:auto;}
-.agreement-doc h1{font-size:20px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:.5rem;}
-.agreement-doc .doc-sub{text-align:center;font-size:12px;color:var(--gray-text);margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:2px solid var(--accent);}
-.agreement-doc h2{font-size:14px;font-weight:700;color:var(--navy);margin:1.25rem 0 .5rem;padding-top:1rem;border-top:1px solid var(--gray-border);}
-.agreement-doc h2:first-of-type{border-top:none;margin-top:0;}
-.agreement-doc p{font-size:13px;color:#374151;line-height:1.8;margin-bottom:.75rem;}
-.agreement-doc .highlight{background:var(--accent-light);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:.75rem 0;font-size:13px;color:#065f46;font-weight:600;}
-.agreement-doc .warning{background:#fffbeb;border-left:3px solid #f59e0b;padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:.75rem 0;font-size:13px;color:#78350f;font-weight:600;}
+/* DOCUMENT */
+.agreement-doc{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:2rem;margin-bottom:1.5rem;max-height:600px;overflow-y:auto;}
+.doc-header{text-align:center;border-bottom:3px solid var(--accent);padding-bottom:1.25rem;margin-bottom:1.5rem;}
+.doc-header h1{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:2px;margin-bottom:.35rem;}
+.doc-header .doc-type{font-size:14px;font-weight:700;color:var(--accent-dark);margin-bottom:.5rem;}
+.doc-header .doc-meta{font-size:12px;color:var(--gray-text);line-height:1.8;}
+.doc-section{margin-bottom:1.5rem;}
+.doc-section h2{font-size:14px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--gray-border);padding-bottom:.4rem;margin-bottom:.75rem;}
+.doc-section p{font-size:13px;color:#374151;line-height:1.8;margin-bottom:.65rem;}
+.doc-section p:last-child{margin-bottom:0;}
+.doc-highlight{background:var(--accent-light);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:.75rem 0;font-size:13px;color:#065f46;font-weight:600;line-height:1.6;}
+.doc-warning{background:#fffbeb;border-left:3px solid #f59e0b;padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:.75rem 0;font-size:13px;color:#78350f;font-weight:600;line-height:1.6;}
+.doc-table{width:100%;border-collapse:collapse;margin:.75rem 0 1rem;font-size:12px;}
+.doc-table th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;}
+.doc-table td{padding:7px 10px;border-bottom:1px solid var(--gray-border);color:#374151;}
+.doc-table tr:last-child td{border-bottom:none;}
 .read-indicator{text-align:center;padding:.75rem;font-size:13px;color:var(--gray-text);border-top:1px solid var(--gray-border);margin-top:1rem;}
 
-/* SIGNATURE SECTION */
+/* SIGNATURE */
 .sig-card{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem;}
-.sig-title{font-size:15px;font-weight:700;color:var(--dark-text);margin-bottom:1.25rem;}
+.sig-title{font-size:15px;font-weight:700;margin-bottom:1.25rem;}
 .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem;}
 .fg label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);}
 .inp{padding:11px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--dark-text);outline:none;width:100%;}
 .inp:focus{border-color:var(--accent);background:var(--white);}
-
-/* CANVAS */
-.canvas-wrap{border:2px solid var(--gray-border);border-radius:10px;background:#fff;position:relative;overflow:hidden;margin-bottom:1rem;}
+.canvas-wrap{border:2px solid var(--gray-border);border-radius:10px;background:#fff;position:relative;overflow:hidden;margin-bottom:.75rem;}
 .canvas-wrap.active{border-color:var(--accent);}
 canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 .canvas-label{position:absolute;bottom:8px;left:12px;font-size:11px;color:var(--gray-text);pointer-events:none;}
-.canvas-actions{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
-.sig-tab{padding:8px 16px;border:1.5px solid var(--gray-border);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:var(--white);}
+.sig-actions{display:flex;gap:8px;margin-bottom:1rem;}
+.sig-tab{padding:8px 16px;border:1.5px solid var(--gray-border);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:#fff;}
 .sig-tab.active{border-color:var(--accent);background:var(--accent-light);color:var(--accent-dark);}
-.clear-btn{padding:8px 16px;border:1.5px solid var(--gray-border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--gray-text);background:var(--white);font-family:inherit;}
-#type-sig-wrap{display:none;}
-#type-sig-input{font-family:'Brush Script MT',cursive;font-size:28px;padding:12px 14px;border:1.5px solid var(--gray-border);border-radius:10px;width:100%;background:#fff;color:var(--navy);outline:none;margin-bottom:8px;}
-#type-sig-input:focus{border-color:var(--accent);}
-
-/* CONSENT */
+.clear-btn{padding:8px 16px;border:1.5px solid var(--gray-border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--gray-text);background:#fff;font-family:inherit;}
+#type-wrap{display:none;}
+#type-input{font-family:'Brush Script MT',cursive;font-size:28px;padding:12px 14px;border:1.5px solid var(--gray-border);border-radius:10px;width:100%;background:#fff;color:var(--navy);outline:none;margin-bottom:8px;}
+#type-input:focus{border-color:var(--accent);}
 .consent-box{background:var(--accent-light);border:1px solid rgba(0,200,150,.3);border-radius:10px;padding:1.25rem;margin-bottom:1.25rem;}
 .consent-check{display:flex;align-items:flex-start;gap:12px;}
 .consent-check input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);margin-top:2px;flex-shrink:0;cursor:pointer;}
 .consent-check label{font-size:13px;color:#065f46;line-height:1.7;cursor:pointer;}
-
-/* SUBMIT */
 .submit-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
 .submit-btn:hover{background:var(--accent-dark);}
 .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -87,42 +82,37 @@ canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading-screen">
   <div class="spinner"></div>
-  <p style="color:var(--gray-text);font-size:14px;">Loading your agreement — this may take up to 30 seconds on first open...</p>
+  <p style="color:var(--gray-text);font-size:14px;">Loading your agreement — please wait...</p>
 </div>
 
-<!-- ERROR -->
 <div id="error-screen">
   <div class="state-box">
     <h2 style="color:var(--red);">⚠️ Link Not Found</h2>
-    <p id="error-msg">This agreement link is invalid or has expired. Please contact your Account Manager for a new link.</p>
+    <p id="error-msg">This agreement link is invalid or has expired.</p>
     <p style="margin-top:1rem;font-size:13px;">Call 785-329-0202 or email hello@mysmartslots.com</p>
   </div>
 </div>
 
-<!-- ALREADY SIGNED -->
 <div id="already-signed">
   <div class="state-box">
     <h2 style="color:var(--green);">✓ Already Signed</h2>
-    <p>You've already signed this agreement. A copy was sent to your email address. Your Account Manager has been notified and will send your payment link shortly.</p>
-    <p style="margin-top:1rem;font-size:13px;">Questions? Call 785-329-0202 or email hello@mysmartslots.com</p>
+    <p>You have already signed this agreement. The owner will countersign shortly and you will receive a fully executed copy via email.</p>
+    <p style="margin-top:1rem;font-size:13px;">Questions? Call 785-329-0202</p>
   </div>
 </div>
 
-<!-- SUCCESS -->
 <div id="signed-success">
   <div class="state-box">
     <div style="font-size:48px;margin-bottom:1rem;">✅</div>
     <h2 style="color:var(--green);">Agreement Signed!</h2>
-    <p>Thank you! A copy of your signed agreement has been sent to your email. Your Account Manager has been notified and will send your payment link shortly.</p>
-    <p style="margin-top:1rem;font-size:13px;color:var(--accent-dark);font-weight:600;">Your automations will be live within 24 hours of completing payment.</p>
+    <p>Your signature has been received. The owner will countersign shortly and you will receive the fully executed copy via email.</p>
+    <p style="margin-top:1rem;font-size:13px;color:var(--accent-dark);font-weight:600;">Welcome to the team. 🚀</p>
     <p style="margin-top:1rem;font-size:12px;color:var(--gray-text);">Questions? Call 785-329-0202</p>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <header>
     <div class="header-logo">My Smart<span>Slots</span></div>
@@ -133,102 +123,52 @@ canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 
     <div class="agreement-banner">
       <div class="banner-info">
-        <div class="banner-company" id="banner-name">Loading...</div>
-        <div class="banner-sub">Please review and sign below · <span id="banner-rep"></span></div>
+        <div class="banner-name" id="banner-name">Loading...</div>
+        <div class="banner-sub">Please review the full agreement below before signing</div>
       </div>
-      <div class="banner-plan" id="banner-plan">—</div>
+      <div class="banner-type" id="banner-type">—</div>
     </div>
 
-    <!-- AGREEMENT TEXT -->
     <div class="agreement-doc" id="agreement-doc" onscroll="checkScroll()">
-      <h1>MY SMART SLOTS</h1>
-      <div class="doc-sub" id="doc-details">Business Services Agreement · Loading...</div>
-
-      <h2>1. Parties & Agreement Overview</h2>
-      <p id="sec1-text">Loading...</p>
-
-      <h2>2. Services & Plan Description</h2>
-      <p id="sec2-text">Loading...</p>
-
-      <h2>3. Fees, Billing & Payment Terms</h2>
-      <p><strong>3.1 Setup Fee.</strong> A one-time, non-refundable setup fee is due at signing. This fee covers configuration of all automations, chatbot, SMS flows, and calendar integration.</p>
-      <p id="sec3-billing"></p>
-      <div class="warning" id="sec3-annual" style="display:none;">⚠️ Annual Billing Commitment: By signing this agreement you are committing to a 12-month service term. Refund schedule: within 30 days — full refund minus setup fee; days 31–90 — 25% of remaining balance; day 91 and beyond — no refund.</div>
-
-      <h2>4. 30-Day Results Guarantee</h2>
-      <p>If you do not see measurable improvement in the first 30 days of active service, the Company will provide month two at no charge. To invoke this guarantee, submit a written request to hello@mysmartslots.com within 37 days of service activation.</p>
-
-      <h2>5. Client Obligations</h2>
-      <p>You agree to: complete the onboard form within 7 days of payment; provide a valid phone number for SMS configuration; provide calendar access where required; notify the Company of business changes within 5 business days; not use the Services for any unlawful purpose.</p>
-
-      <h2>6. SMS Messaging</h2>
-      <p>By using our SMS automation services, your customers will receive automated text messages related to their appointments. All SMS flows include STOP/START/HELP keyword support. Message and data rates may apply. Phone numbers are never sold or shared with third parties.</p>
-
-      <h2>7. Intellectual Property</h2>
-      <p>All software, systems, templates, and automation workflows are the exclusive property of Clair Group LLC. You are granted a limited, non-exclusive license to use the Services during the term of this Agreement. You retain ownership of all your business data and customer information.</p>
-
-      <h2>8. Limitation of Liability</h2>
-      <p>The Company's total liability for any claim shall not exceed the total fees paid in the three months preceding the claim. The Company is not liable for indirect or consequential damages, or for interruptions caused by third-party providers (Twilio, Stripe, Google, etc.).</p>
-
-      <h2>9. Governing Law</h2>
-      <p>This Agreement is governed by the laws of the State of Kansas. Disputes shall be submitted to binding arbitration in Topeka, Kansas under the rules of the American Arbitration Association.</p>
-
-      <h2>10. Electronic Signature</h2>
-      <div class="highlight">Your electronic signature below is legally binding under the Electronic Signatures in Global and National Commerce Act (ESIGN) and the Uniform Electronic Transactions Act (UETA). This signed document constitutes a legally enforceable agreement.</div>
-
-      <div class="read-indicator" id="read-indicator">↓ Scroll to read the full agreement before signing</div>
+      <p style="text-align:center;color:var(--gray-text);padding:2rem;">Loading agreement...</p>
     </div>
 
-    <!-- SIGNATURE SECTION -->
     <div class="sig-card">
       <div class="sig-title">✍️ Sign the Agreement</div>
-
       <div class="fg">
         <label>Your Full Name <span style="color:var(--red);">*</span></label>
-        <input class="inp" type="text" id="signer-name" placeholder="Rick Johnson"/>
+        <input class="inp" type="text" id="signer-name" placeholder="Your full legal name"/>
       </div>
-      <div class="fg">
-        <label>Your Title / Role</label>
-        <input class="inp" type="text" id="signer-title" placeholder="Owner / Authorized Representative"/>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);margin-bottom:.75rem;">Signature</div>
+      <div class="sig-actions">
+        <div class="sig-tab active" id="tab-draw" onclick="switchTab('draw')">Draw</div>
+        <div class="sig-tab" id="tab-type" onclick="switchTab('type')">Type</div>
+        <button class="clear-btn" onclick="clearSig()">Clear</button>
       </div>
-
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);margin-bottom:.75rem;">Signature Method</div>
-      <div class="canvas-actions">
-        <div class="sig-tab active" id="tab-draw" onclick="switchSigTab('draw')">Draw</div>
-        <div class="sig-tab" id="tab-type" onclick="switchSigTab('type')">Type</div>
-        <button class="clear-btn" onclick="clearSignature()">Clear</button>
-      </div>
-
-      <!-- Draw -->
-      <div id="draw-sig-wrap">
+      <div id="draw-wrap">
         <div class="canvas-wrap" id="canvas-wrap">
           <canvas id="sig-canvas" height="120"></canvas>
           <span class="canvas-label">Sign here</span>
         </div>
       </div>
-
-      <!-- Type -->
-      <div id="type-sig-wrap">
-        <input type="text" id="type-sig-input" placeholder="Type your full name to sign" oninput="updateTypedSig()"/>
+      <div id="type-wrap">
+        <input type="text" id="type-input" placeholder="Type your full name" oninput="renderTyped()"/>
         <canvas id="type-canvas" height="80" style="border:1px solid var(--gray-border);border-radius:8px;background:#fff;width:100%;"></canvas>
       </div>
     </div>
 
-    <!-- CONSENT & SUBMIT -->
     <div class="sig-card">
       <div class="consent-box">
         <div class="consent-check">
           <input type="checkbox" id="consent-check"/>
-          <label for="consent-check">
-            I, <strong id="consent-name">the client</strong>, have read and understand the My Smart Slots Business Services Agreement in full. I agree to be bound by its terms and conditions. I understand my electronic signature is legally binding under the ESIGN Act and UETA.
+          <label for="consent-check" id="consent-label">
+            I have read and understand this Agreement in full and agree to be bound by its terms. I understand my electronic signature is legally binding under the ESIGN Act and UETA.
           </label>
         </div>
       </div>
-      <button class="submit-btn" id="submit-btn" onclick="submitSignature()">
-        Sign & Submit Agreement
-      </button>
+      <button class="submit-btn" id="submit-btn" onclick="submitSignature()">Sign & Submit Agreement</button>
       <p class="legal-note">
-        By submitting, a copy will be emailed to you and your Account Manager immediately.<br/>
+        Once submitted the owner will countersign and both parties receive a fully executed PDF.<br/>
         My Smart Slots · Clair Group LLC · 785-329-0202 · hello@mysmartslots.com
       </p>
     </div>
@@ -244,44 +184,26 @@ let sigMethod='draw';
 let hasDrawn=false;
 let hasScrolled=false;
 
-// ── LOAD AGREEMENT ────────────────────────────────────────────────────────────
 window.addEventListener('load', async ()=>{
   const params=new URLSearchParams(window.location.search);
   const token=params.get('token');
-
-  if(!token){
-    showError('No agreement token found in this link. Please check the link from your email.');
-    return;
-  }
-
-  // Wake up the server first — Render free tier sleeps after inactivity
-  try{ await fetch(`${API}/ping`,{ method:'GET' }); } catch(e){}
-
+  if(!token){showError('No agreement token found. Please check the link from your email.');return;}
+  try{ await fetch(`${API}/ping`,{method:'GET'}); }catch(e){}
   try{
     const r=await fetch(`${API}/portal/rep-agreement/get`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({token})
     });
     const d=await r.json();
-
     document.getElementById('loading-screen').style.display='none';
-
-    if(!r.ok){
-      showError(d.error||'Agreement not found or expired.');
-      return;
-    }
-    if(d.already_signed){
-      document.getElementById('already-signed').style.display='flex';
-      return;
-    }
-
+    if(!r.ok){showError(d.error||'Agreement not found or expired.');return;}
+    if(d.already_signed){document.getElementById('already-signed').style.display='flex';return;}
     agreement=d.agreement;
-    populateAgreement(agreement);
+    renderAgreement(agreement);
     document.getElementById('app').style.display='block';
     initCanvas();
   }catch(e){
-    showError('Error: ' + e.message + ' — API: ' + API);
+    showError('Error: '+e.message);
   }
 });
 
@@ -291,156 +213,335 @@ function showError(msg){
   document.getElementById('error-screen').style.display='flex';
 }
 
-function populateAgreement(a){
-  const isRep = a.agreement_type === 'rep';
-  const typeLabel = isRep ? 'Rep Agreement (25% Commission)' : 'Partnership Agreement (30% Commission)';
+function renderAgreement(a){
+  const isRep = a.agreement_type==='rep';
+  const typeLabel = isRep ? 'Account Manager Rep Agreement' : 'Account Manager Partnership Agreement';
+  const n = a.rep_name || '_______________';
+  const t = a.territory || 'Assigned Territory';
+  const sd = a.start_date || '_______________';
+  const d = a.agreement_date || '_______________';
+  const rm = a.referring_manager || '';
 
-  document.getElementById('banner-name').textContent = a.rep_name || 'Account Manager';
-  document.getElementById('banner-rep').textContent  = 'My Smart Slots / Clair Group LLC';
-  document.getElementById('banner-plan').textContent = typeLabel;
-  document.getElementById('consent-name').textContent = a.rep_name || 'the Account Manager';
+  document.getElementById('banner-name').textContent = n;
+  document.getElementById('banner-type').textContent = typeLabel;
+  document.getElementById('consent-label').innerHTML =
+    'I, <strong>'+n+'</strong>, have read and understand the My Smart Slots '+typeLabel+' in full. I agree to be bound by its terms and conditions. I understand my electronic signature is legally binding under the ESIGN Act and UETA.';
 
-  document.getElementById('doc-details').textContent =
-    'Rep: ' + (a.rep_name||'') + ' · Type: ' + typeLabel + ' · Territory: ' + (a.territory||'') + ' · Start Date: ' + (a.start_date||'') + ' · Date: ' + (a.agreement_date||'');
+  const doc = document.getElementById('agreement-doc');
+  doc.innerHTML = isRep ? buildRepAgreement(a,n,t,sd,d,rm) : buildPartnerAgreement(a,n,t,sd,d);
+}
 
-  document.getElementById('sec1-text').textContent =
-    'This Agreement is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ' + (a.rep_name||'Account Manager') + ' ("Account Manager", "you"). This Agreement governs the independent contractor relationship including commission structure, career advancement, incentives, and all related terms.';
+function buildRepAgreement(a,n,t,sd,d,rm){
+  return `
+    <div class="doc-header">
+      <h1>MY SMART SLOTS</h1>
+      <div class="doc-type">ACCOUNT MANAGER REP AGREEMENT</div>
+      <div class="doc-meta">
+        Rep Name: <strong>${n}</strong>${rm?' &nbsp;|&nbsp; Referring Manager: <strong>'+rm+'</strong>':''}<br/>
+        Territory: <strong>${t}</strong> &nbsp;|&nbsp; Start Date: <strong>${sd}</strong> &nbsp;|&nbsp; Agreement Date: <strong>${d}</strong>
+      </div>
+    </div>
 
-  document.getElementById('sec2-text').textContent = isRep
-    ? 'You earn 25% commission on all active clients you close — lifetime recurring. Setup bonus $50 per client. Book report bonus: +0.5% per approved report up to +5% max. Eligible for Jr Regional Manager promotion at 25 clients — converts to full Partnership Agreement at 30% commission.'
-    : 'You earn 30% commission on all active clients you close — lifetime recurring. Setup bonus $50 per client. Book report bonus: +0.5% per approved report up to +5% max. Jr Regional Manager at 25 clients ($1,000 bonus + 10% overrides). Sr Regional Manager at 50 clients ($2,000 bonus + 15% overrides + Bought-In eligible).';
+    <div class="doc-section">
+      <h2>1. Parties & Agreement Overview</h2>
+      <p>This Account Manager Rep Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), ${rm?'the Referring Manager '+rm+' ("Referring Manager"),':''} and ${n} ("Rep", "you").</p>
+      <p>This Agreement governs the independent contractor relationship, including commission structure, performance incentives, advancement eligibility, and all related terms. This Agreement differs from the original Account Manager Partnership Agreement in commission rate, trip eligibility structure, and advancement terms.</p>
+      <div class="doc-warning">The Rep is an independent contractor — not an employee. This Agreement does not create an employment relationship or entitle the Rep to benefits.</div>
+    </div>
 
-  document.getElementById('sec3-billing').textContent =
-    'Territory: ' + (a.territory||'Assigned Territory') + '. Start Date: ' + (a.start_date||'') + '. ' +
-    (a.referring_manager ? 'Referring Manager: ' + a.referring_manager + '. ' : '') +
-    'You are an independent contractor. W-9 required before first commission payment. Payments over $600/year reported on 1099-NEC.';
+    <div class="doc-section">
+      <h2>2. Role & Responsibilities</h2>
+      <p>The Rep will represent My Smart Slots to prospective clients under the supervision of their Referring Manager. Responsibilities mirror those of Account Managers: prospecting, running audit calls, managing pipeline, sending agreements, collecting payment, facilitating onboarding, and maintaining client relationships.</p>
+      <p>The Rep agrees to complete all 7 training modules before making first client contact, maintain accurate pipeline records, and report activity to their Referring Manager.</p>
+      <p><strong>2.1 First Independent Close Requirement.</strong> Milestone bonuses and incentive eligibility do not activate until the Rep's first fully independent close is confirmed — defined the same as in the original Partnership Agreement. During onboarding the Referring Manager or Company owner may participate in joint audit calls for training purposes. The Company owner has sole authority to designate whether a close qualifies as independent.</p>
+    </div>
 
-  const annualBox = document.getElementById('sec3-annual');
-  if(annualBox) annualBox.style.display = 'none';
+    <div class="doc-section">
+      <h2>3. Commission Structure</h2>
+      <p>The Rep earns <strong>25% of the monthly subscription price</strong> for every active client they close, paid monthly for as long as the client remains active. This is lifetime recurring commission.</p>
+      <table class="doc-table">
+        <thead><tr><th>Plan</th><th>Monthly</th><th>Annual</th><th>Your Monthly Commission</th><th>Annual Commission</th></tr></thead>
+        <tbody>
+          <tr><td>Starter</td><td>$125/mo</td><td>$1,250/yr</td><td><strong style="color:#16a34a;">$31.25/mo</strong></td><td>$312.50</td></tr>
+          <tr><td><strong>Pro</strong></td><td>$225/mo</td><td>$2,250/yr</td><td><strong style="color:#16a34a;">$56.25/mo</strong></td><td>$562.50</td></tr>
+          <tr><td>Elite</td><td>$375/mo</td><td>$3,750/yr</td><td><strong style="color:#16a34a;">$93.75/mo</strong></td><td>$937.50</td></tr>
+        </tbody>
+      </table>
+      <p>A setup bonus of $50.00 is paid within 7 business days of each new client's first payment clearing. Monthly commission is paid on the last Friday of each month. W-9 required before first payment.</p>
+      <div class="doc-warning">25% is the Rep's base rate. The 5% difference from the standard 30% funds the override income earned by the Referring Manager and their upline. This structure is fixed and not negotiable during the term of this Agreement.</div>
+      <p><strong>3.1 Book Report Commission Bonus.</strong> The same book report bonus program available to original Account Managers applies to Reps. For every qualifying book report submitted and approved by the Company owner, the Rep earns a permanent +0.5% commission increase on all active accounts, up to a maximum of +5.0% (10 books). A qualifying report must include: book title and author, key lessons learned, specific takeaways applicable to sales and client management, and how the Rep plans to apply the content to their approach and personal growth.</p>
+    </div>
 
-  const consentLabel = document.querySelector('.consent-check label');
-  if(consentLabel){
-    consentLabel.innerHTML = 'I, <strong>' + (a.rep_name||'the Account Manager') + '</strong>, have read and understand the My Smart Slots ' + typeLabel + ' in full. I agree to be bound by its terms. I understand my electronic signature is legally binding under the ESIGN Act and UETA.';
-  }
+    <div class="doc-section">
+      <h2>4. Advancement Eligibility</h2>
+      <p>Advancement is available to Reps who demonstrate sustained performance, professional conduct, and leadership potential. Advancement is not guaranteed and is granted at the Company owner's sole discretion.</p>
+      <p><strong>4.1 Path to Jr Regional Manager.</strong> A Rep who reaches 25 active clients, demonstrates consistent independent performance, and receives endorsement from their Referring Manager may be considered for promotion to Jr Regional Manager status. Upon promotion, the Rep graduates to the full Account Manager Partnership Agreement terms — including 30% commission, override eligibility, and company MRR trip eligibility.</p>
+      <div class="doc-highlight">Promotion to Jr Regional Manager converts this Rep Agreement to a full Partnership Agreement. All prior active clients are credited toward the new commission structure effective the following billing cycle.</div>
+      <p>The decision to promote rests entirely with the Company owner. The Referring Manager may recommend but not unilaterally promote a Rep.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>5. Company Trip Eligibility</h2>
+      <p>Reps covered by this Agreement are eligible for company incentive trips based on their own personal active client milestones — not company-wide MRR milestones. This recognizes strong individual performance while maintaining the original team's milestone-based structure.</p>
+      <table class="doc-table">
+        <thead><tr><th>Rep's Active Clients</th><th>Incentive</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr><td>10 active clients</td><td><strong>Team Dinner</strong></td><td>Invited to the next team dinner event</td></tr>
+          <tr><td>20 active clients</td><td><strong>Weekend Trip</strong></td><td>2 nights — hotel and meals covered</td></tr>
+          <tr><td>35 active clients</td><td><strong>Company Retreat</strong></td><td>3–4 days — flights and accommodation covered</td></tr>
+          <tr><td>50 active clients</td><td><strong>Premium Destination</strong></td><td>5 days international — fully covered</td></tr>
+        </tbody>
+      </table>
+      <p>Trip eligibility is cumulative — once a Rep hits a milestone, they retain eligibility for that tier's incentive regardless of future client fluctuation, provided they remain in good standing. Trips are scheduled at the Company's discretion. Upon promotion to Jr Regional Manager status, the Rep's trip eligibility converts to the company-wide MRR milestone structure.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>6. Monthly Leaderboard</h2>
+      <p>Reps participate in the same monthly points leaderboard as Account Managers. Points: new close +3, retained client +1, churn -5. Top performer with at least 1 new close earns $100 cash. Quarterly perfect retention bonus of $150 applies.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>7. General Provisions</h2>
+      <p><strong>Independent Contractor:</strong> The Rep is an independent contractor. Nothing in this Agreement creates employment.</p>
+      <p><strong>Anti-Poaching:</strong> The Rep may not recruit existing Company clients or active reps for competing businesses during the term and for 90 days following termination.</p>
+      <p><strong>90-Day Tail:</strong> Upon termination, the Rep earns commission on existing active clients for 90 calendar days.</p>
+      <p><strong>Governing Law:</strong> This Agreement is governed by the laws of the State of Kansas.</p>
+      <p><strong>Entire Agreement:</strong> This Agreement supersedes all prior discussions between the parties.</p>
+      <p><strong>Amendments:</strong> Changes require written consent from the Company owner.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>8. Electronic Signature</h2>
+      <div class="doc-highlight">Your electronic signature below is legally binding under the Electronic Signatures in Global and National Commerce Act (ESIGN) and the Uniform Electronic Transactions Act (UETA). This signed document constitutes a legally enforceable agreement between the parties.</div>
+    </div>
+
+    <div class="read-indicator" id="read-indicator">↓ Scroll to read the full agreement before signing</div>`;
+}
+
+function buildPartnerAgreement(a,n,t,sd,d){
+  return `
+    <div class="doc-header">
+      <h1>MY SMART SLOTS</h1>
+      <div class="doc-type">ACCOUNT MANAGER PARTNERSHIP AGREEMENT</div>
+      <div class="doc-meta">
+        Account Manager: <strong>${n}</strong><br/>
+        Territory: <strong>${t}</strong> &nbsp;|&nbsp; Start Date: <strong>${sd}</strong> &nbsp;|&nbsp; Agreement Date: <strong>${d}</strong>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <h2>1. Parties & Agreement Overview</h2>
+      <p>This Account Manager Partnership Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ${n} ("Account Manager", "you").</p>
+      <p>This Agreement governs the independent contractor relationship between the parties, including commission structure, career advancement, team building rights, incentive programs, and all related terms. By signing, both parties agree to all terms set forth herein.</p>
+      <div class="doc-warning">The Account Manager is an independent contractor — not an employee. This Agreement does not create an employment relationship, entitle the Account Manager to benefits, or obligate the Company to provide a minimum income.</div>
+    </div>
+
+    <div class="doc-section">
+      <h2>2. Role & Responsibilities</h2>
+      <p>The Account Manager will represent My Smart Slots to prospective clients in their assigned territory. Responsibilities include prospecting, running audit calls, managing pipeline, sending client agreements, collecting payment, facilitating onboarding, and maintaining client relationships.</p>
+      <p>The Account Manager agrees to complete all 7 training modules before making their first client contact, maintain accurate pipeline records in the Company's CRM tools, and conduct themselves professionally in all client and prospect interactions.</p>
+      <p><strong>2.1 First Independent Close Requirement.</strong> An Account Manager is not considered fully active until completing their first fully independent close — defined as running an audit call, sending the client agreement, and generating the payment link without direct assistance from the owner. The owner has sole discretion to designate whether a close qualifies as independent. A close may be credited as independent during a joint call if the Account Manager takes full lead on running the audit, handling objections, and initiating the close sequence, with the owner present in an observational role only.</p>
+      <div class="doc-highlight">Closes completed with owner assistance still earn 30% commission. However milestone bonuses and incentive eligibility do not activate until the first independent close is confirmed by the owner.</div>
+    </div>
+
+    <div class="doc-section">
+      <h2>3. Commission Structure</h2>
+      <p><strong>3.1 Base Commission.</strong> The Account Manager earns <strong>30% of the monthly subscription price</strong> for every active client they close, paid monthly for as long as the client remains active. This is lifetime recurring commission.</p>
+      <table class="doc-table">
+        <thead><tr><th>Plan</th><th>Monthly</th><th>Annual</th><th>Your Monthly Commission</th><th>Annual Commission</th></tr></thead>
+        <tbody>
+          <tr><td>Starter</td><td>$125/mo</td><td>$1,250/yr</td><td><strong style="color:#16a34a;">$37.50/mo</strong></td><td>$312.50</td></tr>
+          <tr><td><strong>Pro</strong></td><td>$225/mo</td><td>$2,250/yr</td><td><strong style="color:#16a34a;">$67.50/mo</strong></td><td>$562.50</td></tr>
+          <tr><td>Elite</td><td>$375/mo</td><td>$3,750/yr</td><td><strong style="color:#16a34a;">$112.50/mo</strong></td><td>$937.50</td></tr>
+        </tbody>
+      </table>
+      <p>Annual commission is paid out upon receipt of the client's annual payment. Monthly commission is paid on the last Friday of each month. A one-time setup bonus of $50.00 is paid within 7 business days of each new client's first payment clearing.</p>
+      <div class="doc-warning">A client is considered closed only when their first payment clears through Stripe. Verbal commitments and signed agreements alone do not trigger commission.</div>
+      <p><strong>3.2 Book Report Commission Bonus.</strong> For every business, sales, or personal development book the Account Manager reads and submits a qualifying book report to the owner, they earn a permanent commission increase of +0.5% on all active accounts, up to a maximum of +5.0% (10 books). A qualifying book report must include: the book title and author, key lessons learned, specific takeaways applicable to sales and client management, and how the Account Manager plans to apply the content to their sales approach and personal growth. There is no minimum word count but reports must be substantive — summaries copied from the internet will not be accepted. The owner reviews and approves each report within 7 business days.</p>
+      <div class="doc-highlight">Example: An Account Manager who completes 6 qualifying book reports earns 33% commission on all active accounts instead of 30%. This increase is permanent and applies to all existing and future clients.</div>
+    </div>
+
+    <div class="doc-section">
+      <h2>4. Career Advancement & Tier Structure</h2>
+      <p>Account Managers advance through the following tiers based on active client count:</p>
+      <table class="doc-table">
+        <thead><tr><th>Tier</th><th>Active Clients</th><th>Commission</th><th>Override</th><th>Advancement Bonus</th></tr></thead>
+        <tbody>
+          <tr><td>Account Manager</td><td>0–24</td><td>30%</td><td>None</td><td>$500 at 10 clients</td></tr>
+          <tr><td><strong>Jr Regional Manager</strong></td><td>25–49</td><td>30%</td><td>See Section 5</td><td>$1,000 cash</td></tr>
+          <tr><td><strong>Sr Regional Manager</strong></td><td>50+</td><td>30%</td><td>See Section 5</td><td>$2,000 cash</td></tr>
+        </tbody>
+      </table>
+      <p><strong>4.1 Individual Milestone Bonuses.</strong></p>
+      <table class="doc-table">
+        <thead><tr><th>Milestone</th><th>Bonus</th><th>Additional</th></tr></thead>
+        <tbody>
+          <tr><td>First independent close</td><td><strong>$100 cash</strong></td><td>Fully active status activated</td></tr>
+          <tr><td>5 active clients</td><td><strong>$250 cash</strong></td><td></td></tr>
+          <tr><td>10 active clients</td><td><strong>$500 cash</strong></td><td></td></tr>
+          <tr><td>25 active clients</td><td><strong>$1,000 cash + Jr Regional Manager</strong></td><td>Override income begins</td></tr>
+          <tr><td>50 active clients</td><td><strong>$2,000 cash + Sr Regional Manager</strong></td><td>Bought-In eligibility</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-section">
+      <h2>5. Override Income & Downline Structure</h2>
+      <p>Upon reaching Jr Regional Manager status, the Account Manager earns override commissions on closes made by Account Managers they recruit and manage:</p>
+      <table class="doc-table">
+        <thead><tr><th>Level</th><th>Who</th><th>Override Rate</th></tr></thead>
+        <tbody>
+          <tr><td>Level 1</td><td>Your direct recruits' closes</td><td><strong>15% (Sr Regional Manager) / 10% (Jr Regional Manager)</strong></td></tr>
+          <tr><td>Level 2</td><td>Your recruits' recruits' closes</td><td><strong>7%</strong></td></tr>
+          <tr><td>Level 3</td><td>Third level down</td><td><strong>3%</strong></td></tr>
+        </tbody>
+      </table>
+      <p>Override income is paid on the last Friday of each month. Override income only applies to Account Managers recruited through the manager's direct efforts or their downline team.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>6. Team Building & Hiring Authority</h2>
+      <p><strong>6.1 Jr Regional Manager Hiring Authority.</strong> May recruit and interview candidates. Final interview requires the Company owner plus any available Sr Regional Managers. May maintain up to 5 direct recruits without additional owner approval. Expanding beyond 5 requires explicit written approval from the owner. Owner retains final hiring authority on all candidates.</p>
+      <p><strong>6.2 Sr Regional Manager Hiring Authority.</strong> May recruit with no cap on team size. All final interviews require the owner's attendance. All available Sr Regional Managers must attend final interviews. Owner retains final hiring authority.</p>
+      <p><strong>6.3 Anti-Poaching & Downline Protection.</strong> Account Managers may not recruit existing Company clients, active Account Managers, or employees of active clients for competing businesses during the term and for 90 days following termination. Upon termination, a 90-day tail applies — commission continues on existing active clients for 90 calendar days.</p>
+      <p><strong>6.4 Account Managers Hired by Managers.</strong> Account Managers recruited by Jr or Sr Regional Managers are governed by a separate Rep Agreement at 25% base commission. Managers are responsible for ensuring their recruits sign the correct agreement before beginning any client-facing work.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>7. Bought-In Status (Sr Regional Manager Passive Transition)</h2>
+      <p>Upon reaching Sr Regional Manager status, the Account Manager becomes eligible to apply for Bought-In status — a formal transition from active selling to a team leadership and oversight role, while retaining all override income.</p>
+      <p><strong>7.1 Eligibility Requirements:</strong> Must hold Sr Regional Manager status with 50+ active personal clients. Must have at least one Jr Regional Manager actively managing a team within their downline. The team must be generating a combined minimum of $5,000 MRR. Must receive written approval from the Company owner.</p>
+      <p><strong>7.2 Bought-In Rights & Obligations.</strong> No longer required to make personal cold calls or close new personal clients. Role transitions to team oversight, training support, and strategic input. Retains 100% of existing override income on all downline levels. May promote one qualified Account Manager to Jr Regional Manager status, subject to owner approval.</p>
+      <div class="doc-warning">If the team's combined MRR drops below $5,000 in any given month, the Bought-In Sr Regional Manager reverts to active status and must resume personal selling until the threshold is restored for two consecutive months.</div>
+    </div>
+
+    <div class="doc-section">
+      <h2>8. Company Incentive Program</h2>
+      <p>The following company-wide incentives apply to all original Account Managers covered by this Agreement. Eligibility is based on company-wide Monthly Recurring Revenue (MRR) milestones:</p>
+      <table class="doc-table">
+        <thead><tr><th>Company MRR</th><th>Incentive</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr><td>$5,000/mo</td><td><strong>Team Dinner</strong></td><td>Full team — strategy and celebration</td></tr>
+          <tr><td>$15,000/mo</td><td><strong>Weekend Trip</strong></td><td>2 nights — hotel and meals fully covered</td></tr>
+          <tr><td>$30,000/mo</td><td><strong>Company Retreat</strong></td><td>3–4 days — flights and accommodation covered</td></tr>
+          <tr><td>$50,000/mo</td><td><strong>Premium Destination</strong></td><td>5 days international — full team, all covered</td></tr>
+        </tbody>
+      </table>
+      <p>Milestones are permanent once hit — they never reset. Each incentive is scheduled at the Company's discretion. Good standing required for participation. These milestones are Year 1 terms only. New incentive goals will be negotiated annually.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>9. Monthly Leaderboard & Performance Recognition</h2>
+      <p>Points: new client closed +3, active client retained +1, client churned -5. Top Account Manager on the leaderboard at month end earns $100 cash, provided they closed at least 1 new client. Jr and Sr Regional Managers compete separately. Quarterly perfect retention bonus of $150 awarded to any Account Manager who retains 100% of their client base for a full quarter.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>10. Payment Terms</h2>
+      <p>All commission and bonus payments are made via CashApp or cashier's check at the Account Manager's election. Monthly recurring commission is paid on the last Friday of each month. Setup bonuses, milestone bonuses, and advancement bonuses are paid within 7 business days of the qualifying event. The Account Manager must submit a valid W-9 before the first commission payment. Payments totaling $600 or more in a calendar year will be reported on a 1099-NEC filed with the IRS.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>11. General Provisions</h2>
+      <p><strong>Independent Contractor:</strong> Nothing in this Agreement creates employment, partnership, or agency.</p>
+      <p><strong>Governing Law:</strong> This Agreement is governed by the laws of the State of Kansas.</p>
+      <p><strong>Entire Agreement:</strong> This Agreement supersedes all prior discussions, representations, and agreements between the parties.</p>
+      <p><strong>Amendments:</strong> Changes to this Agreement require written consent from both parties.</p>
+      <p><strong>Good Standing:</strong> All bonuses, incentives, and advancement recognition require the Account Manager to be in good standing with no unresolved compliance issues.</p>
+      <p><strong>Year 1 Term:</strong> Company incentive milestones and leaderboard terms apply to Year 1 only. New terms will be negotiated annually.</p>
+    </div>
+
+    <div class="doc-section">
+      <h2>12. Electronic Signature</h2>
+      <div class="doc-highlight">Your electronic signature below is legally binding under the Electronic Signatures in Global and National Commerce Act (ESIGN) and the Uniform Electronic Transactions Act (UETA). This signed document constitutes a legally enforceable agreement between the parties.</div>
+    </div>
+
+    <div class="read-indicator" id="read-indicator">↓ Scroll to read the full agreement before signing</div>`;
 }
 
 function checkScroll(){
   const el=document.getElementById('agreement-doc');
+  if(!el)return;
   const scrolled=el.scrollTop+el.clientHeight>=el.scrollHeight-50;
   if(scrolled&&!hasScrolled){
     hasScrolled=true;
-    document.getElementById('read-indicator').textContent='✓ Agreement reviewed';
-    document.getElementById('read-indicator').style.color='var(--accent-dark)';
-    document.getElementById('read-indicator').style.fontWeight='600';
+    const ind=document.getElementById('read-indicator');
+    if(ind){ind.textContent='✓ Agreement reviewed';ind.style.color='var(--accent-dark)';ind.style.fontWeight='600';}
   }
 }
 
-// ── CANVAS SIGNATURE ──────────────────────────────────────────────────────────
 function initCanvas(){
   const canvas=document.getElementById('sig-canvas');
   const ctx=canvas.getContext('2d');
   const wrap=document.getElementById('canvas-wrap');
   canvas.width=wrap.offsetWidth||600;
-
-  ctx.strokeStyle='#1a1a2e';
-  ctx.lineWidth=2.5;
-  ctx.lineCap='round';
-  ctx.lineJoin='round';
-
+  ctx.strokeStyle='#1a1a2e';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
   const getPos=(e)=>{
     const rect=canvas.getBoundingClientRect();
-    const scaleX=canvas.width/rect.width;
-    const scaleY=canvas.height/rect.height;
-    if(e.touches){
-      return {x:(e.touches[0].clientX-rect.left)*scaleX,y:(e.touches[0].clientY-rect.top)*scaleY};
-    }
-    return {x:(e.clientX-rect.left)*scaleX,y:(e.clientY-rect.top)*scaleY};
+    const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+    if(e.touches)return{x:(e.touches[0].clientX-rect.left)*sx,y:(e.touches[0].clientY-rect.top)*sy};
+    return{x:(e.clientX-rect.left)*sx,y:(e.clientY-rect.top)*sy};
   };
-
-  const start=(e)=>{e.preventDefault();isDrawing=true;hasDrawn=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);wrap.classList.add('active');};
-  const draw=(e)=>{e.preventDefault();if(!isDrawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
-  const stop=(e)=>{e.preventDefault();isDrawing=false;};
-
-  canvas.addEventListener('mousedown',start);
-  canvas.addEventListener('mousemove',draw);
-  canvas.addEventListener('mouseup',stop);
-  canvas.addEventListener('mouseleave',stop);
-  canvas.addEventListener('touchstart',start,{passive:false});
-  canvas.addEventListener('touchmove',draw,{passive:false});
-  canvas.addEventListener('touchend',stop,{passive:false});
+  canvas.addEventListener('mousedown',e=>{isDrawing=true;hasDrawn=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);document.getElementById('canvas-wrap').classList.add('active');});
+  canvas.addEventListener('mousemove',e=>{if(!isDrawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+  canvas.addEventListener('mouseup',()=>isDrawing=false);
+  canvas.addEventListener('mouseleave',()=>isDrawing=false);
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();isDrawing=true;hasDrawn=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);document.getElementById('canvas-wrap').classList.add('active');},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!isDrawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+  canvas.addEventListener('touchend',e=>{e.preventDefault();isDrawing=false;},{passive:false});
 }
 
-function switchSigTab(method){
-  sigMethod=method;
+function switchTab(m){
+  sigMethod=m;
   document.querySelectorAll('.sig-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+method).classList.add('active');
-  document.getElementById('draw-sig-wrap').style.display=method==='draw'?'block':'none';
-  document.getElementById('type-sig-wrap').style.display=method==='type'?'block':'none';
+  document.getElementById('tab-'+m).classList.add('active');
+  document.getElementById('draw-wrap').style.display=m==='draw'?'block':'none';
+  document.getElementById('type-wrap').style.display=m==='type'?'block':'none';
 }
 
-function clearSignature(){
+function clearSig(){
   if(sigMethod==='draw'){
-    const canvas=document.getElementById('sig-canvas');
-    const ctx=canvas.getContext('2d');
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    hasDrawn=false;
+    const c=document.getElementById('sig-canvas');
+    c.getContext('2d').clearRect(0,0,c.width,c.height);
     document.getElementById('canvas-wrap').classList.remove('active');
+    hasDrawn=false;
   } else {
-    document.getElementById('type-sig-input').value='';
-    const canvas=document.getElementById('type-canvas');
-    canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+    document.getElementById('type-input').value='';
+    const c=document.getElementById('type-canvas');
+    c.getContext('2d').clearRect(0,0,c.width,c.height);
+    hasDrawn=false;
   }
 }
 
-function updateTypedSig(){
-  const name=document.getElementById('type-sig-input').value;
+function renderTyped(){
+  const name=document.getElementById('type-input').value;
   const canvas=document.getElementById('type-canvas');
   const ctx=canvas.getContext('2d');
   canvas.width=canvas.offsetWidth||600;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   if(!name)return;
-  ctx.font=`48px "Brush Script MT", cursive`;
+  ctx.font='48px "Brush Script MT",cursive';
   ctx.fillStyle='#1a1a2e';
   ctx.fillText(name,20,60);
   hasDrawn=true;
 }
 
-function getSignatureData(){
-  if(sigMethod==='draw'){
-    const canvas=document.getElementById('sig-canvas');
-    return canvas.toDataURL('image/png');
-  } else {
-    const canvas=document.getElementById('type-canvas');
-    return canvas.toDataURL('image/png');
-  }
+function getSigData(){
+  if(sigMethod==='draw')return document.getElementById('sig-canvas').toDataURL('image/png');
+  return document.getElementById('type-canvas').toDataURL('image/png');
 }
 
-// ── SUBMIT ────────────────────────────────────────────────────────────────────
 async function submitSignature(){
   const name=document.getElementById('signer-name').value.trim();
-  const title=document.getElementById('signer-title').value.trim();
   const agreed=document.getElementById('consent-check').checked;
-
   if(!name){alert('Please enter your full name.');return;}
-  if(!hasDrawn){alert('Please provide your signature — either draw it or type it above.');return;}
+  if(!hasDrawn){alert('Please provide your signature.');return;}
   if(!agreed){alert('Please check the consent box to confirm you have read and agree to the terms.');return;}
-
   const btn=document.getElementById('submit-btn');
   btn.disabled=true;btn.textContent='Submitting...';
-
-  const signatureData=getSignatureData();
-
   try{
     const r=await fetch(`${API}/portal/rep-agreement/sign`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        token:agreement.token,
-        signer_name:name,
-        signer_title:title||'Owner / Authorized Representative',
-        signature_data:signatureData,
-        agreed:true,
-      })
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:agreement.token,signer_name:name,signature_data:getSigData(),agreed:true})
     });
     const d=await r.json();
     if(d.success){
@@ -451,7 +552,7 @@ async function submitSignature(){
       btn.disabled=false;btn.textContent='Sign & Submit Agreement';
     }
   }catch(e){
-    alert('Connection error. Please check your internet and try again.');
+    alert('Connection error: '+e.message);
     btn.disabled=false;btn.textContent='Sign & Submit Agreement';
   }
 }
