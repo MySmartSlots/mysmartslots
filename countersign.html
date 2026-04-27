@@ -116,7 +116,7 @@ canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 
       <div class="fg">
         <label>Your Name</label>
-        <input class="inp" type="text" id="owner-name" value="My Smart Slots" readonly style="background:#f0fdf4;"/>
+        <input class="inp" type="text" id="owner-name" value="Jordan Clair" placeholder="Your full name"/>
       </div>
 
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);margin-bottom:.75rem;">Signature Method</div>
@@ -288,7 +288,7 @@ async function submitCountersign(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         token,
-        owner_name:'My Smart Slots / Clair Group LLC',
+        owner_name:document.getElementById('owner-name').value.trim()||'My Smart Slots / Clair Group LLC',
         owner_signature_data:getSigData()
       })
     });

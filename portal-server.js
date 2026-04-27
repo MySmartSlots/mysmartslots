@@ -1139,7 +1139,7 @@ app.post("/portal/rep-agreement/get-countersign", async (req, res) => {
 });
 
 app.post("/portal/rep-agreement/countersign", async (req, res) => {
-  const { token, owner_signature_data } = req.body;
+  const { token, owner_signature_data, owner_name } = req.body;
   if (!token || !owner_signature_data) return res.status(400).json({ error: "Token and signature required." });
   const { data: agreement, error: getErr } = await supabase.from("rep_agreements").select("*").eq("owner_token", token).single();
   if (getErr || !agreement) return res.status(404).json({ error: "Agreement not found." });
@@ -1149,7 +1149,7 @@ app.post("/portal/rep-agreement/countersign", async (req, res) => {
   const typeLabel    = agreement.agreement_type === "rep" ? "Rep Agreement" : "Partnership Agreement";
 
   const { error: updateErr } = await supabase.from("rep_agreements").update({
-    status: "fully_executed", owner_signature_data, executed_at: new Date().toISOString(),
+    status: "fully_executed", owner_signature_data, owner_name: owner_name || "My Smart Slots / Clair Group LLC", executed_at: new Date().toISOString(),
   }).eq("owner_token", token);
   if (updateErr) return res.status(500).json({ error: updateErr.message });
 
@@ -1186,83 +1186,301 @@ app.post("/portal/rep-agreement/list", requireAuth, requireAdmin, async (req, re
 function generateRepAgreementPDF(agreement) {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    const doc = new PDFDocument({ margin:72, size:"LETTER" });
+    const doc = new PDFDocument({ margin:72, size:"LETTER", bufferPages:true });
     doc.on("data", chunk => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
+
     const typeLabel = agreement.agreement_type === "rep" ? "Rep Agreement" : "Partnership Agreement";
     const isRep = agreement.agreement_type === "rep";
-    doc.rect(0,0,612,80).fill("#1A1A2E");
-    doc.fillColor("#00C896").fontSize(22).font("Helvetica-Bold").text("MY SMART SLOTS", 72, 25, { align:"center" });
-    doc.fillColor("white").fontSize(11).font("Helvetica").text(`${typeLabel} — Executed Copy`, 72, 52, { align:"center" });
-    doc.moveDown(3);
-    doc.fillColor("#1A1A2E").fontSize(13).font("Helvetica-Bold").text("Agreement Details", 72, 110);
-    doc.moveTo(72,128).lineTo(540,128).stroke("#00C896");
+    const n  = agreement.rep_name || "_______________";
+    const t  = agreement.territory || "Assigned Territory";
+    const sd = agreement.start_date || "_______________";
+    const d  = agreement.agreement_date || "_______________";
+    const rm = agreement.referring_manager || "";
+
+    const NAVY  = "#1A1A2E";
+    const GREEN = "#00C896";
+    const GRAY  = "#6B7280";
+    const BODY  = "#374151";
+
+    // Helper functions
+    const h1 = (text) => {
+      if (doc.y > 680) doc.addPage();
+      doc.moveDown(0.5);
+      doc.fillColor(NAVY).fontSize(12).font("Helvetica-Bold").text(text);
+      doc.moveTo(72, doc.y+2).lineTo(540, doc.y+2).stroke(GREEN);
+      doc.moveDown(0.4);
+    };
+    const h2 = (text) => {
+      doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text(text);
+      doc.moveDown(0.2);
+    };
+    const p = (text) => {
+      if (doc.y > 700) doc.addPage();
+      doc.fillColor(BODY).fontSize(10).font("Helvetica").text(text, { lineGap:3 });
+      doc.moveDown(0.4);
+    };
+    const highlight = (text) => {
+      if (doc.y > 680) doc.addPage();
+      doc.rect(72, doc.y, 468, doc.heightOfString(text, {width:448})+16).fill("#E6FAF5");
+      doc.fillColor("#065F46").fontSize(10).font("Helvetica-Bold").text(text, 86, doc.y-doc.heightOfString(text,{width:448})-8, {width:448, lineGap:3});
+      doc.moveDown(0.6);
+    };
+    const warn = (text) => {
+      if (doc.y > 680) doc.addPage();
+      doc.rect(72, doc.y, 468, doc.heightOfString(text, {width:448})+16).fill("#FFFBEB");
+      doc.fillColor("#78350F").fontSize(10).font("Helvetica-Bold").text(text, 86, doc.y-doc.heightOfString(text,{width:448})-8, {width:448, lineGap:3});
+      doc.moveDown(0.6);
+    };
+    const tableRow = (cells, widths, bold=false, header=false) => {
+      if (doc.y > 700) doc.addPage();
+      const rowY = doc.y;
+      let x = 72;
+      cells.forEach((cell, i) => {
+        if (header) doc.rect(x, rowY, widths[i], 18).fill(NAVY);
+        doc.fillColor(header?"#FFFFFF":bold?"#1A1A2E":BODY)
+           .fontSize(9).font(header||bold?"Helvetica-Bold":"Helvetica")
+           .text(cell, x+4, rowY+4, {width:widths[i]-8, lineBreak:false});
+        x += widths[i];
+      });
+      doc.moveTo(72, rowY+20).lineTo(540, rowY+20).stroke("#E5E7EB");
+      doc.y = rowY + 22;
+    };
+
+    // ── COVER PAGE ─────────────────────────────────────────────────────────────
+    doc.rect(0,0,612,90).fill(NAVY);
+    doc.fillColor(GREEN).fontSize(24).font("Helvetica-Bold").text("MY SMART SLOTS", 72, 22, {align:"center"});
+    doc.fillColor("white").fontSize(12).font("Helvetica-Bold").text(`ACCOUNT MANAGER ${typeLabel.toUpperCase()}`, 72, 54, {align:"center"});
+    doc.fillColor(GRAY).fontSize(10).font("Helvetica").text("Clair Group LLC  |  785-329-0202  |  hello@mysmartslots.com", 72, 74, {align:"center"});
+
+    doc.y = 110;
+    doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text("Agreement Details");
+    doc.moveTo(72, doc.y+2).lineTo(540, doc.y+2).stroke(GREEN);
     doc.moveDown(0.5);
+
     const details = [
-      ["Rep Name:", agreement.rep_name],
+      ["Rep Name:", n],
       ["Agreement Type:", typeLabel],
-      ["Territory:", agreement.territory],
-      ["Start Date:", agreement.start_date],
-      ...(agreement.referring_manager?[["Referring Manager:", agreement.referring_manager]]:[]),
+      ["Territory:", t],
+      ["Start Date:", sd],
+      ["Agreement Date:", d],
+      ...(rm?[["Referring Manager:", rm]]:[]),
       ["Rep Signed:", agreement.signed_at ? new Date(agreement.signed_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : "—"],
       ["Executed:", agreement.executed_at || "—"],
     ];
     details.forEach(([label, value]) => {
-      doc.fillColor("#6B7280").fontSize(10).font("Helvetica-Bold").text(label, 72, doc.y, { continued:true, width:180 });
-      doc.fillColor("#1A1A2E").font("Helvetica").text(value || "—");
+      doc.fillColor(GRAY).fontSize(10).font("Helvetica-Bold").text(label, 72, doc.y, {continued:true, width:160});
+      doc.fillColor(NAVY).font("Helvetica").text(value||"—");
     });
-    doc.moveDown(1.5);
-    doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke("#E5E7EB");
+
     doc.moveDown(1);
-    doc.fillColor("#1A1A2E").fontSize(13).font("Helvetica-Bold").text("Key Terms Summary");
+    doc.moveTo(72,doc.y).lineTo(540,doc.y).stroke("#E5E7EB");
     doc.moveDown(0.5);
-    const terms = isRep ? [
-      "Base Commission: 25% of monthly subscription — lifetime recurring",
-      "Setup Bonus: $50 per new client closed",
-      "Book Report Bonus: +0.5% per approved report, up to +5% maximum",
-      "Advancement: Eligible for Jr Regional Manager at 25 active clients",
-      "Trip Eligibility: Personal milestones (10/20/35/50 active clients)",
-      "90-Day Tail: Commission continues 90 days after termination",
-    ] : [
-      "Base Commission: 30% of monthly subscription — lifetime recurring",
-      "Setup Bonus: $50 per new client closed",
-      "Book Report Bonus: +0.5% per approved report, up to +5% maximum",
-      "Jr Regional Manager at 25 clients — 10% override + $1,000 bonus",
-      "Sr Regional Manager at 50 clients — 15% override + $2,000 bonus + Bought-In eligible",
-      "Override Chain: L1 15%/10%, L2 7%, L3 3%",
-      "Bought-In Threshold: Team $5,000+ MRR required",
-      "Company Trips: MRR milestones $5K/$15K/$30K/$50K",
-      "90-Day Tail: Commission continues 90 days after termination",
-    ];
-    terms.forEach(term => { doc.fillColor("#374151").fontSize(10).font("Helvetica").text(`• ${term}`, { lineGap:2 }); });
-    doc.moveDown(1.5);
-    doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke("#E5E7EB");
-    doc.moveDown(1);
-    doc.fillColor("#1A1A2E").fontSize(13).font("Helvetica-Bold").text("Signatures");
+
+    // ── AGREEMENT BODY ─────────────────────────────────────────────────────────
+    if (isRep) {
+      h1("1. Parties & Agreement Overview");
+      p(`This Account Manager Rep Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), ${rm?"the Referring Manager "+rm+' ("Referring Manager"),':""} and ${n} ("Rep", "you").`);
+      p("This Agreement governs the independent contractor relationship, including commission structure, performance incentives, advancement eligibility, and all related terms. This Agreement differs from the original Account Manager Partnership Agreement in commission rate, trip eligibility structure, and advancement terms.");
+      warn("The Rep is an independent contractor — not an employee. This Agreement does not create an employment relationship or entitle the Rep to benefits.");
+
+      h1("2. Role & Responsibilities");
+      p("The Rep will represent My Smart Slots to prospective clients under the supervision of their Referring Manager. Responsibilities include prospecting, running audit calls, managing pipeline, sending agreements, collecting payment, facilitating onboarding, and maintaining client relationships.");
+      p("The Rep agrees to complete all 7 training modules before making first client contact, maintain accurate pipeline records, and report activity to their Referring Manager.");
+      h2("2.1 First Independent Close Requirement");
+      p("Milestone bonuses and incentive eligibility do not activate until the Rep's first fully independent close is confirmed — defined the same as in the original Partnership Agreement. During onboarding the Referring Manager or Company owner may participate in joint audit calls. The Company owner has sole authority to designate whether a close qualifies as independent.");
+
+      h1("3. Commission Structure");
+      p("The Rep earns 25% of the monthly subscription price for every active client they close, paid monthly for as long as the client remains active. This is lifetime recurring commission.");
+      doc.moveDown(0.2);
+      tableRow(["Plan","Monthly","Annual","Your Monthly Commission","Annual Commission"],[80,70,80,160,78],false,true);
+      tableRow(["Starter","$125/mo","$1,250/yr","$31.25/mo","$312.50"],[80,70,80,160,78]);
+      tableRow(["Pro (Recommended)","$225/mo","$2,250/yr","$56.25/mo","$562.50"],[80,70,80,160,78],true);
+      tableRow(["Elite","$375/mo","$3,750/yr","$93.75/mo","$937.50"],[80,70,80,160,78]);
+      doc.moveDown(0.4);
+      p("A setup bonus of $50.00 is paid within 7 business days of each new client's first payment clearing. Monthly commission is paid on the last Friday of each month. W-9 required before first payment.");
+      warn("25% is the Rep's base rate. The 5% difference from the standard 30% funds the override income earned by the Referring Manager and their upline. This structure is fixed and not negotiable.");
+      h2("3.1 Book Report Commission Bonus");
+      p("For every qualifying book report submitted and approved by the Company owner, the Rep earns a permanent +0.5% commission increase on all active accounts, up to a maximum of +5.0% (10 books). A qualifying report must include: book title and author, key lessons learned, specific takeaways applicable to sales and client management, and how the Rep plans to apply it to their approach and personal growth.");
+
+      h1("4. Advancement Eligibility");
+      p("Advancement is available to Reps who demonstrate sustained performance, professional conduct, and leadership potential. Advancement is not guaranteed and is granted at the Company owner's sole discretion.");
+      h2("4.1 Path to Jr Regional Manager");
+      p("A Rep who reaches 25 active clients, demonstrates consistent independent performance, and receives endorsement from their Referring Manager may be considered for promotion to Jr Regional Manager status. Upon promotion, the Rep graduates to the full Account Manager Partnership Agreement terms — including 30% commission, override eligibility, and company MRR trip eligibility.");
+      highlight("Promotion to Jr Regional Manager converts this Rep Agreement to a full Partnership Agreement. All prior active clients are credited toward the new commission structure effective the following billing cycle.");
+      p("The decision to promote rests entirely with the Company owner. The Referring Manager may recommend but not unilaterally promote a Rep.");
+
+      h1("5. Company Trip Eligibility");
+      p("Reps covered by this Agreement are eligible for company incentive trips based on their own personal active client milestones — not company-wide MRR milestones.");
+      doc.moveDown(0.2);
+      tableRow(["Rep's Active Clients","Incentive","Details"],[130,130,208],false,true);
+      tableRow(["10 active clients","Team Dinner","Invited to the next team dinner event"],[130,130,208]);
+      tableRow(["20 active clients","Weekend Trip","2 nights — hotel and meals covered"],[130,130,208]);
+      tableRow(["35 active clients","Company Retreat","3–4 days — flights and accommodation covered"],[130,130,208]);
+      tableRow(["50 active clients","Premium Destination","5 days international — fully covered"],[130,130,208]);
+      doc.moveDown(0.4);
+      p("Trip eligibility is cumulative — once a Rep hits a milestone, they retain eligibility for that tier's incentive regardless of future client fluctuation, provided they remain in good standing.");
+
+      h1("6. Monthly Leaderboard");
+      p("Reps participate in the same monthly points leaderboard as Account Managers. Points: new close +3, retained client +1, churn -5. Top performer with at least 1 new close earns $100 cash. Quarterly perfect retention bonus of $150 applies.");
+
+      h1("7. General Provisions");
+      p("Independent Contractor: The Rep is an independent contractor. Nothing in this Agreement creates employment.");
+      p("Anti-Poaching: The Rep may not recruit existing Company clients or active reps for competing businesses during the term and for 90 days following termination.");
+      p("90-Day Tail: Upon termination, the Rep earns commission on existing active clients for 90 calendar days.");
+      p("Governing Law: This Agreement is governed by the laws of the State of Kansas.");
+      p("Entire Agreement: This Agreement supersedes all prior discussions between the parties.");
+      p("Amendments: Changes require written consent from the Company owner.");
+
+    } else {
+
+      h1("1. Parties & Agreement Overview");
+      p(`This Account Manager Partnership Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ${n} ("Account Manager", "you").`);
+      p("This Agreement governs the independent contractor relationship between the parties, including commission structure, career advancement, team building rights, incentive programs, and all related terms.");
+      warn("The Account Manager is an independent contractor — not an employee. This Agreement does not create an employment relationship, entitle the Account Manager to benefits, or obligate the Company to provide a minimum income.");
+
+      h1("2. Role & Responsibilities");
+      p("The Account Manager will represent My Smart Slots to prospective clients in their assigned territory. Responsibilities include prospecting, running audit calls, managing pipeline, sending client agreements, collecting payment, facilitating onboarding, and maintaining client relationships.");
+      p("The Account Manager agrees to complete all 7 training modules before making their first client contact, maintain accurate pipeline records, and conduct themselves professionally in all interactions.");
+      h2("2.1 First Independent Close Requirement");
+      p("An Account Manager is not considered fully active until completing their first fully independent close — defined as running an audit call, sending the client agreement, and generating the payment link without direct assistance from the owner. A close may be credited as independent during a joint call if the Account Manager takes full lead, with the owner present in an observational role only.");
+      highlight("Closes completed with owner assistance still earn 30% commission. However milestone bonuses and incentive eligibility do not activate until the first independent close is confirmed by the owner.");
+
+      h1("3. Commission Structure");
+      h2("3.1 Base Commission");
+      p("The Account Manager earns 30% of the monthly subscription price for every active client they close, paid monthly for as long as the client remains active. This is lifetime recurring commission.");
+      doc.moveDown(0.2);
+      tableRow(["Plan","Monthly","Annual","Your Monthly Commission","Annual Commission"],[80,70,80,160,78],false,true);
+      tableRow(["Starter","$125/mo","$1,250/yr","$37.50/mo","$312.50"],[80,70,80,160,78]);
+      tableRow(["Pro (Recommended)","$225/mo","$2,250/yr","$67.50/mo","$562.50"],[80,70,80,160,78],true);
+      tableRow(["Elite","$375/mo","$3,750/yr","$112.50/mo","$937.50"],[80,70,80,160,78]);
+      doc.moveDown(0.4);
+      p("Annual commission is paid out upon receipt of the client's annual payment. Monthly commission is paid on the last Friday of each month. A one-time setup bonus of $50.00 is paid within 7 business days of each new client's first payment clearing.");
+      warn("A client is considered closed only when their first payment clears through Stripe. Verbal commitments and signed agreements alone do not trigger commission.");
+      h2("3.2 Book Report Commission Bonus");
+      p("For every business, sales, or personal development book the Account Manager reads and submits a qualifying book report to the owner, they earn a permanent commission increase of +0.5% on all active accounts, up to a maximum of +5.0% (10 books). A qualifying report must include: book title and author, key lessons learned, specific takeaways applicable to sales and client management, and how they plan to apply the content to their sales approach and personal growth. Reports must be substantive — summaries copied from the internet will not be accepted.");
+      highlight("Example: An Account Manager who completes 6 qualifying book reports earns 33% commission on all active accounts instead of 30%. This increase is permanent and applies to all existing and future clients.");
+
+      h1("4. Career Advancement & Tier Structure");
+      doc.moveDown(0.2);
+      tableRow(["Tier","Active Clients","Commission","Override","Advancement Bonus"],[130,80,70,90,98],false,true);
+      tableRow(["Account Manager","0–24","30%","None","$500 at 10 clients"],[130,80,70,90,98]);
+      tableRow(["Jr Regional Manager","25–49","30%","See §5","$1,000 cash"],[130,80,70,90,98],true);
+      tableRow(["Sr Regional Manager","50+","30%","See §5","$2,000 cash"],[130,80,70,90,98],true);
+      doc.moveDown(0.4);
+      h2("4.1 Individual Milestone Bonuses");
+      doc.moveDown(0.2);
+      tableRow(["Milestone","Bonus","Additional"],[180,150,138],false,true);
+      tableRow(["First independent close","$100 cash","Fully active status activated"],[180,150,138]);
+      tableRow(["5 active clients","$250 cash",""],[180,150,138]);
+      tableRow(["10 active clients","$500 cash",""],[180,150,138]);
+      tableRow(["25 active clients","$1,000 cash + Jr Regional Manager","Override income begins"],[180,150,138]);
+      tableRow(["50 active clients","$2,000 cash + Sr Regional Manager","Bought-In eligibility"],[180,150,138]);
+      doc.moveDown(0.4);
+
+      h1("5. Override Income & Downline Structure");
+      p("Upon reaching Jr Regional Manager status, the Account Manager earns override commissions on closes made by Account Managers they recruit and manage:");
+      doc.moveDown(0.2);
+      tableRow(["Level","Who","Override Rate"],[80,220,168],false,true);
+      tableRow(["Level 1","Your direct recruits' closes","15% (Sr Regional Manager) / 10% (Jr Regional Manager)"],[80,220,168]);
+      tableRow(["Level 2","Your recruits' recruits' closes","7%"],[80,220,168]);
+      tableRow(["Level 3","Third level down","3%"],[80,220,168]);
+      doc.moveDown(0.4);
+      p("Override income is paid on the last Friday of each month alongside regular commission. Override income only applies to Account Managers recruited through the manager's direct efforts or their downline team.");
+
+      h1("6. Team Building & Hiring Authority");
+      h2("6.1 Jr Regional Manager Hiring Authority");
+      p("May recruit and interview candidates. Final interview requires the Company owner plus any available Sr Regional Managers. May maintain up to 5 direct recruits without additional owner approval. Expanding beyond 5 requires explicit written approval from the owner. Owner retains final hiring authority on all candidates.");
+      h2("6.2 Sr Regional Manager Hiring Authority");
+      p("May recruit with no cap on team size. All final interviews require the owner's attendance. All available Sr Regional Managers must attend final interviews. Owner retains final hiring authority.");
+      h2("6.3 Anti-Poaching & Downline Protection");
+      p("Account Managers may not recruit existing Company clients, active Account Managers, or employees of active clients for competing businesses during the term and for 90 days following termination. A 90-day tail applies — commission continues on existing active clients for 90 calendar days after termination.");
+      h2("6.4 Account Managers Hired by Managers");
+      p("Account Managers recruited by Jr or Sr Regional Managers are governed by a separate Rep Agreement at 25% base commission. Managers are responsible for ensuring their recruits sign the correct agreement before beginning any client-facing work.");
+
+      h1("7. Bought-In Status (Sr Regional Manager Passive Transition)");
+      p("Upon reaching Sr Regional Manager status, the Account Manager becomes eligible to apply for Bought-In status — a formal transition from active selling to a team leadership and oversight role, while retaining all override income.");
+      h2("7.1 Eligibility Requirements");
+      p("Must hold Sr Regional Manager status with 50+ active personal clients. Must have at least one Jr Regional Manager actively managing a team within their downline. The team must be generating a combined minimum of $5,000 MRR. Must receive written approval from the Company owner.");
+      h2("7.2 Bought-In Rights & Obligations");
+      p("No longer required to make personal cold calls or close new personal clients. Role transitions to team oversight, training support, and strategic input. Retains 100% of existing override income on all downline levels. May promote one qualified Account Manager to Jr Regional Manager status, subject to owner approval.");
+      warn("If the team's combined MRR drops below $5,000 in any given month, the Bought-In Sr Regional Manager reverts to active status and must resume personal selling until the threshold is restored for two consecutive months.");
+
+      h1("8. Company Incentive Program");
+      p("The following company-wide incentives apply to all original Account Managers covered by this Agreement. Eligibility is based on company-wide Monthly Recurring Revenue (MRR) milestones:");
+      doc.moveDown(0.2);
+      tableRow(["Company MRR","Incentive","Details"],[120,140,208],false,true);
+      tableRow(["$5,000/mo","Team Dinner","Full team — strategy and celebration"],[120,140,208]);
+      tableRow(["$15,000/mo","Weekend Trip","2 nights — hotel and meals fully covered"],[120,140,208]);
+      tableRow(["$30,000/mo","Company Retreat","3–4 days — flights and accommodation covered"],[120,140,208]);
+      tableRow(["$50,000/mo","Premium Destination","5 days international — full team, all covered"],[120,140,208]);
+      doc.moveDown(0.4);
+      p("Milestones are permanent once hit — they never reset. Good standing required. These milestones are Year 1 terms only. New incentive goals will be negotiated annually.");
+
+      h1("9. Monthly Leaderboard & Performance Recognition");
+      p("Points: new client closed +3, active client retained +1, client churned -5. Top Account Manager with at least 1 new close earns $100 cash at month end. Jr and Sr Regional Managers compete separately. Quarterly perfect retention bonus of $150 awarded to any Account Manager who retains 100% of their client base for a full quarter.");
+
+      h1("10. Payment Terms");
+      p("All commission and bonus payments are made via CashApp or cashier's check. Monthly recurring commission is paid on the last Friday of each month. Setup bonuses, milestone bonuses, and advancement bonuses are paid within 7 business days of the qualifying event. W-9 required before first commission payment. Payments of $600+ per year reported on 1099-NEC.");
+
+      h1("11. General Provisions");
+      p("Independent Contractor: Nothing in this Agreement creates employment, partnership, or agency.");
+      p("Governing Law: This Agreement is governed by the laws of the State of Kansas.");
+      p("Entire Agreement: This Agreement supersedes all prior discussions, representations, and agreements between the parties.");
+      p("Amendments: Changes to this Agreement require written consent from both parties.");
+      p("Good Standing: All bonuses, incentives, and advancement recognition require the Account Manager to be in good standing.");
+      p("Year 1 Term: Company incentive milestones and leaderboard terms apply to Year 1 only.");
+    }
+
+    // ── SIGNATURES ─────────────────────────────────────────────────────────────
+    if (doc.y > 580) doc.addPage();
+    h1("Signatures");
+    p("By signing below, all parties acknowledge they have read, understand, and agree to all terms of this Agreement. Electronic signatures are legally binding under the ESIGN Act and UETA.");
+
     doc.moveDown(0.5);
-    doc.fillColor("#1A1A2E").fontSize(11).font("Helvetica-Bold").text("Rep / Account Manager");
-    doc.fillColor("#6B7280").fontSize(10).font("Helvetica").text(`Name: ${agreement.rep_signer_name || agreement.rep_name}`);
-    doc.fillColor("#6B7280").text(`Date: ${agreement.signed_at ? new Date(agreement.signed_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : "—"}`);
-    doc.moveDown(0.5);
+
+    // Rep signature
+    doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text("Rep / Account Manager");
+    doc.moveDown(0.2);
+    doc.fillColor(GRAY).fontSize(10).font("Helvetica").text(`Name: ${agreement.rep_signer_name || n}`);
+    doc.fillColor(GRAY).text(`Date: ${agreement.signed_at ? new Date(agreement.signed_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : "—"}`);
+    doc.moveDown(0.4);
     if (agreement.signature_data && agreement.signature_data.startsWith("data:image")) {
-      try { const b = Buffer.from(agreement.signature_data.split(",")[1],"base64"); doc.image(b,72,doc.y,{width:200,height:60}); doc.moveDown(4); }
-      catch(e) { doc.fillColor("#00C896").text("[Signed electronically]"); doc.moveDown(1); }
+      try {
+        const b = Buffer.from(agreement.signature_data.split(",")[1],"base64");
+        doc.image(b, 72, doc.y, {width:200, height:60});
+        doc.y += 68;
+      } catch(e) { doc.fillColor(GREEN).text("[Signed electronically]"); }
     }
     doc.moveTo(72,doc.y).lineTo(300,doc.y).stroke("#E5E7EB");
-    doc.fillColor("#6B7280").fontSize(9).text("Rep Signature"); doc.moveDown(1.5);
-    doc.fillColor("#1A1A2E").fontSize(11).font("Helvetica-Bold").text("My Smart Slots / Clair Group LLC");
-    doc.fillColor("#6B7280").fontSize(10).font("Helvetica").text("Title: Owner / Founder");
-    doc.fillColor("#6B7280").text(`Executed: ${agreement.executed_at || "—"}`);
-    doc.moveDown(0.5);
+    doc.fillColor(GRAY).fontSize(9).text("Account Manager Signature");
+    doc.moveDown(1.5);
+
+    // Owner signature
+    doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text("My Smart Slots / Clair Group LLC");
+    doc.moveDown(0.2);
+    doc.fillColor(GRAY).fontSize(10).font("Helvetica").text(`Name: ${agreement.owner_name || "My Smart Slots / Clair Group LLC"}`);
+    doc.fillColor(GRAY).text("Title: Owner / Founder");
+    doc.fillColor(GRAY).text(`Executed: ${agreement.executed_at || "—"}`);
+    doc.moveDown(0.4);
     if (agreement.owner_signature_data && agreement.owner_signature_data.startsWith("data:image")) {
-      try { const b = Buffer.from(agreement.owner_signature_data.split(",")[1],"base64"); doc.image(b,72,doc.y,{width:200,height:60}); doc.moveDown(4); }
-      catch(e) { doc.fillColor("#00C896").text("[Countersigned electronically]"); doc.moveDown(1); }
+      try {
+        const b = Buffer.from(agreement.owner_signature_data.split(",")[1],"base64");
+        doc.image(b, 72, doc.y, {width:200, height:60});
+        doc.y += 68;
+      } catch(e) { doc.fillColor(GREEN).text("[Countersigned electronically]"); }
     }
     doc.moveTo(72,doc.y).lineTo(300,doc.y).stroke("#E5E7EB");
-    doc.fillColor("#6B7280").fontSize(9).text("Owner Signature"); doc.moveDown(2);
-    doc.moveTo(72,doc.y).lineTo(540,doc.y).stroke("#E5E7EB"); doc.moveDown(0.5);
-    doc.fillColor("#6B7280").fontSize(9).text("My Smart Slots · Clair Group LLC · 785-329-0202 · hello@mysmartslots.com", { align:"center" });
+    doc.fillColor(GRAY).fontSize(9).text("Owner Signature");
+    doc.moveDown(2);
+
+    // Footer
+    doc.moveTo(72,doc.y).lineTo(540,doc.y).stroke("#E5E7EB");
+    doc.moveDown(0.5);
+    doc.fillColor(GRAY).fontSize(9).text("My Smart Slots · Clair Group LLC · 785-329-0202 · hello@mysmartslots.com · mysmartslots.com", {align:"center"});
+    doc.fillColor(GRAY).fontSize(8).text(`Document ID: ${agreement.token?.substring(0,16)}... · Generated: ${new Date().toISOString()} · Confidential — Internal Use Only`, {align:"center"});
+
     doc.end();
   });
 }
