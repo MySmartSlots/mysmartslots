@@ -90,7 +90,7 @@ canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 <!-- LOADING -->
 <div id="loading-screen">
   <div class="spinner"></div>
-  <p style="color:var(--gray-text);font-size:14px;">Loading your agreement...</p>
+  <p style="color:var(--gray-text);font-size:14px;">Loading your agreement — this may take up to 30 seconds on first open...</p>
 </div>
 
 <!-- ERROR -->
@@ -254,6 +254,9 @@ window.addEventListener('load', async ()=>{
     return;
   }
 
+  // Wake up the server first — Render free tier sleeps after inactivity
+  try{ await fetch(`${API}/ping`,{ method:'GET' }); } catch(e){}
+
   try{
     const r=await fetch(`${API}/portal/rep-agreement/get`,{
       method:'POST',
@@ -278,7 +281,7 @@ window.addEventListener('load', async ()=>{
     document.getElementById('app').style.display='block';
     initCanvas();
   }catch(e){
-    showError('Connection error. Please check your internet and try again.');
+    showError('Error: ' + e.message + ' — API: ' + API);
   }
 });
 
