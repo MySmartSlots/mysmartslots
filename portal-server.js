@@ -679,14 +679,13 @@ app.post("/portal/agreement/get", async (req, res) => {
   res.json({ success: true, agreement: data });
 });
 
-// Submit signed agreement
+// Submit signed agreement — CLIENT signs
 app.post("/portal/agreement/sign", async (req, res) => {
-  const { token, signer_name, signer_title, signature_data, ip_address, agreed } = req.body;
+  const { token, signer_name, signer_title, signature_data, agreed } = req.body;
   if (!token || !signer_name || !signature_data || !agreed) {
     return res.status(400).json({ error: "Token, name, signature, and agreement are required." });
   }
 
-  // Get agreement
   const { data: agreement, error: getErr } = await supabase.from("agreements").select("*").eq("token", token).single();
   if (getErr || !agreement) return res.status(404).json({ error: "Agreement not found." });
   if (agreement.status === "signed") return res.status(409).json({ error: "Agreement already signed." });
@@ -694,45 +693,33 @@ app.post("/portal/agreement/sign", async (req, res) => {
   const signedAt = new Date().toISOString();
   const signedDate = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
 
-  // Update Supabase
+  // Update Supabase — client signed
   const { error: updateErr } = await supabase.from("agreements").update({
-    status:         "signed",
+    status:         "client_signed",
     signer_name,
     signer_title:   signer_title || "Owner / Authorized Representative",
     signature_data,
     signed_at:      signedAt,
-    signed_ip:      ip_address || "unknown",
   }).eq("token", token);
   if (updateErr) return res.status(500).json({ error: updateErr.message });
 
-  // Generate PDF and send emails
+  // Generate owner countersign token
+  const ownerToken = crypto.randomBytes(32).toString("hex");
+  await supabase.from("agreements").update({ owner_token: ownerToken }).eq("token", token);
+
+  const ownerSignUrl = `https://mysmartslots.com/countersign?token=${ownerToken}`;
+
   try {
-    const pdfBuffer = await generateAgreementPDF({ ...agreement, signer_name, signer_title, signature_data, signed_at:signedDate });
-
-    const emailOpts = {
+    // 1. Email REP — client signed, send payment link now
+    await emailTransporter.sendMail({
       from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
-      attachments: [{ filename:`MySmartSlots_Agreement_${agreement.client_name.replace(/\s+/g,"_")}.pdf`, content:pdfBuffer }],
-    };
-
-    // Email client
-    await emailTransporter.sendMail({ ...emailOpts, to:agreement.client_email, subject:"✓ Signed — My Smart Slots Services Agreement",
-      html:`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
-        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
-        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
-          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ Agreement Signed Successfully</p>
-          <p style="color:#374151;line-height:1.7;">Hi ${agreement.client_name}, thank you for signing. Your fully executed agreement is attached to this email. Keep it for your records.</p>
-          <p style="color:#374151;line-height:1.7;">Your Account Manager <strong>${agreement.rep_name}</strong> will be in touch shortly with your payment link. Once payment is complete your automations will be live within 24 hours.</p>
-          <p style="color:#6b7280;font-size:13px;">Questions? Contact ${agreement.rep_email} or call 785-329-0202.</p>
-        </div></div>`
-    });
-
-    // Email rep
-    await emailTransporter.sendMail({ ...emailOpts, to:agreement.rep_email, subject:`✓ ${agreement.client_name} signed — send payment link now`,
-      html:`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+      to: agreement.rep_email,
+      subject: `✓ ${agreement.client_name} signed — send payment link now`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
         <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
         <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
           <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ ${agreement.client_name} just signed their agreement</p>
-          <p style="color:#374151;line-height:1.7;"><strong>Action required:</strong> Log into the billing page and send the payment link now.</p>
+          <p style="color:#374151;line-height:1.7;"><strong>Action required:</strong> Send the payment link now. The final countersigned agreement will be sent to all parties once the owner signs.</p>
           <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
             <div><strong>Client:</strong> ${agreement.client_name} (${agreement.client_email})</div>
             <div><strong>Plan:</strong> ${agreement.plan_label}</div>
@@ -742,33 +729,122 @@ app.post("/portal/agreement/sign", async (req, res) => {
           <div style="text-align:center;margin:24px 0;">
             <a href="https://mysmartslots.com/financial" style="background:#00C896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Send Payment Link →</a>
           </div>
-          <p style="color:#6b7280;font-size:12px;">The signed agreement PDF is attached for your records.</p>
         </div></div>`
     });
 
-    // Email owner
-    await emailTransporter.sendMail({ ...emailOpts, to:OWNER_EMAIL, subject:`New signed agreement — ${agreement.client_name} (${agreement.plan_label})`,
-      html:`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+    // 2. Email CLIENT — confirmation they signed, waiting for countersign
+    await emailTransporter.sendMail({
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      to: agreement.client_email,
+      subject: "✓ Agreement Received — Countersignature in Progress",
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
         <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
         <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
-          <p style="color:#16a34a;font-size:18px;font-weight:700;">New Agreement Signed</p>
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ Your signature was received</p>
+          <p style="color:#374151;line-height:1.7;">Hi ${agreement.client_name}, thank you for signing. Your Account Manager <strong>${agreement.rep_name}</strong> will be in touch shortly with your payment link.</p>
+          <p style="color:#374151;line-height:1.7;">Once the agreement is countersigned by our owner, a fully executed copy will be emailed to you for your records.</p>
+          <p style="color:#6b7280;font-size:13px;">Questions? Contact ${agreement.rep_email} or call 785-329-0202.</p>
+        </div></div>`
+    });
+
+    // 3. Email OWNER — countersign request
+    await emailTransporter.sendMail({
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      to: OWNER_EMAIL,
+      subject: `New agreement to countersign — ${agreement.client_name} (${agreement.plan_label})`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">Countersignature Required</p>
+          <p style="color:#374151;line-height:1.7;">${agreement.client_name} has signed their services agreement. Please countersign to finalize and send the executed copy to all parties.</p>
           <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
             <div><strong>Client:</strong> ${agreement.client_name} (${agreement.client_email})</div>
             <div><strong>Plan:</strong> ${agreement.plan_label}</div>
             <div><strong>Billing:</strong> ${agreement.billing_type}</div>
-            <div><strong>Rep:</strong> ${agreement.rep_name} (${agreement.rep_email})</div>
-            <div><strong>Setup Fee:</strong> $${agreement.setup_fee}</div>
-            <div><strong>Signed:</strong> ${signedDate}</div>
+            <div><strong>Rep:</strong> ${agreement.rep_name}</div>
+            <div><strong>Client Signed:</strong> ${signedDate}</div>
           </div>
-          <p style="color:#6b7280;font-size:12px;">Signed agreement attached. ${agreement.rep_name} has been notified to send the payment link.</p>
+          <div style="text-align:center;margin:24px 0;">
+            <a href="${ownerSignUrl}" style="background:#00C896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Countersign Agreement →</a>
+          </div>
+          <p style="color:#6b7280;font-size:12px;">Once you sign, a fully executed PDF will be sent automatically to the client and rep.</p>
         </div></div>`
     });
+
   } catch (e) {
-    console.error("PDF/email error:", e.message);
-    // Agreement is saved — return success even if email fails
+    console.error("Email error after client sign:", e.message);
   }
 
-  res.json({ success: true, message: "Agreement signed. PDF sent to all parties." });
+  res.json({ success: true, message: "Agreement signed. Rep notified. Owner countersign request sent." });
+});
+
+// Owner countersign page — get agreement by owner token
+app.post("/portal/agreement/get-countersign", async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: "Token required." });
+  const { data, error } = await supabase.from("agreements").select("*").eq("owner_token", token).single();
+  if (error || !data) return res.status(404).json({ error: "Agreement not found." });
+  if (data.status === "fully_executed") return res.json({ success: true, agreement: data, already_signed: true });
+  res.json({ success: true, agreement: data });
+});
+
+// Owner countersigns — final execution
+app.post("/portal/agreement/countersign", async (req, res) => {
+  const { token, owner_name, owner_signature_data } = req.body;
+  if (!token || !owner_signature_data) return res.status(400).json({ error: "Token and signature required." });
+
+  const { data: agreement, error: getErr } = await supabase.from("agreements").select("*").eq("owner_token", token).single();
+  if (getErr || !agreement) return res.status(404).json({ error: "Agreement not found." });
+  if (agreement.status === "fully_executed") return res.status(409).json({ error: "Already countersigned." });
+
+  const executedDate = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+
+  // Update Supabase — fully executed
+  const { error: updateErr } = await supabase.from("agreements").update({
+    status:               "fully_executed",
+    owner_signature_data,
+    owner_name:           owner_name || "My Smart Slots",
+    executed_at:          new Date().toISOString(),
+  }).eq("owner_token", token);
+  if (updateErr) return res.status(500).json({ error: updateErr.message });
+
+  // Generate final PDF and send to all parties
+  try {
+    const pdfBuffer = await generateAgreementPDF({
+      ...agreement,
+      owner_signature_data,
+      owner_name: owner_name || "My Smart Slots",
+      executed_at: executedDate,
+    });
+
+    const emailOpts = {
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      subject: `✓ Fully Executed — My Smart Slots Services Agreement (${agreement.plan_label})`,
+      attachments: [{ filename:`MySmartSlots_Agreement_${agreement.client_name.replace(/\s+/g,"_")}.pdf`, content:pdfBuffer }],
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ Agreement Fully Executed</p>
+          <p style="color:#374151;line-height:1.7;">Your My Smart Slots Business Services Agreement has been signed by all parties. The fully executed copy is attached for your records.</p>
+          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+            <div><strong>Client:</strong> ${agreement.client_name}</div>
+            <div><strong>Plan:</strong> ${agreement.plan_label} · ${agreement.billing_type}</div>
+            <div><strong>Executed:</strong> ${executedDate}</div>
+          </div>
+          <p style="color:#6b7280;font-size:13px;">Keep this email for your records. Questions? Call 785-329-0202 or email hello@mysmartslots.com.</p>
+        </div></div>`
+    };
+
+    // Send final PDF to client, rep, and owner
+    await emailTransporter.sendMail({ ...emailOpts, to: agreement.client_email });
+    await emailTransporter.sendMail({ ...emailOpts, to: agreement.rep_email });
+    await emailTransporter.sendMail({ ...emailOpts, to: OWNER_EMAIL });
+
+  } catch (e) {
+    console.error("Final PDF/email error:", e.message);
+  }
+
+  res.json({ success: true, message: "Agreement fully executed. Final PDF sent to all parties." });
 });
 
 // List agreements (admin)
@@ -925,6 +1001,268 @@ function generateAgreementPDF(agreement) {
     doc.end();
   });
 }
+
+// ── REP AGREEMENT SYSTEM (Admin only) ────────────────────────────────────────
+const REP_DETAILS = {
+  orion1:  { name:"Orion",  email:"orion@mysmartslots.com"  },
+  braden1: { name:"Braden", email:"braden@mysmartslots.com" },
+  carson1: { name:"Carson", email:"carson@mysmartslots.com" },
+  rep2:    { name:"Rep 2",  email:"rep2@mysmartslots.com"   },
+};
+
+app.post("/portal/rep-agreement/create", requireAuth, requireAdmin, async (req, res) => {
+  const { rep_username, rep_name_custom, rep_email_custom, territory, start_date, agreement_type, referring_manager } = req.body;
+  let repName, repEmail;
+  if (rep_username && REP_DETAILS[rep_username]) {
+    repName = REP_DETAILS[rep_username].name;
+    repEmail = REP_DETAILS[rep_username].email;
+  } else if (rep_name_custom && rep_email_custom) {
+    repName = rep_name_custom;
+    repEmail = rep_email_custom;
+  } else {
+    return res.status(400).json({ error: "Rep name and email required." });
+  }
+  const token      = crypto.randomBytes(32).toString("hex");
+  const ownerToken = crypto.randomBytes(32).toString("hex");
+  const today      = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+  const expiresAt  = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+  const typeLabel  = agreement_type === "rep" ? "Rep Agreement" : "Partnership Agreement";
+
+  const { error } = await supabase.from("rep_agreements").insert({
+    token, owner_token: ownerToken, rep_name: repName, rep_email: repEmail,
+    territory: territory || "Assigned Territory", start_date: start_date || today,
+    agreement_date: today, agreement_type: agreement_type || "partnership",
+    referring_manager: referring_manager || "", status: "pending",
+    expires_at: expiresAt, created_at: new Date().toISOString(),
+  });
+  if (error) return res.status(500).json({ error: error.message });
+
+  const signUrl = `https://mysmartslots.com/rep-sign?token=${token}`;
+  try {
+    await emailTransporter.sendMail({
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      to: repEmail,
+      subject: `My Smart Slots — Please Sign Your ${typeLabel}`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="font-size:16px;color:#111827;">Hi ${repName},</p>
+          <p style="color:#374151;line-height:1.7;">Your My Smart Slots <strong>${typeLabel}</strong> is ready for your review and signature. Please read it carefully before signing.</p>
+          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:24px 0;">
+            <div><strong>Type:</strong> ${typeLabel}</div>
+            <div><strong>Territory:</strong> ${territory||"Assigned Territory"}</div>
+            <div><strong>Start Date:</strong> ${start_date||today}</div>
+            ${referring_manager?`<div><strong>Referring Manager:</strong> ${referring_manager}</div>`:""}
+          </div>
+          <div style="text-align:center;margin:32px 0;">
+            <a href="${signUrl}" style="background:#00C896;color:#fff;padding:16px 40px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">Review & Sign Agreement →</a>
+          </div>
+          <p style="color:#6b7280;font-size:13px;">This link expires in 14 days. Questions? Call 785-329-0202.</p>
+        </div></div>`,
+    });
+  } catch(e) { console.error("Rep agreement email error:", e.message); }
+  res.json({ success: true, token, sign_url: signUrl });
+});
+
+app.post("/portal/rep-agreement/get", async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: "Token required." });
+  const { data, error } = await supabase.from("rep_agreements").select("*").eq("token", token).single();
+  if (error || !data) return res.status(404).json({ error: "Agreement not found or expired." });
+  if (data.status === "rep_signed" || data.status === "fully_executed") return res.json({ success:true, agreement:data, already_signed:true });
+  if (new Date(data.expires_at) < new Date()) return res.status(410).json({ error: "This link has expired. Contact hello@mysmartslots.com for a new one." });
+  res.json({ success: true, agreement: data });
+});
+
+app.post("/portal/rep-agreement/sign", async (req, res) => {
+  const { token, signer_name, signature_data, agreed } = req.body;
+  if (!token || !signer_name || !signature_data || !agreed) return res.status(400).json({ error: "All fields required." });
+  const { data: agreement, error: getErr } = await supabase.from("rep_agreements").select("*").eq("token", token).single();
+  if (getErr || !agreement) return res.status(404).json({ error: "Agreement not found." });
+  if (agreement.status !== "pending") return res.status(409).json({ error: "Already signed." });
+
+  const signedDate   = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+  const ownerSignUrl = `https://mysmartslots.com/rep-countersign?token=${agreement.owner_token}`;
+  const typeLabel    = agreement.agreement_type === "rep" ? "Rep Agreement" : "Partnership Agreement";
+
+  const { error: updateErr } = await supabase.from("rep_agreements").update({
+    status: "rep_signed", rep_signer_name: signer_name, signature_data, signed_at: new Date().toISOString(),
+  }).eq("token", token);
+  if (updateErr) return res.status(500).json({ error: updateErr.message });
+
+  try {
+    await emailTransporter.sendMail({
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`, to: OWNER_EMAIL,
+      subject: `✓ ${agreement.rep_name} signed their ${typeLabel} — countersign needed`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ ${agreement.rep_name} signed their ${typeLabel}</p>
+          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+            <div><strong>Rep:</strong> ${agreement.rep_name} (${agreement.rep_email})</div>
+            <div><strong>Type:</strong> ${typeLabel}</div>
+            <div><strong>Territory:</strong> ${agreement.territory}</div>
+            <div><strong>Signed:</strong> ${signedDate}</div>
+          </div>
+          <div style="text-align:center;margin:24px 0;">
+            <a href="${ownerSignUrl}" style="background:#00C896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Countersign Agreement →</a>
+          </div>
+        </div></div>`,
+    });
+    await emailTransporter.sendMail({
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`, to: agreement.rep_email,
+      subject: `✓ ${typeLabel} Received — Countersignature in Progress`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ Your signature was received</p>
+          <p style="color:#374151;line-height:1.7;">Hi ${agreement.rep_name}, your ${typeLabel} has been received. The owner will countersign shortly and you'll receive the fully executed copy via email.</p>
+          <p style="color:#374151;font-weight:700;">Welcome to the team. 🚀</p>
+        </div></div>`,
+    });
+  } catch(e) { console.error("Rep sign email error:", e.message); }
+  res.json({ success: true, message: "Agreement signed. Owner notified." });
+});
+
+app.post("/portal/rep-agreement/get-countersign", async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: "Token required." });
+  const { data, error } = await supabase.from("rep_agreements").select("*").eq("owner_token", token).single();
+  if (error || !data) return res.status(404).json({ error: "Agreement not found." });
+  if (data.status === "fully_executed") return res.json({ success:true, agreement:data, already_signed:true });
+  res.json({ success: true, agreement: data });
+});
+
+app.post("/portal/rep-agreement/countersign", async (req, res) => {
+  const { token, owner_signature_data } = req.body;
+  if (!token || !owner_signature_data) return res.status(400).json({ error: "Token and signature required." });
+  const { data: agreement, error: getErr } = await supabase.from("rep_agreements").select("*").eq("owner_token", token).single();
+  if (getErr || !agreement) return res.status(404).json({ error: "Agreement not found." });
+  if (agreement.status === "fully_executed") return res.status(409).json({ error: "Already countersigned." });
+
+  const executedDate = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+  const typeLabel    = agreement.agreement_type === "rep" ? "Rep Agreement" : "Partnership Agreement";
+
+  const { error: updateErr } = await supabase.from("rep_agreements").update({
+    status: "fully_executed", owner_signature_data, executed_at: new Date().toISOString(),
+  }).eq("owner_token", token);
+  if (updateErr) return res.status(500).json({ error: updateErr.message });
+
+  try {
+    const pdfBuffer = await generateRepAgreementPDF({ ...agreement, owner_signature_data, executed_at: executedDate });
+    const emailOpts = {
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      subject: `✓ Fully Executed — My Smart Slots ${typeLabel}`,
+      attachments: [{ filename:`MySmartSlots_${typeLabel.replace(/ /g,"_")}_${agreement.rep_name.replace(/ /g,"_")}.pdf`, content:pdfBuffer }],
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ ${typeLabel} Fully Executed</p>
+          <p style="color:#374151;line-height:1.7;">The fully executed copy is attached for your records.</p>
+          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+            <div><strong>Rep:</strong> ${agreement.rep_name}</div>
+            <div><strong>Territory:</strong> ${agreement.territory}</div>
+            <div><strong>Executed:</strong> ${executedDate}</div>
+          </div>
+        </div></div>`,
+    };
+    await emailTransporter.sendMail({ ...emailOpts, to: agreement.rep_email });
+    await emailTransporter.sendMail({ ...emailOpts, to: OWNER_EMAIL });
+  } catch(e) { console.error("Rep countersign PDF error:", e.message); }
+  res.json({ success: true });
+});
+
+app.post("/portal/rep-agreement/list", requireAuth, requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from("rep_agreements").select("*").order("created_at", { ascending:false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success:true, agreements: data || [] });
+});
+
+function generateRepAgreementPDF(agreement) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin:72, size:"LETTER" });
+    doc.on("data", chunk => chunks.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+    const typeLabel = agreement.agreement_type === "rep" ? "Rep Agreement" : "Partnership Agreement";
+    const isRep = agreement.agreement_type === "rep";
+    doc.rect(0,0,612,80).fill("#1A1A2E");
+    doc.fillColor("#00C896").fontSize(22).font("Helvetica-Bold").text("MY SMART SLOTS", 72, 25, { align:"center" });
+    doc.fillColor("white").fontSize(11).font("Helvetica").text(`${typeLabel} — Executed Copy`, 72, 52, { align:"center" });
+    doc.moveDown(3);
+    doc.fillColor("#1A1A2E").fontSize(13).font("Helvetica-Bold").text("Agreement Details", 72, 110);
+    doc.moveTo(72,128).lineTo(540,128).stroke("#00C896");
+    doc.moveDown(0.5);
+    const details = [
+      ["Rep Name:", agreement.rep_name],
+      ["Agreement Type:", typeLabel],
+      ["Territory:", agreement.territory],
+      ["Start Date:", agreement.start_date],
+      ...(agreement.referring_manager?[["Referring Manager:", agreement.referring_manager]]:[]),
+      ["Rep Signed:", agreement.signed_at ? new Date(agreement.signed_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : "—"],
+      ["Executed:", agreement.executed_at || "—"],
+    ];
+    details.forEach(([label, value]) => {
+      doc.fillColor("#6B7280").fontSize(10).font("Helvetica-Bold").text(label, 72, doc.y, { continued:true, width:180 });
+      doc.fillColor("#1A1A2E").font("Helvetica").text(value || "—");
+    });
+    doc.moveDown(1.5);
+    doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke("#E5E7EB");
+    doc.moveDown(1);
+    doc.fillColor("#1A1A2E").fontSize(13).font("Helvetica-Bold").text("Key Terms Summary");
+    doc.moveDown(0.5);
+    const terms = isRep ? [
+      "Base Commission: 25% of monthly subscription — lifetime recurring",
+      "Setup Bonus: $50 per new client closed",
+      "Book Report Bonus: +0.5% per approved report, up to +5% maximum",
+      "Advancement: Eligible for Jr Regional Manager at 25 active clients",
+      "Trip Eligibility: Personal milestones (10/20/35/50 active clients)",
+      "90-Day Tail: Commission continues 90 days after termination",
+    ] : [
+      "Base Commission: 30% of monthly subscription — lifetime recurring",
+      "Setup Bonus: $50 per new client closed",
+      "Book Report Bonus: +0.5% per approved report, up to +5% maximum",
+      "Jr Regional Manager at 25 clients — 10% override + $1,000 bonus",
+      "Sr Regional Manager at 50 clients — 15% override + $2,000 bonus + Bought-In eligible",
+      "Override Chain: L1 15%/10%, L2 7%, L3 3%",
+      "Bought-In Threshold: Team $5,000+ MRR required",
+      "Company Trips: MRR milestones $5K/$15K/$30K/$50K",
+      "90-Day Tail: Commission continues 90 days after termination",
+    ];
+    terms.forEach(term => { doc.fillColor("#374151").fontSize(10).font("Helvetica").text(`• ${term}`, { lineGap:2 }); });
+    doc.moveDown(1.5);
+    doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke("#E5E7EB");
+    doc.moveDown(1);
+    doc.fillColor("#1A1A2E").fontSize(13).font("Helvetica-Bold").text("Signatures");
+    doc.moveDown(0.5);
+    doc.fillColor("#1A1A2E").fontSize(11).font("Helvetica-Bold").text("Rep / Account Manager");
+    doc.fillColor("#6B7280").fontSize(10).font("Helvetica").text(`Name: ${agreement.rep_signer_name || agreement.rep_name}`);
+    doc.fillColor("#6B7280").text(`Date: ${agreement.signed_at ? new Date(agreement.signed_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : "—"}`);
+    doc.moveDown(0.5);
+    if (agreement.signature_data && agreement.signature_data.startsWith("data:image")) {
+      try { const b = Buffer.from(agreement.signature_data.split(",")[1],"base64"); doc.image(b,72,doc.y,{width:200,height:60}); doc.moveDown(4); }
+      catch(e) { doc.fillColor("#00C896").text("[Signed electronically]"); doc.moveDown(1); }
+    }
+    doc.moveTo(72,doc.y).lineTo(300,doc.y).stroke("#E5E7EB");
+    doc.fillColor("#6B7280").fontSize(9).text("Rep Signature"); doc.moveDown(1.5);
+    doc.fillColor("#1A1A2E").fontSize(11).font("Helvetica-Bold").text("My Smart Slots / Clair Group LLC");
+    doc.fillColor("#6B7280").fontSize(10).font("Helvetica").text("Title: Owner / Founder");
+    doc.fillColor("#6B7280").text(`Executed: ${agreement.executed_at || "—"}`);
+    doc.moveDown(0.5);
+    if (agreement.owner_signature_data && agreement.owner_signature_data.startsWith("data:image")) {
+      try { const b = Buffer.from(agreement.owner_signature_data.split(",")[1],"base64"); doc.image(b,72,doc.y,{width:200,height:60}); doc.moveDown(4); }
+      catch(e) { doc.fillColor("#00C896").text("[Countersigned electronically]"); doc.moveDown(1); }
+    }
+    doc.moveTo(72,doc.y).lineTo(300,doc.y).stroke("#E5E7EB");
+    doc.fillColor("#6B7280").fontSize(9).text("Owner Signature"); doc.moveDown(2);
+    doc.moveTo(72,doc.y).lineTo(540,doc.y).stroke("#E5E7EB"); doc.moveDown(0.5);
+    doc.fillColor("#6B7280").fontSize(9).text("My Smart Slots · Clair Group LLC · 785-329-0202 · hello@mysmartslots.com", { align:"center" });
+    doc.end();
+  });
+}
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`MySmartSlots portal server running on port ${PORT}`));

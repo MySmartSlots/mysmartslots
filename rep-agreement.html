@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Send Rep Agreement</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#00C896;--accent-dark:#009e78;--accent-light:#e6faf5;
+  --navy:#1a1a2e;--white:#fff;--gray-bg:#f5f7fb;--gray-border:#e4e8f0;
+  --gray-text:#6b7280;--dark-text:#111827;--red:#e74c3c;--green:#16a34a;--orange:#f39c12;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--gray-bg);color:var(--dark-text);min-height:100vh;}
+header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.header-logo{font-size:16px;font-weight:700;color:#fff;}
+.header-logo span{color:var(--accent);}
+.badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+.badge-admin{background:rgba(243,156,18,.15);border:1px solid rgba(243,156,18,.3);color:var(--orange);}
+.badge-page{background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);color:var(--accent);}
+.sign-out-btn{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.login-box{background:var(--white);border:1px solid var(--gray-border);border-radius:16px;padding:2.5rem 2rem;width:360px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+.login-logo{font-size:20px;font-weight:700;color:var(--dark-text);margin-bottom:4px;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--gray-text);margin-bottom:1.5rem;}
+.inp{padding:11px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--dark-text);outline:none;width:100%;margin-bottom:10px;}
+.inp:focus{border-color:var(--accent);}
+.login-btn{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.login-err{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+#app{display:none;}
+.main{max-width:680px;margin:0 auto;padding:2rem 1rem 5rem;}
+.card{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-dark);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--gray-border);}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:520px){.fg-row{grid-template-columns:1fr;}}
+.type-row{display:flex;gap:8px;margin-bottom:1rem;}
+.type-opt{flex:1;padding:12px;border:2px solid var(--gray-border);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s;}
+.type-opt:hover{border-color:var(--accent);}
+.type-opt.selected{border-color:var(--accent);background:var(--accent-light);}
+.type-opt .t-name{font-size:13px;font-weight:700;color:var(--dark-text);}
+.type-opt .t-sub{font-size:11px;color:var(--gray-text);margin-top:3px;line-height:1.4;}
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.rep-card{border:2px solid var(--gray-border);border-radius:10px;padding:1rem;cursor:pointer;transition:all .15s;text-align:center;}
+.rep-card:hover{border-color:var(--accent);}
+.rep-card.selected{border-color:var(--accent);background:var(--accent-light);}
+.rep-card .rn{font-size:14px;font-weight:700;}
+.rep-card .re{font-size:11px;color:var(--gray-text);margin-top:2px;}
+.rep-card.custom{border-style:dashed;}
+.send-btn{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+.send-btn:hover{background:var(--accent-dark);}
+.send-btn:disabled{opacity:.5;cursor:not-allowed;}
+.success-card{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:14px;padding:1.75rem;margin-bottom:1.25rem;display:none;}
+.success-card h3{font-size:18px;font-weight:700;color:var(--green);margin-bottom:.75rem;}
+.si{background:#fff;border:1px solid #a7f3d0;border-radius:10px;padding:1rem;font-size:13px;margin-bottom:.75rem;line-height:1.8;}
+.new-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.agr-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--gray-border);gap:8px;flex-wrap:wrap;}
+.agr-row:last-child{border-bottom:none;}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.s-pending{background:#fff7ed;color:#c2410c;}
+.s-rep_signed{background:#eff6ff;color:#1d4ed8;}
+.s-fully_executed{background:#ecfdf5;color:var(--green);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;transition:transform .3s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast-el" class="toast"></div>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">My Smart<span>Slots</span></div>
+    <div class="login-sub">Rep Agreements — Admin Access Only</div>
+    <input class="inp" type="text" id="lu" placeholder="Username" autocomplete="off"/>
+    <input class="inp" type="password" id="lp" placeholder="Password"/>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="lerr">Admin access required.</div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="header-logo">My Smart<span>Slots</span></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="badge badge-admin">🔐 Admin</span>
+      <span class="badge badge-page">📋 Rep Agreements</span>
+      <button class="sign-out-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <div class="success-card" id="success-card">
+      <h3>✓ Agreement Sent!</h3>
+      <p style="font-size:13px;color:#065f46;line-height:1.7;margin-bottom:1rem;">The rep has been emailed a secure link to review and sign. You'll receive a countersign request the moment they complete their signature.</p>
+      <div class="si" id="success-info"></div>
+      <button class="new-btn" onclick="resetForm()">+ Send Another</button>
+    </div>
+
+    <div id="form-wrap">
+
+      <div class="card">
+        <div class="card-title">📄 Agreement Type</div>
+        <div class="type-row">
+          <div class="type-opt selected" id="type-partnership" onclick="selectType('partnership')">
+            <div class="t-name">Partnership Agreement</div>
+            <div class="t-sub">Orion, Braden, Carson — 30% commission, full advancement path, company MRR trip milestones</div>
+          </div>
+          <div class="type-opt" id="type-rep" onclick="selectType('rep')">
+            <div class="t-name">Rep Agreement</div>
+            <div class="t-sub">Manager-hired reps — 25% commission, personal milestone trips, advancement eligible</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Select Rep</div>
+        <div class="rep-grid">
+          <div class="rep-card" id="rep-orion1" onclick="selectRep('orion1','Orion','orion@mysmartslots.com')">
+            <div class="rn">Orion</div>
+            <div class="re">orion@mysmartslots.com</div>
+          </div>
+          <div class="rep-card" id="rep-braden1" onclick="selectRep('braden1','Braden','braden@mysmartslots.com')">
+            <div class="rn">Braden</div>
+            <div class="re">braden@mysmartslots.com</div>
+          </div>
+          <div class="rep-card" id="rep-carson1" onclick="selectRep('carson1','Carson','carson@mysmartslots.com')">
+            <div class="rn">Carson</div>
+            <div class="re">carson@mysmartslots.com</div>
+          </div>
+          <div class="rep-card custom" id="rep-custom" onclick="selectRep('custom','','')">
+            <div class="rn">+ Custom Rep</div>
+            <div class="re">Enter manually below</div>
+          </div>
+        </div>
+        <div id="custom-wrap" style="display:none;">
+          <div class="fg-row">
+            <div class="fg">
+              <label>Rep Full Name *</label>
+              <input class="inp" type="text" id="custom-name" placeholder="Jake Smith" style="margin-bottom:0;"/>
+            </div>
+            <div class="fg">
+              <label>Rep Email *</label>
+              <input class="inp" type="email" id="custom-email" placeholder="jake@mysmartslots.com" style="margin-bottom:0;"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Details</div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Territory</label>
+            <input class="inp" type="text" id="territory" placeholder="Kansas City Metro" style="margin-bottom:0;"/>
+          </div>
+          <div class="fg">
+            <label>Start Date</label>
+            <input class="inp" type="text" id="start-date" style="margin-bottom:0;"/>
+          </div>
+        </div>
+        <div class="fg" id="referring-wrap" style="display:none;margin-top:8px;">
+          <label>Referring Manager</label>
+          <input class="inp" type="text" id="referring" placeholder="Orion" style="margin-bottom:0;"/>
+        </div>
+      </div>
+
+      <div class="card">
+        <button class="send-btn" id="send-btn" onclick="sendAgreement()">
+          <span>Send Agreement to Rep</span>
+          <span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">📧 Email</span>
+        </button>
+        <p style="text-align:center;font-size:12px;color:var(--gray-text);margin-top:.75rem;line-height:1.6;">Rep gets a secure email link to review and sign. You get a countersign request the moment they complete their signature.</p>
+      </div>
+    </div>
+
+    <div class="card" id="history-card" style="display:none;">
+      <div class="card-title">📋 Agreement History</div>
+      <div id="history-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API="https://mysmartslots-portal.onrender.com";
+let currentU=null,currentP=null;
+let selectedType='partnership',selectedRep=null,selectedRepName='',selectedRepEmail='';
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none') doLogin();
+});
+
+async function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value;
+  try{
+    const r=await fetch(`${API}/portal/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok||!d.isAdmin){document.getElementById('lerr').style.display='block';return;}
+    currentU=u;currentP=p;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('start-date').value=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    loadHistory();
+  }catch(e){document.getElementById('lerr').style.display='block';}
+}
+
+function doLogout(){
+  currentU=null;currentP=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+function selectType(t){
+  selectedType=t;
+  document.querySelectorAll('.type-opt').forEach(x=>x.classList.remove('selected'));
+  document.getElementById('type-'+t).classList.add('selected');
+  document.getElementById('referring-wrap').style.display=t==='rep'?'block':'none';
+}
+
+function selectRep(u,name,email){
+  selectedRep=u;selectedRepName=name;selectedRepEmail=email;
+  document.querySelectorAll('.rep-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('rep-'+(u||'custom')).classList.add('selected');
+  document.getElementById('custom-wrap').style.display=u==='custom'?'block':'none';
+}
+
+async function sendAgreement(){
+  let rName=selectedRepName,rEmail=selectedRepEmail;
+  if(selectedRep==='custom'){
+    rName=document.getElementById('custom-name').value.trim();
+    rEmail=document.getElementById('custom-email').value.trim();
+  }
+  if(!selectedRep){toast('Select a rep.');return;}
+  if(!rName||!rEmail||!rEmail.includes('@')){toast('Enter a valid rep name and email.');return;}
+
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true;btn.innerHTML='<span>Sending...</span>';
+
+  try{
+    const r=await fetch(`${API}/portal/rep-agreement/create`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        username:currentU,password:currentP,
+        rep_username:selectedRep==='custom'?null:selectedRep,
+        rep_name_custom:selectedRep==='custom'?rName:null,
+        rep_email_custom:selectedRep==='custom'?rEmail:null,
+        territory:document.getElementById('territory').value.trim()||'Assigned Territory',
+        start_date:document.getElementById('start-date').value.trim(),
+        agreement_type:selectedType,
+        referring_manager:document.getElementById('referring').value.trim(),
+      })
+    });
+    const d=await r.json();
+    if(!d.success){toast('Error: '+(d.error||'Unknown'),true);btn.disabled=false;btn.innerHTML='<span>Send Agreement to Rep</span><span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">📧 Email</span>';return;}
+    const lbl=selectedType==='rep'?'Rep Agreement':'Partnership Agreement';
+    document.getElementById('success-info').innerHTML=`<div><strong>Rep:</strong> ${rName} (${rEmail})</div><div><strong>Type:</strong> ${lbl}</div><div><strong>Territory:</strong> ${document.getElementById('territory').value||'Assigned Territory'}</div><div style="margin-top:6px;color:var(--green);font-weight:600;">✓ Email sent to ${rEmail}</div>`;
+    document.getElementById('form-wrap').style.display='none';
+    document.getElementById('success-card').style.display='block';
+    loadHistory();
+  }catch(e){toast('Connection error',true);btn.disabled=false;btn.innerHTML='<span>Send Agreement to Rep</span><span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">📧 Email</span>';}
+}
+
+async function loadHistory(){
+  try{
+    const r=await fetch(`${API}/portal/rep-agreement/list`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP})});
+    const d=await r.json();
+    if(!d.success||!d.agreements?.length)return;
+    document.getElementById('history-card').style.display='block';
+    const statusMap={pending:'Pending Signature',rep_signed:'Signed — Awaiting Your Countersign',fully_executed:'✓ Fully Executed'};
+    document.getElementById('history-list').innerHTML=d.agreements.map(a=>`
+      <div class="agr-row">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${a.rep_name}</div>
+          <div style="font-size:12px;color:var(--gray-text);">${a.agreement_type==='rep'?'Rep Agreement':'Partnership Agreement'} · ${a.territory}</div>
+          <div style="font-size:11px;color:var(--gray-text);">${new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+        </div>
+        <span class="status-badge s-${a.status}">${statusMap[a.status]||a.status}</span>
+      </div>`).join('');
+  }catch(e){}
+}
+
+function resetForm(){
+  document.getElementById('success-card').style.display='none';
+  document.getElementById('form-wrap').style.display='block';
+  document.querySelectorAll('.rep-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('custom-wrap').style.display='none';
+  document.getElementById('custom-name').value='';
+  document.getElementById('custom-email').value='';
+  document.getElementById('territory').value='';
+  document.getElementById('referring').value='';
+  selectedRep=null;selectedRepName='';selectedRepEmail='';
+  selectType('partnership');
+  const btn=document.getElementById('send-btn');
+  btn.disabled=false;btn.innerHTML='<span>Send Agreement to Rep</span><span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">📧 Email</span>';
+}
+
+function toast(msg,err=false){
+  const t=document.getElementById('toast-el');
+  t.textContent=msg;t.style.background=err?'var(--red)':'var(--navy)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

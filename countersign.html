@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Smart Slots — Countersign Agreement</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#00C896;--accent-dark:#009e78;--accent-light:#e6faf5;
+  --navy:#1a1a2e;--white:#fff;--gray-bg:#f5f7fb;--gray-border:#e4e8f0;
+  --gray-text:#6b7280;--dark-text:#111827;--red:#e74c3c;--green:#16a34a;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--gray-bg);color:var(--dark-text);min-height:100vh;}
+#loading-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.spinner{width:40px;height:40px;border:4px solid var(--gray-border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:1rem;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#error-screen,#already-done,#success-screen{display:none;min-height:100vh;align-items:center;justify-content:center;}
+.state-box{background:var(--white);border:1px solid var(--gray-border);border-radius:16px;padding:2.5rem 2rem;max-width:480px;text-align:center;margin:2rem auto;}
+.state-box h2{font-size:20px;font-weight:700;margin-bottom:.75rem;}
+.state-box p{font-size:14px;color:var(--gray-text);line-height:1.7;}
+header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.header-logo{font-size:16px;font-weight:700;color:#fff;}
+.header-logo span{color:var(--accent);}
+.secure-badge{background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+#app{display:none;}
+.main{max-width:680px;margin:0 auto;padding:2rem 1rem 5rem;}
+.card{background:var(--white);border:1px solid var(--gray-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-dark);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--gray-border);}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--gray-border);font-size:14px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{color:var(--gray-text);}
+.detail-val{font-weight:600;color:var(--dark-text);}
+.client-sig-preview{background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:10px;padding:1rem;margin-bottom:1.25rem;text-align:center;}
+.client-sig-preview img{max-width:300px;max-height:80px;border:1px solid var(--gray-border);border-radius:6px;background:#fff;}
+.client-sig-preview p{font-size:12px;color:var(--gray-text);margin-top:.5rem;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem;}
+.fg label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);}
+.inp{padding:11px 14px;background:var(--gray-bg);border:1.5px solid var(--gray-border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--dark-text);outline:none;width:100%;}
+.inp:focus{border-color:var(--accent);background:var(--white);}
+.canvas-wrap{border:2px solid var(--gray-border);border-radius:10px;background:#fff;position:relative;overflow:hidden;margin-bottom:.75rem;}
+.canvas-wrap.active{border-color:var(--accent);}
+canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
+.canvas-label{position:absolute;bottom:8px;left:12px;font-size:11px;color:var(--gray-text);pointer-events:none;}
+.sig-actions{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
+.sig-tab{padding:8px 16px;border:1.5px solid var(--gray-border);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:#fff;}
+.sig-tab.active{border-color:var(--accent);background:var(--accent-light);color:var(--accent-dark);}
+.clear-btn{padding:8px 16px;border:1.5px solid var(--gray-border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--gray-text);background:#fff;font-family:inherit;}
+#type-wrap{display:none;}
+#type-input{font-family:'Brush Script MT',cursive;font-size:28px;padding:12px 14px;border:1.5px solid var(--gray-border);border-radius:10px;width:100%;background:#fff;color:var(--navy);outline:none;margin-bottom:8px;}
+#type-input:focus{border-color:var(--accent);}
+.submit-btn{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.submit-btn:hover{background:var(--accent-dark);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+.legal-note{text-align:center;font-size:11px;color:var(--gray-text);margin-top:.75rem;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <p style="color:var(--gray-text);font-size:14px;">Loading agreement...</p>
+</div>
+
+<div id="error-screen">
+  <div class="state-box">
+    <h2 style="color:var(--red);">⚠️ Link Not Found</h2>
+    <p id="error-msg">This countersign link is invalid or has expired.</p>
+  </div>
+</div>
+
+<div id="already-done">
+  <div class="state-box">
+    <h2 style="color:var(--green);">✓ Already Countersigned</h2>
+    <p>This agreement has already been fully executed. The final PDF was sent to all parties.</p>
+  </div>
+</div>
+
+<div id="success-screen">
+  <div class="state-box">
+    <div style="font-size:48px;margin-bottom:1rem;">✅</div>
+    <h2 style="color:var(--green);">Agreement Fully Executed</h2>
+    <p>The final signed agreement has been emailed to the client, the Account Manager, and your inbox.</p>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="header-logo">My Smart<span>Slots</span></div>
+    <div class="secure-badge">🔒 Owner Countersign</div>
+  </header>
+
+  <div class="main">
+
+    <div class="card">
+      <div class="card-title">📋 Agreement Summary</div>
+      <div class="detail-row"><span class="detail-label">Client</span><span class="detail-val" id="d-client">—</span></div>
+      <div class="detail-row"><span class="detail-label">Plan</span><span class="detail-val" id="d-plan">—</span></div>
+      <div class="detail-row"><span class="detail-label">Billing</span><span class="detail-val" id="d-billing">—</span></div>
+      <div class="detail-row"><span class="detail-label">Setup Fee</span><span class="detail-val" id="d-fee">—</span></div>
+      <div class="detail-row"><span class="detail-label">Account Manager</span><span class="detail-val" id="d-rep">—</span></div>
+      <div class="detail-row"><span class="detail-label">Client Signed</span><span class="detail-val" id="d-signed">—</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✍️ Client Signature Preview</div>
+      <div class="client-sig-preview">
+        <img id="client-sig-img" src="" alt="Client signature"/>
+        <p id="client-sig-name">—</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✍️ Your Countersignature</div>
+
+      <div class="fg">
+        <label>Your Name</label>
+        <input class="inp" type="text" id="owner-name" value="My Smart Slots" readonly style="background:#f0fdf4;"/>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-text);margin-bottom:.75rem;">Signature Method</div>
+      <div class="sig-actions">
+        <div class="sig-tab active" id="tab-draw" onclick="switchTab('draw')">Draw</div>
+        <div class="sig-tab" id="tab-type" onclick="switchTab('type')">Type</div>
+        <button class="clear-btn" onclick="clearSig()">Clear</button>
+      </div>
+
+      <div id="draw-wrap">
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="sig-canvas" height="120"></canvas>
+          <span class="canvas-label">Sign here</span>
+        </div>
+      </div>
+
+      <div id="type-wrap">
+        <input type="text" id="type-input" placeholder="Type your name to sign" oninput="renderTyped()"/>
+        <canvas id="type-canvas" height="80" style="border:1px solid var(--gray-border);border-radius:8px;background:#fff;width:100%;"></canvas>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitCountersign()">
+        Countersign & Send Final Agreement
+      </button>
+      <p class="legal-note">
+        By signing, the fully executed agreement will be emailed to the client, Account Manager, and your inbox.<br/>
+        My Smart Slots · Clair Group LLC · hello@mysmartslots.com
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API="https://mysmartslots-portal.onrender.com";
+let agreement=null;
+let isDrawing=false;
+let sigMethod='draw';
+let hasDrawn=false;
+
+window.addEventListener('load', async ()=>{
+  const params=new URLSearchParams(window.location.search);
+  const token=params.get('token');
+  if(!token){showError('No token found in this link.');return;}
+
+  try{
+    const r=await fetch(`${API}/portal/agreement/get-countersign`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token})
+    });
+    const d=await r.json();
+    document.getElementById('loading-screen').style.display='none';
+
+    if(!r.ok){showError(d.error||'Agreement not found.');return;}
+    if(d.already_signed){document.getElementById('already-done').style.display='flex';return;}
+
+    agreement=d.agreement;
+    populate(agreement);
+    document.getElementById('app').style.display='block';
+    initCanvas();
+  }catch(e){showError('Connection error. Please try again.');}
+});
+
+function showError(msg){
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('error-msg').textContent=msg;
+  document.getElementById('error-screen').style.display='flex';
+}
+
+function populate(a){
+  document.getElementById('d-client').textContent=`${a.client_name} (${a.client_email})`;
+  document.getElementById('d-plan').textContent=a.plan_label;
+  document.getElementById('d-billing').textContent=a.billing_type;
+  document.getElementById('d-fee').textContent=`$${a.setup_fee}.00`;
+  document.getElementById('d-rep').textContent=`${a.rep_name} (${a.rep_email})`;
+  document.getElementById('d-signed').textContent=a.signed_at?new Date(a.signed_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  if(a.signature_data){
+    document.getElementById('client-sig-img').src=a.signature_data;
+  }
+  document.getElementById('client-sig-name').textContent=`${a.signer_name} · ${a.signer_title||'Owner / Authorized Representative'}`;
+}
+
+function initCanvas(){
+  const canvas=document.getElementById('sig-canvas');
+  const ctx=canvas.getContext('2d');
+  const wrap=document.getElementById('canvas-wrap');
+  canvas.width=wrap.offsetWidth||600;
+  ctx.strokeStyle='#1a1a2e';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+
+  const getPos=(e)=>{
+    const rect=canvas.getBoundingClientRect();
+    const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+    if(e.touches)return{x:(e.touches[0].clientX-rect.left)*sx,y:(e.touches[0].clientY-rect.top)*sy};
+    return{x:(e.clientX-rect.left)*sx,y:(e.clientY-rect.top)*sy};
+  };
+  canvas.addEventListener('mousedown',e=>{isDrawing=true;hasDrawn=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);document.getElementById('canvas-wrap').classList.add('active');});
+  canvas.addEventListener('mousemove',e=>{if(!isDrawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+  canvas.addEventListener('mouseup',()=>isDrawing=false);
+  canvas.addEventListener('mouseleave',()=>isDrawing=false);
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();isDrawing=true;hasDrawn=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!isDrawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+  canvas.addEventListener('touchend',e=>{e.preventDefault();isDrawing=false;},{passive:false});
+}
+
+function switchTab(m){
+  sigMethod=m;
+  document.querySelectorAll('.sig-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+m).classList.add('active');
+  document.getElementById('draw-wrap').style.display=m==='draw'?'block':'none';
+  document.getElementById('type-wrap').style.display=m==='type'?'block':'none';
+}
+
+function clearSig(){
+  if(sigMethod==='draw'){
+    const c=document.getElementById('sig-canvas');
+    c.getContext('2d').clearRect(0,0,c.width,c.height);
+    document.getElementById('canvas-wrap').classList.remove('active');
+    hasDrawn=false;
+  } else {
+    document.getElementById('type-input').value='';
+    const c=document.getElementById('type-canvas');
+    c.getContext('2d').clearRect(0,0,c.width,c.height);
+    hasDrawn=false;
+  }
+}
+
+function renderTyped(){
+  const name=document.getElementById('type-input').value;
+  const canvas=document.getElementById('type-canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||600;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!name)return;
+  ctx.font='48px "Brush Script MT",cursive';
+  ctx.fillStyle='#1a1a2e';
+  ctx.fillText(name,20,60);
+  hasDrawn=true;
+}
+
+function getSigData(){
+  if(sigMethod==='draw')return document.getElementById('sig-canvas').toDataURL('image/png');
+  return document.getElementById('type-canvas').toDataURL('image/png');
+}
+
+async function submitCountersign(){
+  if(!hasDrawn){alert('Please provide your signature.');return;}
+  const params=new URLSearchParams(window.location.search);
+  const token=params.get('token');
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Processing...';
+
+  try{
+    const r=await fetch(`${API}/portal/agreement/countersign`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        token,
+        owner_name:'My Smart Slots / Clair Group LLC',
+        owner_signature_data:getSigData()
+      })
+    });
+    const d=await r.json();
+    if(d.success){
+      document.getElementById('app').style.display='none';
+      document.getElementById('success-screen').style.display='flex';
+    } else {
+      alert('Error: '+(d.error||'Something went wrong.'));
+      btn.disabled=false;btn.textContent='Countersign & Send Final Agreement';
+    }
+  }catch(e){
+    alert('Connection error. Please try again.');
+    btn.disabled=false;btn.textContent='Countersign & Send Final Agreement';
+  }
+}
+</script>
+</body>
+</html>
