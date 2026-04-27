@@ -1206,46 +1206,81 @@ function generateRepAgreementPDF(agreement) {
 
     // Helper functions
     const h1 = (text) => {
-      if (doc.y > 680) doc.addPage();
+      if (doc.y > 660) doc.addPage();
       doc.moveDown(0.5);
-      doc.fillColor(NAVY).fontSize(12).font("Helvetica-Bold").text(text);
-      doc.moveTo(72, doc.y+2).lineTo(540, doc.y+2).stroke(GREEN);
+      doc.fillColor(NAVY).fontSize(12).font("Helvetica-Bold").text(text, 72, doc.y, {width:468});
+      doc.moveDown(0.1);
+      doc.moveTo(72, doc.y).lineTo(540, doc.y).stroke(GREEN);
       doc.moveDown(0.4);
     };
     const h2 = (text) => {
-      doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text(text);
+      if (doc.y > 700) doc.addPage();
+      doc.fillColor(NAVY).fontSize(11).font("Helvetica-Bold").text(text, 72, doc.y, {width:468});
       doc.moveDown(0.2);
     };
     const p = (text) => {
       if (doc.y > 700) doc.addPage();
-      doc.fillColor(BODY).fontSize(10).font("Helvetica").text(text, { lineGap:3 });
+      doc.fillColor(BODY).fontSize(10).font("Helvetica").text(text, 72, doc.y, { width:468, lineGap:3 });
       doc.moveDown(0.4);
     };
     const highlight = (text) => {
-      if (doc.y > 680) doc.addPage();
-      doc.rect(72, doc.y, 468, doc.heightOfString(text, {width:448})+16).fill("#E6FAF5");
-      doc.fillColor("#065F46").fontSize(10).font("Helvetica-Bold").text(text, 86, doc.y-doc.heightOfString(text,{width:448})-8, {width:448, lineGap:3});
-      doc.moveDown(0.6);
+      if (doc.y > 660) doc.addPage();
+      const textH = doc.heightOfString(text, {width:442, fontSize:10}) + 16;
+      const boxY = doc.y;
+      doc.rect(72, boxY, 468, textH).fill("#E6FAF5");
+      doc.rect(72, boxY, 4, textH).fill("#00C896");
+      doc.fillColor("#065F46").fontSize(10).font("Helvetica-Bold")
+         .text(text, 86, boxY+8, {width:442, lineGap:3});
+      doc.y = boxY + textH + 8;
     };
     const warn = (text) => {
-      if (doc.y > 680) doc.addPage();
-      doc.rect(72, doc.y, 468, doc.heightOfString(text, {width:448})+16).fill("#FFFBEB");
-      doc.fillColor("#78350F").fontSize(10).font("Helvetica-Bold").text(text, 86, doc.y-doc.heightOfString(text,{width:448})-8, {width:448, lineGap:3});
-      doc.moveDown(0.6);
+      if (doc.y > 660) doc.addPage();
+      const textH = doc.heightOfString(text, {width:442, fontSize:10}) + 16;
+      const boxY = doc.y;
+      doc.rect(72, boxY, 468, textH).fill("#FFFBEB");
+      doc.rect(72, boxY, 4, textH).fill("#F59E0B");
+      doc.fillColor("#78350F").fontSize(10).font("Helvetica-Bold")
+         .text(text, 86, boxY+8, {width:442, lineGap:3});
+      doc.y = boxY + textH + 8;
     };
     const tableRow = (cells, widths, bold=false, header=false) => {
-      if (doc.y > 700) doc.addPage();
+      // Calculate actual row height based on longest cell content
+      let maxHeight = 18;
+      cells.forEach((cell, i) => {
+        const h = doc.heightOfString(cell, { width: widths[i]-8, fontSize:9 }) + 10;
+        if (h > maxHeight) maxHeight = h;
+      });
+      maxHeight = Math.max(maxHeight, 20);
+
+      // Page break if needed
+      if (doc.y + maxHeight > 720) doc.addPage();
+
       const rowY = doc.y;
       let x = 72;
+
+      // Draw backgrounds
       cells.forEach((cell, i) => {
-        if (header) doc.rect(x, rowY, widths[i], 18).fill(NAVY);
-        doc.fillColor(header?"#FFFFFF":bold?"#1A1A2E":BODY)
-           .fontSize(9).font(header||bold?"Helvetica-Bold":"Helvetica")
-           .text(cell, x+4, rowY+4, {width:widths[i]-8, lineBreak:false});
+        if (header) {
+          doc.rect(x, rowY, widths[i], maxHeight).fill(NAVY);
+        } else if (bold) {
+          doc.rect(x, rowY, widths[i], maxHeight).fill("#F0FDF4");
+        }
         x += widths[i];
       });
-      doc.moveTo(72, rowY+20).lineTo(540, rowY+20).stroke("#E5E7EB");
-      doc.y = rowY + 22;
+
+      // Draw text
+      x = 72;
+      cells.forEach((cell, i) => {
+        doc.fillColor(header ? "#FFFFFF" : bold ? "#1A1A2E" : BODY)
+           .fontSize(9)
+           .font(header || bold ? "Helvetica-Bold" : "Helvetica")
+           .text(cell, x+4, rowY+5, { width: widths[i]-8, lineGap:2 });
+        x += widths[i];
+      });
+
+      // Bottom border
+      doc.moveTo(72, rowY + maxHeight).lineTo(540, rowY + maxHeight).stroke("#E5E7EB");
+      doc.y = rowY + maxHeight + 2;
     };
 
     // ── COVER PAGE ─────────────────────────────────────────────────────────────
