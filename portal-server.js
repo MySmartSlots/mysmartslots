@@ -1,10 +1,19 @@
 import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
+import Stripe from "stripe";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
+import PDFDocument from "pdfkit";
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "*", methods: ["GET","POST","OPTIONS"], allowedHeaders: ["Content-Type","Authorization"] }));
+app.options("*", cors());
+
+// ── HEALTH / KEEP-ALIVE ───────────────────────────────────────────────────────
+app.get("/health", (req, res) => res.json({ status:"ok", time: new Date().toISOString() }));
+app.get("/ping",   (req, res) => res.json({ pong: true }));
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 // These are set as environment variables in Render — never hardcode them here
@@ -374,7 +383,6 @@ app.post("/portal/admin/report/save", requireAuth, requireAdmin, async (req, res
 
 // ── STRIPE — Create Checkout Session ─────────────────────────────────────────
 // Install: npm install stripe  (add to package.json dependencies)
-import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 // ── Stripe Price IDs ──────────────────────────────────────────────────────────
@@ -586,9 +594,6 @@ app.post("/portal/admin/contacts/wipe", requireAuth, requireAdmin, async (req, r
 });
 
 // ── AGREEMENT SYSTEM ─────────────────────────────────────────────────────────
-import crypto from "crypto";
-import nodemailer from "nodemailer";
-import PDFDocument from "pdfkit";
 
 const emailTransporter = nodemailer.createTransport({
   service: "gmail",
@@ -1181,7 +1186,6 @@ app.post("/portal/rep-agreement/list", requireAuth, requireAdmin, async (req, re
 function generateRepAgreementPDF(agreement) {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin:72, size:"LETTER" });
     doc.on("data", chunk => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
