@@ -1,0 +1,29 @@
+[[redirects]]
+  from = "/sign"
+  to = "/sign.html"
+  status = 200
+
+[[redirects]]
+  from = "/countersign"
+  to = "/countersign.html"
+  status = 200
+
+[[redirects]]
+  from = "/rep-sign"
+  to = "/rep-sign.html"
+  status = 200
+
+[[redirects]]
+  from = "/rep-countersign"
+  to = "/rep-countersign.html"
+  status = 200
+
+[[redirects]]
+  from = "/agreement"
+  to = "/agreement.html"
+  status = 200
+
+[[redirects]]
+  from = "/rep-agreement"
+  to = "/rep-agreement.html"
+  status = 200
