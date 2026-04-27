@@ -292,27 +292,35 @@ function showError(msg){
 }
 
 function populateAgreement(a){
-  const planDescriptions={
-    starter:"AI Chat Booking, SMS Confirmations, Appointment Reminders, Calendar Sync, Monthly Report, Dedicated Account Manager",
-    pro:"Everything in Starter + Missed Call Text Back, Live SMS Chat, Post-Job Review Requests",
-    elite:"Everything in Pro + Lead Re-Engagement, Partial Email Replies, Job Status Update Texts, Quarterly Strategy Review",
-  };
+  const isRep = a.agreement_type === 'rep';
+  const typeLabel = isRep ? 'Rep Agreement (25% Commission)' : 'Partnership Agreement (30% Commission)';
 
-  document.getElementById('banner-name').textContent=a.client_name;
-  document.getElementById('banner-rep').textContent=`Account Manager: ${a.rep_name}`;
-  document.getElementById('banner-plan').textContent=`${a.plan_label} · ${a.billing_type}`;
-  document.getElementById('consent-name').textContent=a.client_name;
+  document.getElementById('banner-name').textContent = a.rep_name || 'Account Manager';
+  document.getElementById('banner-rep').textContent  = 'My Smart Slots / Clair Group LLC';
+  document.getElementById('banner-plan').textContent = typeLabel;
+  document.getElementById('consent-name').textContent = a.rep_name || 'the Account Manager';
 
-  document.getElementById('doc-details').textContent=`Client: ${a.client_name} · Plan: ${a.plan_label} · Billing: ${a.billing_type} · Setup Fee: $${a.setup_fee} · Date: ${a.agreement_date}`;
+  document.getElementById('doc-details').textContent =
+    'Rep: ' + (a.rep_name||'') + ' · Type: ' + typeLabel + ' · Territory: ' + (a.territory||'') + ' · Start Date: ' + (a.start_date||'') + ' · Date: ' + (a.agreement_date||'');
 
-  document.getElementById('sec1-text').textContent=`This Business Services Agreement ("Agreement") is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ${a.client_name} ("Client"). This Agreement governs your access to and use of My Smart Slots' AI-powered automation services. By signing this Agreement, the Client agrees to all terms set forth herein.`;
+  document.getElementById('sec1-text').textContent =
+    'This Agreement is entered into between Clair Group LLC, doing business as My Smart Slots ("Company"), and ' + (a.rep_name||'Account Manager') + ' ("Account Manager", "you"). This Agreement governs the independent contractor relationship including commission structure, career advancement, incentives, and all related terms.';
 
-  document.getElementById('sec2-text').textContent=`The Company will provide the Services associated with the ${a.plan_label} plan. Included automations: ${planDescriptions[a.plan]||planDescriptions.pro}. All plans include a Dedicated Account Manager. Service will be activated within 24 hours of completing the onboard form.`;
+  document.getElementById('sec2-text').textContent = isRep
+    ? 'You earn 25% commission on all active clients you close — lifetime recurring. Setup bonus $50 per client. Book report bonus: +0.5% per approved report up to +5% max. Eligible for Jr Regional Manager promotion at 25 clients — converts to full Partnership Agreement at 30% commission.'
+    : 'You earn 30% commission on all active clients you close — lifetime recurring. Setup bonus $50 per client. Book report bonus: +0.5% per approved report up to +5% max. Jr Regional Manager at 25 clients ($1,000 bonus + 10% overrides). Sr Regional Manager at 50 clients ($2,000 bonus + 15% overrides + Bought-In eligible).';
 
-  document.getElementById('sec3-billing').textContent=`You have selected ${a.billing_type} billing. Setup fee: $${a.setup_fee}.00 (one-time, non-refundable once configuration begins). Monthly subscribers may cancel at any time with notice. Cancellation takes effect at the end of the current billing cycle.`;
+  document.getElementById('sec3-billing').textContent =
+    'Territory: ' + (a.territory||'Assigned Territory') + '. Start Date: ' + (a.start_date||'') + '. ' +
+    (a.referring_manager ? 'Referring Manager: ' + a.referring_manager + '. ' : '') +
+    'You are an independent contractor. W-9 required before first commission payment. Payments over $600/year reported on 1099-NEC.';
 
-  if(a.billing_type.toLowerCase().includes('annual')){
-    document.getElementById('sec3-annual').style.display='block';
+  const annualBox = document.getElementById('sec3-annual');
+  if(annualBox) annualBox.style.display = 'none';
+
+  const consentLabel = document.querySelector('.consent-check label');
+  if(consentLabel){
+    consentLabel.innerHTML = 'I, <strong>' + (a.rep_name||'the Account Manager') + '</strong>, have read and understand the My Smart Slots ' + typeLabel + ' in full. I agree to be bound by its terms. I understand my electronic signature is legally binding under the ESIGN Act and UETA.';
   }
 }
 

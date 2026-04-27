@@ -60,7 +60,7 @@ canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 
 <div id="loading-screen">
   <div class="spinner"></div>
-  <p style="color:var(--gray-text);font-size:14px;">Loading agreement...</p>
+  <p style="color:var(--gray-text);font-size:14px;">Loading agreement — please wait...</p>
 </div>
 
 <div id="error-screen">
@@ -95,18 +95,18 @@ canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
 
     <div class="card">
       <div class="card-title">📋 Agreement Summary</div>
-      <div class="detail-row"><span class="detail-label">Client</span><span class="detail-val" id="d-client">—</span></div>
-      <div class="detail-row"><span class="detail-label">Plan</span><span class="detail-val" id="d-plan">—</span></div>
-      <div class="detail-row"><span class="detail-label">Billing</span><span class="detail-val" id="d-billing">—</span></div>
-      <div class="detail-row"><span class="detail-label">Setup Fee</span><span class="detail-val" id="d-fee">—</span></div>
-      <div class="detail-row"><span class="detail-label">Account Manager</span><span class="detail-val" id="d-rep">—</span></div>
-      <div class="detail-row"><span class="detail-label">Client Signed</span><span class="detail-val" id="d-signed">—</span></div>
+      <div class="detail-row"><span class="detail-label">Rep Name</span><span class="detail-val" id="d-client">—</span></div>
+      <div class="detail-row"><span class="detail-label">Agreement Type</span><span class="detail-val" id="d-plan">—</span></div>
+      <div class="detail-row"><span class="detail-label">Territory</span><span class="detail-val" id="d-billing">—</span></div>
+      <div class="detail-row"><span class="detail-label">Start Date</span><span class="detail-val" id="d-fee">—</span></div>
+      <div class="detail-row"><span class="detail-label">Rep Email</span><span class="detail-val" id="d-rep">—</span></div>
+      <div class="detail-row"><span class="detail-label">Rep Signed</span><span class="detail-val" id="d-signed">—</span></div>
     </div>
 
     <div class="card">
-      <div class="card-title">✍️ Client Signature Preview</div>
-      <div class="client-sig-preview">
-        <img id="client-sig-img" src="" alt="Client signature"/>
+      <div class="card-title">✍️ Rep Signature Preview</div>
+      <div class="client-sig-preview" style="margin-bottom:1.25rem;">
+        <img id="client-sig-img" src="" alt="Rep signature"/>
         <p id="client-sig-name">—</p>
       </div>
     </div>
@@ -162,6 +162,9 @@ window.addEventListener('load', async ()=>{
   const token=params.get('token');
   if(!token){showError('No token found in this link.');return;}
 
+  // Wake up server — Render free tier sleeps after inactivity
+  try{ await fetch(`${API}/ping`,{method:'GET'}); }catch(e){}
+
   try{
     const r=await fetch(`${API}/portal/rep-agreement/get-countersign`,{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -187,16 +190,23 @@ function showError(msg){
 }
 
 function populate(a){
-  document.getElementById('d-client').textContent=`${a.client_name} (${a.client_email})`;
-  document.getElementById('d-plan').textContent=a.plan_label;
-  document.getElementById('d-billing').textContent=a.billing_type;
-  document.getElementById('d-fee').textContent=`$${a.setup_fee}.00`;
-  document.getElementById('d-rep').textContent=`${a.rep_name} (${a.rep_email})`;
-  document.getElementById('d-signed').textContent=a.signed_at?new Date(a.signed_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  const isRep = a.agreement_type === 'rep';
+  const typeLabel = isRep ? 'Rep Agreement (25% Commission)' : 'Partnership Agreement (30% Commission)';
+
+  document.getElementById('d-client').textContent = a.rep_name || '—';
+  document.getElementById('d-plan').textContent   = typeLabel;
+  document.getElementById('d-billing').textContent = a.territory || '—';
+  document.getElementById('d-fee').textContent     = a.start_date || '—';
+  document.getElementById('d-rep').textContent     = a.rep_email || '—';
+  document.getElementById('d-signed').textContent  = a.signed_at
+    ? new Date(a.signed_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})
+    : '—';
+
   if(a.signature_data){
-    document.getElementById('client-sig-img').src=a.signature_data;
+    document.getElementById('client-sig-img').src = a.signature_data;
   }
-  document.getElementById('client-sig-name').textContent=`${a.signer_name} · ${a.signer_title||'Owner / Authorized Representative'}`;
+  const sigName = a.rep_signer_name || a.rep_name || '—';
+  document.getElementById('client-sig-name').textContent = sigName + ' · Account Manager';
 }
 
 function initCanvas(){
