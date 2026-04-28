@@ -1521,5 +1521,217 @@ function generateRepAgreementPDF(agreement) {
 }
 
 
+// ── JOB STATUS SYSTEM ─────────────────────────────────────────────────────────
+
+// Employee login by PIN
+app.post("/portal/status/employee-login", async (req, res) => {
+  const { client_id, pin } = req.body;
+  if (!client_id || !pin) return res.status(400).json({ error: "client_id and pin required." });
+  const { data: emp, error: empErr } = await supabase.from("status_employees")
+    .select("*").eq("client_id", client_id).eq("pin", pin).single();
+  if (empErr || !emp) return res.status(401).json({ error: "Invalid PIN." });
+  const { data: shop } = await supabase.from("status_clients").select("*").eq("client_id", client_id).single();
+  res.json({ success: true, employee: { id:emp.id, name:emp.name, role:emp.role, is_admin: emp.role==="admin" }, shop: shop || {} });
+});
+
+// Admin login
+app.post("/portal/status/admin-login", async (req, res) => {
+  const { client_id, password } = req.body;
+  if (!client_id || !password) return res.status(400).json({ error: "client_id and password required." });
+  const { data: shop, error } = await supabase.from("status_clients").select("*").eq("client_id", client_id).single();
+  if (error || !shop) return res.status(404).json({ error: "Shop not found." });
+  if (shop.admin_password !== password) return res.status(401).json({ error: "Invalid password." });
+  res.json({ success: true, shop });
+});
+
+// Get jobs for a client
+app.post("/portal/status/jobs", async (req, res) => {
+  const { client_id } = req.body;
+  if (!client_id) return res.status(400).json({ error: "client_id required." });
+  const { data, error } = await supabase.from("status_jobs")
+    .select("*").eq("client_id", client_id).eq("archived", false)
+    .order("created_at", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, jobs: data || [] });
+});
+
+// Add a new job
+app.post("/portal/status/add-job", async (req, res) => {
+  const { client_id, customer_name, customer_phone, year, make, model, color, job_type, notes, created_by } = req.body;
+  if (!client_id || !customer_name || !customer_phone) return res.status(400).json({ error: "client_id, customer_name, customer_phone required." });
+  const { data, error } = await supabase.from("status_jobs").insert({
+    client_id, customer_name, customer_phone,
+    year: year||null, make: make||null, model: model||null, color: color||null,
+    job_type: job_type||"General Service", notes: notes||"",
+    current_status_id: 0, current_status_name: "Vehicle Checked In",
+    created_by: created_by||"Employee", archived: false,
+    last_updated: new Date().toISOString(), created_at: new Date().toISOString(),
+  }).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, job_id: data.id });
+});
+
+// Update job status + send SMS
+app.post("/portal/status/update", async (req, res) => {
+  const { client_id, job_id, status_id, status_name, message, employee_name, customer_phone } = req.body;
+  if (!client_id || !job_id) return res.status(400).json({ error: "client_id and job_id required." });
+
+  // Update job status
+  const { error: updateErr } = await supabase.from("status_jobs").update({
+    current_status_id: status_id,
+    current_status_name: status_name,
+    last_updated: new Date().toISOString(),
+  }).eq("id", job_id).eq("client_id", client_id);
+  if (updateErr) return res.status(500).json({ error: updateErr.message });
+
+  // Log the update
+  await supabase.from("status_updates").insert({
+    client_id, job_id, status_id, status_name,
+    message: message||"", employee_name: employee_name||"Employee",
+    customer_phone: customer_phone||"", sms_sent: false,
+    created_at: new Date().toISOString(),
+  });
+
+  // Send SMS via Twilio if configured
+  let smsSent = false;
+  if (message && customer_phone) {
+    try {
+      const { data: shop } = await supabase.from("status_clients").select("*").eq("client_id", client_id).single();
+      if (shop?.twilio_sid && shop?.twilio_token && shop?.twilio_number) {
+        const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${shop.twilio_sid}/Messages.json`;
+        const twilioAuth = "Basic " + Buffer.from(`${shop.twilio_sid}:${shop.twilio_token}`).toString("base64");
+        const params = new URLSearchParams({ To: customer_phone, From: shop.twilio_number, Body: message });
+        const r = await fetch(twilioUrl, {
+          method: "POST",
+          headers: { "Authorization": twilioAuth, "Content-Type": "application/x-www-form-urlencoded" },
+          body: params.toString(),
+        });
+        const twilioData = await r.json();
+        if (twilioData.sid) smsSent = true;
+        else console.error("Twilio error:", twilioData);
+      }
+    } catch(e) { console.error("Twilio exception:", e.message); }
+  }
+
+  res.json({ success: true, sms_sent: smsSent });
+});
+
+// Get recent updates for a client (dashboard activity feed)
+app.post("/portal/status/recent-updates", async (req, res) => {
+  const { client_id } = req.body;
+  const { data, error } = await supabase.from("status_updates")
+    .select("*, status_jobs(customer_name)")
+    .eq("client_id", client_id)
+    .order("created_at", { ascending: false }).limit(20);
+  if (error) return res.status(500).json({ error: error.message });
+  const updates = (data||[]).map(u => ({ ...u, customer_name: u.status_jobs?.customer_name || "—" }));
+  res.json({ success: true, updates });
+});
+
+// Get status history for a specific job
+app.post("/portal/status/job-history", async (req, res) => {
+  const { client_id, job_id } = req.body;
+  const { data, error } = await supabase.from("status_updates")
+    .select("*").eq("client_id", client_id).eq("job_id", job_id)
+    .order("created_at", { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, updates: data||[] });
+});
+
+// Get employees for a client
+app.post("/portal/status/employees", async (req, res) => {
+  const { client_id, password } = req.body;
+  const { data: shop } = await supabase.from("status_clients").select("admin_password").eq("client_id", client_id).single();
+  if (!shop || shop.admin_password !== password) return res.status(401).json({ error: "Unauthorized." });
+  const { data, error } = await supabase.from("status_employees").select("id, name, pin, role").eq("client_id", client_id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, employees: data||[] });
+});
+
+// Add employee
+app.post("/portal/status/add-employee", async (req, res) => {
+  const { client_id, password, name, pin, role } = req.body;
+  const { data: shop } = await supabase.from("status_clients").select("admin_password").eq("client_id", client_id).single();
+  if (!shop || shop.admin_password !== password) return res.status(401).json({ error: "Unauthorized." });
+  const { data, error } = await supabase.from("status_employees").insert({
+    client_id, name, pin, role: role||"technician", created_at: new Date().toISOString()
+  }).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, employee_id: data.id });
+});
+
+// Delete employee
+app.post("/portal/status/delete-employee", async (req, res) => {
+  const { client_id, password, employee_id } = req.body;
+  const { data: shop } = await supabase.from("status_clients").select("admin_password").eq("client_id", client_id).single();
+  if (!shop || shop.admin_password !== password) return res.status(401).json({ error: "Unauthorized." });
+  const { error } = await supabase.from("status_employees").delete().eq("id", employee_id).eq("client_id", client_id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// Save shop settings
+app.post("/portal/status/save-settings", async (req, res) => {
+  const { client_id, password, shop_name, phone, hours, twilio_number, twilio_sid, twilio_token } = req.body;
+  const { data: shop } = await supabase.from("status_clients").select("admin_password").eq("client_id", client_id).single();
+  if (!shop || shop.admin_password !== password) return res.status(401).json({ error: "Unauthorized." });
+  const updates = { shop_name, phone, hours, twilio_number };
+  if (twilio_sid) updates.twilio_sid = twilio_sid;
+  if (twilio_token) updates.twilio_token = twilio_token;
+  const { error } = await supabase.from("status_clients").update(updates).eq("client_id", client_id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// Change admin password
+app.post("/portal/status/change-password", async (req, res) => {
+  const { client_id, password, new_password } = req.body;
+  const { data: shop } = await supabase.from("status_clients").select("admin_password").eq("client_id", client_id).single();
+  if (!shop || shop.admin_password !== password) return res.status(401).json({ error: "Unauthorized." });
+  const { error } = await supabase.from("status_clients").update({ admin_password: new_password }).eq("client_id", client_id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// Test SMS
+app.post("/portal/status/test-sms", async (req, res) => {
+  const { client_id, password, to_phone } = req.body;
+  const { data: shop } = await supabase.from("status_clients").select("*").eq("client_id", client_id).single();
+  if (!shop || shop.admin_password !== password) return res.status(401).json({ error: "Unauthorized." });
+  if (!shop.twilio_sid || !shop.twilio_token || !shop.twilio_number) return res.status(400).json({ error: "Twilio not configured. Add your Twilio credentials in Settings first." });
+  try {
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${shop.twilio_sid}/Messages.json`;
+    const twilioAuth = "Basic " + Buffer.from(`${shop.twilio_sid}:${shop.twilio_token}`).toString("base64");
+    const params = new URLSearchParams({ To: to_phone, From: shop.twilio_number, Body: `Test message from ${shop.shop_name} via My Smart Slots. Your job status system is working correctly! ✓` });
+    const r = await fetch(twilioUrl, { method:"POST", headers:{"Authorization":twilioAuth,"Content-Type":"application/x-www-form-urlencoded"}, body:params.toString() });
+    const d = await r.json();
+    if (d.sid) res.json({ success: true });
+    else res.json({ success: false, error: d.message || "Twilio error" });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Archive completed jobs
+app.post("/portal/status/archive-completed", async (req, res) => {
+  const { client_id, password } = req.body;
+  const { data: shop } = await supabase.from("status_clients").select("admin_password").eq("client_id", client_id).single();
+  if (!shop || shop.admin_password !== password) return res.status(401).json({ error: "Unauthorized." });
+  const { error } = await supabase.from("status_jobs").update({ archived: true }).eq("client_id", client_id).eq("current_status_id", 12);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// Create new client (called from your setup wizard later)
+app.post("/portal/status/create-client", requireAuth, requireAdmin, async (req, res) => {
+  const { client_id, shop_name, phone, hours, admin_password } = req.body;
+  if (!client_id || !shop_name || !admin_password) return res.status(400).json({ error: "client_id, shop_name, admin_password required." });
+  const { error } = await supabase.from("status_clients").insert({
+    client_id, shop_name, phone: phone||"", hours: hours||"",
+    admin_password, twilio_number:null, twilio_sid:null, twilio_token:null,
+    created_at: new Date().toISOString(),
+  });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`MySmartSlots portal server running on port ${PORT}`));

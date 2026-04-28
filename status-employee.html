@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Shop Status — Employee</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0F1117;
+  --surface:#181C27;
+  --surface2:#1E2334;
+  --border:#2A3045;
+  --accent:#F59E0B;
+  --accent2:#EF4444;
+  --green:#10B981;
+  --blue:#3B82F6;
+  --white:#F8FAFC;
+  --gray:#8892A4;
+  --light:#CBD5E1;
+  --radius:14px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+html,body{height:100%;background:var(--bg);color:var(--white);font-family:'Barlow',sans-serif;-webkit-font-smoothing:antialiased;}
+body{display:flex;flex-direction:column;min-height:100vh;}
+
+/* ── HEADER ── */
+.app-header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.shop-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--white);}
+.shop-name span{color:var(--accent);}
+.emp-badge{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.5px;}
+
+/* ── SCREENS ── */
+.screen{display:none;flex:1;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ── PIN SCREEN ── */
+#pin-screen{align-items:center;justify-content:center;padding:2rem 1.5rem;background:var(--bg);}
+.pin-box{width:100%;max-width:360px;}
+.pin-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-align:center;margin-bottom:.35rem;}
+.pin-sub{font-size:14px;color:var(--gray);text-align:center;margin-bottom:2rem;}
+.pin-display{display:flex;gap:14px;justify-content:center;margin-bottom:2rem;}
+.pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);transition:all .15s;}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);}
+.pin-dot.error{background:var(--accent2);border-color:var(--accent2);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.num-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;font-size:22px;font-weight:700;font-family:'Barlow',sans-serif;color:var(--white);cursor:pointer;transition:all .1s;user-select:none;-webkit-tap-highlight-color:transparent;text-align:center;}
+.num-btn:active{background:var(--accent);color:#000;transform:scale(.96);}
+.num-btn.del{font-size:16px;color:var(--gray);}
+.num-btn.empty{background:transparent;border-color:transparent;cursor:default;}
+.pin-error{text-align:center;color:var(--accent2);font-size:13px;font-weight:600;margin-top:1rem;min-height:20px;}
+
+/* ── JOB LIST SCREEN ── */
+#jobs-screen{background:var(--bg);}
+.jobs-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;}
+.toolbar-greeting{font-size:15px;font-weight:600;}
+.toolbar-greeting span{color:var(--accent);}
+.add-job-btn{background:var(--accent);color:#000;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.jobs-list{flex:1;overflow-y:auto;padding:1rem;}
+.job-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-bottom:.75rem;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.job-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--border);}
+.job-card.status-0::before{background:#64748B;}
+.job-card.status-1::before{background:#3B82F6;}
+.job-card.status-2::before{background:#F59E0B;}
+.job-card.status-3::before{background:#8B5CF6;}
+.job-card.status-4::before{background:#06B6D4;}
+.job-card.status-5::before{background:#F97316;}
+.job-card.status-6::before{background:#EC4899;}
+.job-card.status-7::before{background:#10B981;}
+.job-card.status-8::before{background:#EF4444;}
+.job-card.status-9::before{background:#F59E0B;}
+.job-card.status-10::before{background:#8B5CF6;}
+.job-card.status-11::before{background:#6366F1;}
+.job-card.status-12::before{background:#10B981;}
+.job-card:active{transform:scale(.99);border-color:var(--accent);}
+.job-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:.5rem;}
+.job-customer{font-size:16px;font-weight:700;}
+.job-vehicle{font-size:13px;color:var(--gray);margin-top:2px;}
+.job-status-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;background:rgba(255,255,255,.08);color:var(--light);}
+.job-meta{display:flex;gap:12px;font-size:12px;color:var(--gray);}
+.job-meta span{display:flex;align-items:center;gap:4px;}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;text-align:center;}
+.empty-icon{font-size:48px;margin-bottom:1rem;}
+.empty-title{font-size:18px;font-weight:700;margin-bottom:.5rem;}
+.empty-sub{font-size:14px;color:var(--gray);line-height:1.6;}
+
+/* ── STATUS UPDATE SCREEN ── */
+#status-screen{background:var(--bg);}
+.status-back{background:none;border:none;color:var(--gray);font-size:14px;font-weight:600;font-family:'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;padding:1rem 1.25rem;}
+.status-back:active{color:var(--white);}
+.job-detail-card{background:var(--surface);border-bottom:1px solid var(--border);padding:1.25rem;}
+.job-detail-name{font-size:20px;font-weight:800;margin-bottom:.25rem;}
+.job-detail-vehicle{font-size:14px;color:var(--accent);font-weight:600;margin-bottom:.5rem;}
+.job-detail-meta{font-size:12px;color:var(--gray);display:flex;gap:12px;flex-wrap:wrap;}
+.current-status-bar{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);margin:1rem;border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:10px;}
+.current-status-label{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;}
+.current-status-value{font-size:14px;font-weight:700;color:var(--accent);}
+.statuses-title{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:0 1rem .5rem;}
+.statuses-grid{padding:0 1rem 2rem;display:flex;flex-direction:column;gap:.5rem;}
+.status-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;font-family:'Barlow',sans-serif;-webkit-tap-highlight-color:transparent;}
+.status-btn:active{transform:scale(.98);border-color:var(--accent);}
+.status-btn.active-status{border-color:var(--accent);background:rgba(245,158,11,.08);}
+.status-emoji{font-size:20px;width:28px;text-align:center;flex-shrink:0;}
+.status-text{text-align:left;}
+.status-name{font-size:14px;font-weight:700;color:var(--white);}
+.status-desc{font-size:12px;color:var(--gray);margin-top:1px;line-height:1.4;}
+.status-sending{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:1rem;}
+.status-sending.show{display:flex;}
+.sending-spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sending-text{font-size:16px;font-weight:700;color:var(--white);}
+
+/* ── ADD JOB MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:flex-end;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:1.5rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.25rem;}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:1.25rem;}
+.form-field{margin-bottom:.85rem;}
+.form-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:.4rem;}
+.form-field input,.form-field select{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:15px;font-family:'Barlow',sans-serif;color:var(--white);outline:none;}
+.form-field input:focus,.form-field select:focus{border-color:var(--accent);}
+.form-field select option{background:var(--surface2);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-submit{width:100%;background:var(--accent);color:#000;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:800;font-family:'Barlow',sans-serif;cursor:pointer;margin-top:.5rem;}
+.modal-submit:active{opacity:.85;}
+.modal-cancel{width:100%;background:none;border:none;color:var(--gray);font-size:14px;font-weight:600;font-family:'Barlow',sans-serif;cursor:pointer;padding:.75rem;margin-top:.25rem;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);color:var(--white);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:300;transition:transform .3s;pointer-events:none;border:1px solid var(--border);max-width:320px;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:var(--green);background:#052e16;}
+.toast.error{border-color:var(--accent2);background:#2d0a0a;}
+</style>
+</head>
+<body>
+
+<div id="toast-el" class="toast"></div>
+
+<!-- SENDING OVERLAY -->
+<div class="status-sending" id="sending-overlay">
+  <div class="sending-spinner"></div>
+  <div class="sending-text">Sending update to customer...</div>
+</div>
+
+<!-- ADD JOB MODAL -->
+<div class="modal-overlay" id="add-job-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add New Job</div>
+    <div class="form-field">
+      <label>Customer Name *</label>
+      <input type="text" id="new-customer" placeholder="John Smith" autocomplete="off"/>
+    </div>
+    <div class="form-field">
+      <label>Customer Phone *</label>
+      <input type="tel" id="new-phone" placeholder="(785) 555-0100" autocomplete="off"/>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Year</label>
+        <input type="text" id="new-year" placeholder="2019" maxlength="4"/>
+      </div>
+      <div class="form-field">
+        <label>Make</label>
+        <input type="text" id="new-make" placeholder="Toyota"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Model</label>
+        <input type="text" id="new-model" placeholder="Camry"/>
+      </div>
+      <div class="form-field">
+        <label>Color</label>
+        <input type="text" id="new-color" placeholder="Silver"/>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Job Type</label>
+      <select id="new-jobtype">
+        <option value="General Service">General Service</option>
+        <option value="Oil Change">Oil Change</option>
+        <option value="Brake Service">Brake Service</option>
+        <option value="Tire Service">Tire Service</option>
+        <option value="Engine Repair">Engine Repair</option>
+        <option value="Transmission Service">Transmission Service</option>
+        <option value="AC/Heating Service">AC/Heating Service</option>
+        <option value="Electrical Diagnosis">Electrical Diagnosis</option>
+        <option value="Suspension/Steering">Suspension/Steering</option>
+        <option value="Exhaust Service">Exhaust Service</option>
+        <option value="Diagnostic Scan">Diagnostic Scan</option>
+        <option value="State Inspection">State Inspection</option>
+        <option value="Detailing">Detailing</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Notes (optional)</label>
+      <input type="text" id="new-notes" placeholder="Customer concern or additional info"/>
+    </div>
+    <button class="modal-submit" onclick="submitNewJob()">Add Job to Queue</button>
+    <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- APP HEADER -->
+<div class="app-header" id="app-header" style="display:none;">
+  <div class="shop-name" id="header-shop-name">Shop<span>Status</span></div>
+  <div class="emp-badge" id="header-emp-name">Employee</div>
+</div>
+
+<!-- PIN SCREEN -->
+<div class="screen active" id="pin-screen">
+  <div class="pin-box">
+    <div class="pin-title">Enter Your PIN</div>
+    <div class="pin-sub">4-digit employee PIN</div>
+    <div class="pin-display" id="pin-display">
+      <div class="pin-dot" id="dot-0"></div>
+      <div class="pin-dot" id="dot-1"></div>
+      <div class="pin-dot" id="dot-2"></div>
+      <div class="pin-dot" id="dot-3"></div>
+    </div>
+    <div class="numpad">
+      <button class="num-btn" onclick="pinPress('1')">1</button>
+      <button class="num-btn" onclick="pinPress('2')">2</button>
+      <button class="num-btn" onclick="pinPress('3')">3</button>
+      <button class="num-btn" onclick="pinPress('4')">4</button>
+      <button class="num-btn" onclick="pinPress('5')">5</button>
+      <button class="num-btn" onclick="pinPress('6')">6</button>
+      <button class="num-btn" onclick="pinPress('7')">7</button>
+      <button class="num-btn" onclick="pinPress('8')">8</button>
+      <button class="num-btn" onclick="pinPress('9')">9</button>
+      <div class="num-btn empty"></div>
+      <button class="num-btn" onclick="pinPress('0')">0</button>
+      <button class="num-btn del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
+
+<!-- JOBS SCREEN -->
+<div class="screen" id="jobs-screen">
+  <div class="jobs-toolbar">
+    <div class="toolbar-greeting">Hey, <span id="emp-name-display">—</span></div>
+    <button class="add-job-btn" onclick="openModal()">+ New Job</button>
+  </div>
+  <div id="jobs-container" style="flex:1;overflow-y:auto;padding:1rem;"></div>
+</div>
+
+<!-- STATUS UPDATE SCREEN -->
+<div class="screen" id="status-screen">
+  <button class="status-back" onclick="backToJobs()">← Back to Jobs</button>
+  <div class="job-detail-card">
+    <div class="job-detail-name" id="detail-customer"></div>
+    <div class="job-detail-vehicle" id="detail-vehicle"></div>
+    <div class="job-detail-meta">
+      <span id="detail-phone"></span>
+      <span id="detail-jobtype"></span>
+    </div>
+  </div>
+  <div class="current-status-bar">
+    <div>
+      <div class="current-status-label">Current Status</div>
+      <div class="current-status-value" id="current-status-display">Not Started</div>
+    </div>
+  </div>
+  <div class="statuses-title">Update Status</div>
+  <div class="statuses-grid" id="statuses-grid"></div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const API = "https://mysmartslots-portal.onrender.com";
+
+// Client config — this gets set per client during setup
+// In production this comes from a URL param or subdomain lookup
+const CLIENT_ID = new URLSearchParams(window.location.search).get('client') || 'demo';
+
+// ── STATUSES ──────────────────────────────────────────────────────────────────
+const STATUSES = [
+  {
+    id: 0, emoji: "🔍", name: "Vehicle Checked In",
+    desc: "Customer vehicle has arrived and been logged",
+    msg: "Hi {name}, this is {shop}. Your {vehicle} has been checked in and is in our queue. We'll keep you updated as we progress. Questions? Call us at {phone}."
+  },
+  {
+    id: 1, emoji: "🔧", name: "Inspection in Progress",
+    desc: "Technician is currently inspecting the vehicle",
+    msg: "Hi {name}, your {vehicle} is currently being inspected by our technician. We'll reach out shortly with our findings."
+  },
+  {
+    id: 2, emoji: "📋", name: "Estimate Ready — Awaiting Approval",
+    desc: "Inspection complete, customer needs to approve",
+    msg: "Hi {name}, your {vehicle} inspection is complete. Please call us at {phone} to review the estimate and authorize repairs. We won't begin work until we hear from you."
+  },
+  {
+    id: 3, emoji: "⚠️", name: "Additional Work Found",
+    desc: "Technician discovered an additional concern",
+    msg: "Hi {name}, during service on your {vehicle} our technician discovered an additional concern that should be addressed. Please call us at {phone} to discuss your options. We won't proceed without your approval."
+  },
+  {
+    id: 4, emoji: "⏳", name: "Waiting on Customer Authorization",
+    desc: "Awaiting customer response to proceed",
+    msg: "Hi {name}, we're currently waiting on your authorization to proceed with repairs on your {vehicle}. Please call us at {phone} or reply to this message at your earliest convenience."
+  },
+  {
+    id: 5, emoji: "✅", name: "Repair Approved",
+    desc: "Customer has authorized — work beginning",
+    msg: "Hi {name}, thank you for approving the repairs on your {vehicle}. Our technician will begin work shortly."
+  },
+  {
+    id: 6, emoji: "🚗", name: "Parts Ordered",
+    desc: "Waiting on parts to arrive",
+    msg: "Hi {name}, we've ordered the necessary parts for your {vehicle}. We'll notify you as soon as they arrive and work begins."
+  },
+  {
+    id: 7, emoji: "🔩", name: "Repair in Progress",
+    desc: "Technician is actively working on the vehicle",
+    msg: "Hi {name}, repairs are currently underway on your {vehicle}. We'll notify you when the work is complete."
+  },
+  {
+    id: 8, emoji: "📅", name: "Vehicle Needs to Stay Overnight",
+    desc: "Job requires more time — overnight stay",
+    msg: "Hi {name}, we want to let you know that your {vehicle} will need to remain with us overnight to complete the repair properly. We'll notify you as soon as it's ready. Questions? Call us at {phone}."
+  },
+  {
+    id: 9, emoji: "🔍", name: "Quality Check",
+    desc: "Repairs done — final inspection underway",
+    msg: "Hi {name}, repairs on your {vehicle} are complete and the vehicle is now going through our final quality inspection."
+  },
+  {
+    id: 10, emoji: "🎉", name: "Vehicle Ready for Pickup",
+    desc: "Job complete — customer can come get their vehicle",
+    msg: "Hi {name}, great news — your {vehicle} is ready for pickup at {shop}. Our hours are {hours}. See you soon!"
+  },
+  {
+    id: 11, emoji: "📞", name: "Called — No Answer",
+    desc: "Attempted to reach customer, no response",
+    msg: "Hi {name}, we tried to reach you regarding your {vehicle} but were unable to connect. Please call us back at {phone} at your earliest convenience."
+  },
+  {
+    id: 12, emoji: "🏁", name: "Job Complete — Closed",
+    desc: "Vehicle picked up, job closed",
+    msg: "Hi {name}, thank you for choosing {shop}. Your {vehicle} service is complete. We appreciate your business and hope to see you again."
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentEmployee = null;
+let currentPin = '';
+let jobs = [];
+let selectedJob = null;
+let shopConfig = null;
+
+// ── PIN LOGIC ─────────────────────────────────────────────────────────────────
+function pinPress(digit) {
+  if (currentPin.length >= 4) return;
+  currentPin += digit;
+  updatePinDots();
+  if (currentPin.length === 4) {
+    setTimeout(checkPin, 120);
+  }
+}
+
+function pinDel() {
+  currentPin = currentPin.slice(0, -1);
+  updatePinDots(false);
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updatePinDots(error = false) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.classList.remove('filled', 'error');
+    if (i < currentPin.length) {
+      dot.classList.add(error ? 'error' : 'filled');
+    }
+  }
+}
+
+async function checkPin() {
+  try {
+    await fetch(`${API}/ping`, { method: 'GET' }).catch(() => {});
+    const r = await fetch(`${API}/portal/status/employee-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: CLIENT_ID, pin: currentPin })
+    });
+    const d = await r.json();
+    if (d.success) {
+      currentEmployee = d.employee;
+      shopConfig = d.shop;
+      loginSuccess();
+    } else {
+      pinError();
+    }
+  } catch(e) {
+    // Demo mode — use hardcoded demo data
+    if (currentPin === '1234') {
+      currentEmployee = { name: 'Demo Tech', pin: '1234', is_admin: false };
+      shopConfig = {
+        shop_name: 'Demo Auto Shop',
+        phone: '785-329-0202',
+        hours: 'Mon–Fri 8AM–6PM, Sat 9AM–3PM',
+        twilio_number: null,
+      };
+      loginSuccess();
+    } else {
+      pinError();
+    }
+  }
+}
+
+function pinError() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById(`dot-${i}`).classList.add('error');
+    document.getElementById(`dot-${i}`).classList.remove('filled');
+  }
+  document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+  setTimeout(() => {
+    currentPin = '';
+    updatePinDots();
+    document.getElementById('pin-error').textContent = '';
+  }, 1200);
+}
+
+function loginSuccess() {
+  document.getElementById('header-shop-name').innerHTML =
+    shopConfig.shop_name.replace(/(\w+)$/, '<span>$1</span>');
+  document.getElementById('header-emp-name').textContent = currentEmployee.name;
+  document.getElementById('emp-name-display').textContent = currentEmployee.name.split(' ')[0];
+  document.getElementById('app-header').style.display = 'flex';
+  showScreen('jobs-screen');
+  loadJobs();
+}
+
+// ── JOBS ──────────────────────────────────────────────────────────────────────
+async function loadJobs() {
+  try {
+    const r = await fetch(`${API}/portal/status/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: CLIENT_ID })
+    });
+    const d = await r.json();
+    if (d.success) {
+      jobs = d.jobs;
+      renderJobs();
+    }
+  } catch(e) {
+    // Demo jobs
+    jobs = [
+      { id: 'demo-1', customer_name: 'Mike Johnson', customer_phone: '785-555-0101', year: '2018', make: 'Ford', model: 'F-150', color: 'Blue', job_type: 'Brake Service', current_status_id: 1, notes: 'Front brakes squealing', created_at: new Date().toISOString() },
+      { id: 'demo-2', customer_name: 'Sarah Williams', customer_phone: '785-555-0102', year: '2021', make: 'Honda', model: 'Accord', color: 'White', job_type: 'Oil Change', current_status_id: 0, notes: '', created_at: new Date().toISOString() },
+      { id: 'demo-3', customer_name: 'Tom Davis', customer_phone: '785-555-0103', year: '2015', make: 'Chevy', model: 'Silverado', color: 'Black', job_type: 'Engine Repair', current_status_id: 7, notes: 'Check engine light on, rough idle', created_at: new Date().toISOString() },
+    ];
+    renderJobs();
+  }
+}
+
+function renderJobs() {
+  const container = document.getElementById('jobs-container');
+  const active = jobs.filter(j => j.current_status_id !== 12);
+  const closed = jobs.filter(j => j.current_status_id === 12);
+
+  if (!active.length && !closed.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🚗</div>
+        <div class="empty-title">No Active Jobs</div>
+        <div class="empty-sub">Tap "+ New Job" to add a vehicle to the queue.</div>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  if (active.length) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.75rem;">Active Jobs (${active.length})</div>`;
+    active.forEach(j => { html += jobCardHTML(j); });
+  }
+  if (closed.length) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin:.75rem 0;opacity:.6;">Completed Today (${closed.length})</div>`;
+    closed.forEach(j => { html += jobCardHTML(j, true); });
+  }
+  container.innerHTML = html;
+}
+
+function jobCardHTML(job, dimmed = false) {
+  const status = STATUSES[job.current_status_id] || STATUSES[0];
+  const vehicle = [job.year, job.make, job.model].filter(Boolean).join(' ') || 'Vehicle';
+  const time = new Date(job.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return `
+    <div class="job-card status-${job.current_status_id}" style="${dimmed?'opacity:.5':''}" onclick="selectJob('${job.id}')">
+      <div class="job-header">
+        <div>
+          <div class="job-customer">${job.customer_name}</div>
+          <div class="job-vehicle">${vehicle} ${job.color ? '· '+job.color : ''}</div>
+        </div>
+        <div class="job-status-badge">${status.emoji} ${status.name}</div>
+      </div>
+      <div class="job-meta">
+        <span>🔧 ${job.job_type}</span>
+        <span>⏱ ${time}</span>
+        ${job.notes ? `<span>📝 ${job.notes.substring(0,30)}${job.notes.length>30?'...':''}</span>` : ''}
+      </div>
+    </div>`;
+}
+
+function selectJob(jobId) {
+  selectedJob = jobs.find(j => j.id === jobId);
+  if (!selectedJob) return;
+  const vehicle = [selectedJob.year, selectedJob.make, selectedJob.model].filter(Boolean).join(' ') || 'Vehicle';
+  document.getElementById('detail-customer').textContent = selectedJob.customer_name;
+  document.getElementById('detail-vehicle').textContent = vehicle + (selectedJob.color ? ' · ' + selectedJob.color : '');
+  document.getElementById('detail-phone').textContent = '📞 ' + selectedJob.customer_phone;
+  document.getElementById('detail-jobtype').textContent = '🔧 ' + selectedJob.job_type;
+  const currentStatus = STATUSES[selectedJob.current_status_id] || STATUSES[0];
+  document.getElementById('current-status-display').textContent = currentStatus.emoji + ' ' + currentStatus.name;
+  renderStatusButtons();
+  showScreen('status-screen');
+}
+
+function renderStatusButtons() {
+  const grid = document.getElementById('statuses-grid');
+  grid.innerHTML = STATUSES.map(s => `
+    <button class="status-btn ${s.id === selectedJob.current_status_id ? 'active-status' : ''}"
+            onclick="sendStatusUpdate(${s.id})">
+      <span class="status-emoji">${s.emoji}</span>
+      <div class="status-text">
+        <div class="status-name">${s.name}${s.id === selectedJob.current_status_id ? ' ✓' : ''}</div>
+        <div class="status-desc">${s.desc}</div>
+      </div>
+    </button>`).join('');
+}
+
+// ── STATUS UPDATE ─────────────────────────────────────────────────────────────
+async function sendStatusUpdate(statusId) {
+  if (statusId === selectedJob.current_status_id) {
+    toast('Already set to this status', 'error');
+    return;
+  }
+
+  const status = STATUSES[statusId];
+  const vehicle = [selectedJob.year, selectedJob.make, selectedJob.model].filter(Boolean).join(' ') || 'your vehicle';
+
+  // Build the SMS message
+  const msg = status.msg
+    .replace(/{name}/g, selectedJob.customer_name.split(' ')[0])
+    .replace(/{vehicle}/g, vehicle)
+    .replace(/{shop}/g, shopConfig?.shop_name || 'our shop')
+    .replace(/{phone}/g, shopConfig?.phone || 'our shop')
+    .replace(/{hours}/g, shopConfig?.hours || 'during business hours');
+
+  document.getElementById('sending-overlay').classList.add('show');
+
+  try {
+    const r = await fetch(`${API}/portal/status/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: CLIENT_ID,
+        job_id: selectedJob.id,
+        status_id: statusId,
+        status_name: status.name,
+        message: msg,
+        employee_name: currentEmployee.name,
+        customer_phone: selectedJob.customer_phone,
+      })
+    });
+    const d = await r.json();
+
+    document.getElementById('sending-overlay').classList.remove('show');
+
+    if (d.success) {
+      selectedJob.current_status_id = statusId;
+      document.getElementById('current-status-display').textContent = status.emoji + ' ' + status.name;
+      renderStatusButtons();
+      const j = jobs.find(j => j.id === selectedJob.id);
+      if (j) j.current_status_id = statusId;
+      toast(`✓ ${status.name} — Customer notified`, 'success');
+    } else {
+      toast('Error sending update: ' + (d.error || 'Unknown'), 'error');
+    }
+  } catch(e) {
+    document.getElementById('sending-overlay').classList.remove('show');
+    // Demo mode — simulate success
+    selectedJob.current_status_id = statusId;
+    document.getElementById('current-status-display').textContent = status.emoji + ' ' + status.name;
+    renderStatusButtons();
+    const j = jobs.find(j => j.id === selectedJob.id);
+    if (j) j.current_status_id = statusId;
+    toast(`✓ ${status.name} — [Demo: SMS would send]`, 'success');
+  }
+}
+
+// ── ADD JOB ───────────────────────────────────────────────────────────────────
+function openModal() { document.getElementById('add-job-modal').classList.add('show'); }
+function closeModal() { document.getElementById('add-job-modal').classList.remove('show'); }
+
+async function submitNewJob() {
+  const name  = document.getElementById('new-customer').value.trim();
+  const phone = document.getElementById('new-phone').value.trim();
+  const year  = document.getElementById('new-year').value.trim();
+  const make  = document.getElementById('new-make').value.trim();
+  const model = document.getElementById('new-model').value.trim();
+  const color = document.getElementById('new-color').value.trim();
+  const jtype = document.getElementById('new-jobtype').value;
+  const notes = document.getElementById('new-notes').value.trim();
+
+  if (!name || !phone) { toast('Customer name and phone are required', 'error'); return; }
+
+  const newJob = {
+    id: 'job-' + Date.now(),
+    client_id: CLIENT_ID,
+    customer_name: name,
+    customer_phone: phone,
+    year, make, model, color,
+    job_type: jtype,
+    notes,
+    current_status_id: 0,
+    created_by: currentEmployee.name,
+    created_at: new Date().toISOString(),
+  };
+
+  try {
+    const r = await fetch(`${API}/portal/status/add-job`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...newJob, client_id: CLIENT_ID })
+    });
+    const d = await r.json();
+    if (d.success) newJob.id = d.job_id;
+  } catch(e) { /* demo mode — use local id */ }
+
+  jobs.unshift(newJob);
+  renderJobs();
+  closeModal();
+
+  // Clear form
+  ['new-customer','new-phone','new-year','new-make','new-model','new-color','new-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  // Auto-send check-in text
+  const sendCheckIn = confirm(`Send check-in text to ${name}?`);
+  if (sendCheckIn) {
+    selectedJob = newJob;
+    shopConfig = shopConfig || { shop_name: 'Our Shop', phone: '785-329-0202', hours: 'business hours' };
+    await sendStatusUpdate(0);
+    selectedJob = null;
+  }
+
+  toast(`✓ ${name}'s vehicle added to queue`, 'success');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Hide header on PIN screen
+  document.getElementById('app-header').style.display = id === 'pin-screen' ? 'none' : 'flex';
+}
+
+function backToJobs() {
+  selectedJob = null;
+  loadJobs();
+  showScreen('jobs-screen');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const t = document.getElementById('toast-el');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

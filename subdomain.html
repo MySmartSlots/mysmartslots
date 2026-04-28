@@ -323,31 +323,90 @@ footer{border-top:1px solid var(--b2);padding:2rem 0;background:var(--dark);}
 
 <script>
 const RU='https://mysmartslots-chat.onrender.com';
+const CLIENT_ID='diamond-plumbing';
+
 (function(){
   const me=document.getElementById('demo-msgs'),ie=document.getElementById('demo-input'),sb=document.getElementById('demo-send');
   if(!me)return;let hist=[];
-  function add(t,r){const el=document.createElement('div');el.className='dmsg '+r;el.textContent=t;me.appendChild(el);me.scrollTop=me.scrollHeight;}
+  function add(t,r,url){
+    const el=document.createElement('div');el.className='dmsg '+r;
+    if(url){
+      el.textContent=t+' ';
+      const a=document.createElement('a');
+      a.href=url;a.target='_blank';
+      a.textContent='Book your appointment →';
+      a.style.cssText='color:#4ade80;font-weight:700;display:block;margin-top:6px;';
+      el.appendChild(a);
+    } else {
+      el.textContent=t;
+    }
+    me.appendChild(el);me.scrollTop=me.scrollHeight;
+  }
   function typ(){const el=document.createElement('div');el.className='demo-typing';el.innerHTML='<span></span><span></span><span></span>';me.appendChild(el);me.scrollTop=me.scrollHeight;return el;}
-  setTimeout(()=>add("👋 Hi! I'm the booking assistant for Diamond Plumbing. I can answer questions about services, pricing, or help you schedule. What can I help you with?",'bot'),700);
-  async function send(){const t=ie.value.trim();if(!t)return;ie.value='';add(t,'user');hist.push({role:'user',content:t});const ty=typ();sb.disabled=true;
-    try{const r=await fetch(RU+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist})});const d=await r.json();ty.remove();const rep=d.reply||d.error||'Sorry, try again.';add(rep,'bot');hist.push({role:'assistant',content:rep});}
-    catch{ty.remove();add("Sorry, couldn't connect right now.",'bot');}finally{sb.disabled=false;ie.focus();}}
-  sb.addEventListener('click',send);ie.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
+  setTimeout(()=>add("👋 Hi! I'm the AI assistant for Diamond Plumbing Co. I can answer questions about our services or help you schedule an appointment. What can I help you with today?",'bot'),700);
+  async function send(){
+    const t=ie.value.trim();if(!t)return;ie.value='';add(t,'user');
+    hist.push({role:'user',content:t});const ty=typ();sb.disabled=true;
+    try{
+      const r=await fetch(RU+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist,client_id:CLIENT_ID})});
+      const d=await r.json();ty.remove();
+      const rep=d.reply||d.error||'Sorry, try again.';
+      add(rep,'bot',d.booking_url||null);
+      hist.push({role:'assistant',content:rep});
+    }
+    catch{ty.remove();add("Sorry, couldn't connect right now.",'bot');}
+    finally{sb.disabled=false;}
+  }
+  sb.addEventListener('click',send);
+  ie.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
 })();
+
 (function(){
   const cb=document.getElementById('cb'),cw=document.getElementById('cw'),cm=document.getElementById('cm'),ci=document.getElementById('ci'),cs=document.getElementById('cs');
   let hist=[],opened=false;
-  function add(t,r){const el=document.createElement('div');el.className='cmsg '+r;el.textContent=t;cm.appendChild(el);cm.scrollTop=cm.scrollHeight;}
+  function add(t,r,url){
+    const el=document.createElement('div');el.className='cmsg '+r;
+    if(url){
+      el.textContent=t+' ';
+      const a=document.createElement('a');
+      a.href=url;a.target='_blank';
+      a.textContent='Book your appointment →';
+      a.style.cssText='color:#4ade80;font-weight:700;display:block;margin-top:6px;font-size:13px;';
+      el.appendChild(a);
+    } else {
+      el.textContent=t;
+    }
+    cm.appendChild(el);cm.scrollTop=cm.scrollHeight;
+  }
   function typ(){const el=document.createElement('div');el.className='ctyping';el.innerHTML='<span></span><span></span><span></span>';cm.appendChild(el);cm.scrollTop=cm.scrollHeight;return el;}
-  async function send(){const t=ci.value.trim();if(!t)return;ci.value='';ci.style.height='auto';add(t,'user');hist.push({role:'user',content:t});const ty=typ();cs.disabled=true;
-    try{const r=await fetch(RU+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist})});const d=await r.json();ty.remove();const rep=d.reply||d.error||'Sorry, try again.';add(rep,'bot');hist.push({role:'assistant',content:rep});}
-    catch{ty.remove();add('Sorry, trouble connecting. Try again!','bot');}finally{cs.disabled=false;}}
-  cb.addEventListener('click',()=>{const o=cw.classList.toggle('open');if(o&&!opened){opened=true;const b=cb.querySelector('.cb-badge');if(b)b.remove();setTimeout(()=>add("👋 Hi! How can I help you today? I can answer questions or help book an appointment.",'bot'),300);}if(o)ci.focus();});
+  async function send(){
+    const t=ci.value.trim();if(!t)return;ci.value='';ci.style.height='auto';add(t,'user');
+    hist.push({role:'user',content:t});const ty=typ();cs.disabled=true;
+    try{
+      const r=await fetch(RU+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist,client_id:CLIENT_ID})});
+      const d=await r.json();ty.remove();
+      const rep=d.reply||d.error||'Sorry, try again.';
+      add(rep,'bot',d.booking_url||null);
+      hist.push({role:'assistant',content:rep});
+    }
+    catch{ty.remove();add('Sorry, trouble connecting. Try again!','bot');}
+    finally{cs.disabled=false;}
+  }
+  cb.addEventListener('click',()=>{
+    const o=cw.classList.toggle('open');
+    if(o&&!opened){
+      opened=true;
+      const b=cb.querySelector('.cb-badge');if(b)b.remove();
+      setTimeout(()=>add("👋 Hi! Welcome to Diamond Plumbing Co. I can answer questions or help schedule your service. What can I help you with today?",'bot'),300);
+    }
+    if(o)ci.focus();
+  });
   document.getElementById('cc').addEventListener('click',()=>cw.classList.remove('open'));
   cs.addEventListener('click',send);
   ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
   ci.addEventListener('input',()=>{ci.style.height='auto';ci.style.height=Math.min(ci.scrollHeight,80)+'px';});
 })();
+
 function submitBooking(){
   const first=document.getElementById('f-first').value.trim();
   const phone=document.getElementById('f-phone').value.trim();

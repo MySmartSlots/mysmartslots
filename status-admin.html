@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shop Status — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0F1117;--surface:#181C27;--surface2:#1E2334;--border:#2A3045;
+  --accent:#F59E0B;--green:#10B981;--red:#EF4444;--blue:#3B82F6;--purple:#8B5CF6;
+  --white:#F8FAFC;--gray:#8892A4;--light:#CBD5E1;--radius:12px;
+}
+html,body{height:100%;background:var(--bg);color:var(--white);font-family:'Barlow',sans-serif;-webkit-font-smoothing:antialiased;}
+body{display:flex;flex-direction:column;min-height:100vh;}
+
+/* HEADER */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.header-logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;}
+.header-logo span{color:var(--accent);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.admin-badge{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--gray);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:'Barlow',sans-serif;}
+
+/* LOGIN */
+#login-screen{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:380px;text-align:center;}
+.login-logo{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;margin-bottom:.25rem;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+.inp{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--white);outline:none;margin-bottom:10px;}
+.inp:focus{border-color:var(--accent);}
+.login-btn{width:100%;background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:800;font-family:'Barlow',sans-serif;cursor:pointer;}
+.login-err{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+/* APP */
+#app{display:none;flex:1;flex-direction:column;}
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 1rem;}
+.tab{padding:.75rem 1.25rem;font-size:13px;font-weight:700;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-content{display:none;flex:1;overflow-y:auto;padding:1.5rem;}
+.tab-content.active{display:block;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:center;}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;color:var(--accent);}
+.stat-label{font-size:12px;color:var(--gray);margin-top:.25rem;}
+
+/* JOB TABLE */
+.job-table{width:100%;border-collapse:collapse;}
+.job-table th{background:var(--surface2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);padding:10px 12px;text-align:left;}
+.job-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+.job-table tr:last-child td{border-bottom:none;}
+.job-table tr:hover td{background:var(--surface2);}
+.status-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(255,255,255,.07);color:var(--light);}
+
+/* HISTORY */
+.history-item{display:flex;gap:12px;padding:.75rem 0;border-bottom:1px solid var(--border);}
+.history-item:last-child{border-bottom:none;}
+.history-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0;}
+.history-content{flex:1;}
+.history-status{font-size:13px;font-weight:700;}
+.history-meta{font-size:11px;color:var(--gray);margin-top:2px;}
+.history-msg{font-size:12px;color:var(--light);margin-top:4px;background:var(--surface2);padding:.5rem .75rem;border-radius:8px;line-height:1.5;}
+
+/* EMPLOYEES */
+.emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;}
+.emp-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;position:relative;}
+.emp-name{font-size:15px;font-weight:700;margin-bottom:.25rem;}
+.emp-pin{font-size:13px;color:var(--gray);}
+.emp-role{font-size:11px;font-weight:700;color:var(--accent);margin-top:.35rem;}
+.emp-delete{position:absolute;top:.75rem;right:.75rem;background:none;border:none;color:var(--gray);cursor:pointer;font-size:16px;padding:2px 6px;}
+.emp-delete:hover{color:var(--red);}
+
+/* FORMS */
+.fg{margin-bottom:.85rem;}
+.fg label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:.4rem;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--white);outline:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
+.fg textarea{resize:vertical;min-height:80px;}
+.fg select option{background:var(--surface2);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:540px){.form-grid{grid-template-columns:1fr;}}
+.btn{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;border:none;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.btn-ghost{background:none;color:var(--gray);border:1px solid var(--border);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);color:var(--white);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:300;transition:transform .3s;pointer-events:none;border:1px solid var(--border);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:var(--green);background:#052e16;}
+.toast.error{border-color:var(--red);background:#2d0a0a;}
+</style>
+</head>
+<body>
+
+<div id="toast-el" class="toast"></div>
+
+<div class="header">
+  <div class="header-logo">Shop<span>Status</span> Admin</div>
+  <div class="header-right">
+    <div class="admin-badge" id="shop-badge">Admin</div>
+    <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Shop<span>Status</span></div>
+    <div class="login-sub">Owner / Admin Access</div>
+    <input class="inp" type="text" id="login-client" placeholder="Client ID" autocomplete="off"/>
+    <input class="inp" type="password" id="login-pass" placeholder="Admin Password"/>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err">Incorrect credentials.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+    <div class="tab" onclick="switchTab('jobs')">🚗 All Jobs</div>
+    <div class="tab" onclick="switchTab('employees')">👥 Employees</div>
+    <div class="tab" onclick="switchTab('settings')">⚙️ Settings</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="stat-active">—</div><div class="stat-label">Active Jobs</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-today">—</div><div class="stat-label">Added Today</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-complete">—</div><div class="stat-label">Completed Today</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-texts">—</div><div class="stat-label">Texts Sent Today</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Active Jobs — Live Status</div>
+      <div id="dashboard-jobs-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <div id="recent-activity"></div>
+    </div>
+  </div>
+
+  <!-- ALL JOBS -->
+  <div class="tab-content" id="tab-jobs">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+      <div style="font-size:18px;font-weight:800;">Job Queue</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select class="inp" id="job-filter" onchange="filterJobs()" style="width:auto;padding:8px 12px;font-size:13px;">
+          <option value="active">Active Only</option>
+          <option value="all">All Jobs</option>
+          <option value="complete">Completed</option>
+        </select>
+        <button class="btn btn-danger" onclick="archiveCompleted()">Archive Completed</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="job-table" id="jobs-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Vehicle</th>
+            <th>Job Type</th>
+            <th>Status</th>
+            <th>Last Update</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="jobs-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- JOB HISTORY PANEL -->
+    <div class="card" id="job-history-panel" style="display:none;margin-top:1.5rem;">
+      <div class="card-title" id="history-panel-title">Status History</div>
+      <div id="job-history-list"></div>
+    </div>
+  </div>
+
+  <!-- EMPLOYEES -->
+  <div class="tab-content" id="tab-employees">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;" class="emp-layout">
+      <div>
+        <div style="font-size:18px;font-weight:800;margin-bottom:1rem;">Team Members</div>
+        <div class="emp-grid" id="emp-grid"></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">Add Employee</div>
+          <div class="fg">
+            <label>Full Name *</label>
+            <input class="inp" type="text" id="new-emp-name" placeholder="Jake Smith" style="width:100%;"/>
+          </div>
+          <div class="fg">
+            <label>4-Digit PIN *</label>
+            <input class="inp" type="text" id="new-emp-pin" placeholder="1234" maxlength="4" style="width:100%;"/>
+          </div>
+          <div class="fg">
+            <label>Role</label>
+            <select class="inp" id="new-emp-role" style="width:100%;">
+              <option value="technician">Technician</option>
+              <option value="service_advisor">Service Advisor</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addEmployee()">Add Employee</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tab-content" id="tab-settings">
+    <div class="card">
+      <div class="card-title">Shop Configuration</div>
+      <div class="form-grid">
+        <div class="fg">
+          <label>Shop Name *</label>
+          <input class="inp" type="text" id="set-shopname" placeholder="Topeka Auto Repair" style="width:100%;"/>
+        </div>
+        <div class="fg">
+          <label>Shop Phone *</label>
+          <input class="inp" type="tel" id="set-phone" placeholder="785-329-0202" style="width:100%;"/>
+        </div>
+        <div class="fg">
+          <label>Business Hours</label>
+          <input class="inp" type="text" id="set-hours" placeholder="Mon–Fri 8AM–6PM, Sat 9AM–3PM" style="width:100%;"/>
+        </div>
+        <div class="fg">
+          <label>Twilio Number (SMS from)</label>
+          <input class="inp" type="tel" id="set-twilio" placeholder="+17855550100" style="width:100%;"/>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Twilio Account SID</label>
+        <input class="inp" type="text" id="set-twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="width:100%;"/>
+      </div>
+      <div class="fg">
+        <label>Twilio Auth Token</label>
+        <input class="inp" type="password" id="set-twilio-token" placeholder="••••••••••••••••••••••••••••••••" style="width:100%;"/>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        <button class="btn btn-ghost" onclick="testSMS()">Send Test SMS</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Admin Password</div>
+      <div class="fg">
+        <label>New Password</label>
+        <input class="inp" type="password" id="new-password" placeholder="New admin password" style="width:100%;max-width:320px;"/>
+      </div>
+      <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Employee App Link</div>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:.75rem;line-height:1.6;">Share this link with your employees. Bookmark it on their phones.</p>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;font-size:13px;font-family:monospace;color:var(--accent);word-break:break-all;" id="emp-link-display"></div>
+      <button class="btn btn-ghost" style="margin-top:.75rem;" onclick="copyEmpLink()">Copy Link</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = "https://mysmartslots-portal.onrender.com";
+let clientId = null, adminPass = null, shopConfig = null, allJobs = [], allEmployees = [];
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+async function doLogin() {
+  clientId = document.getElementById('login-client').value.trim();
+  adminPass = document.getElementById('login-pass').value;
+  if (!clientId || !adminPass) return;
+
+  try {
+    await fetch(`${API}/ping`, { method: 'GET' }).catch(() => {});
+    const r = await fetch(`${API}/portal/status/admin-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: clientId, password: adminPass })
+    });
+    const d = await r.json();
+    if (d.success) {
+      shopConfig = d.shop;
+      loadApp();
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+    }
+  } catch(e) {
+    // Demo mode
+    if (adminPass === 'demo123') {
+      clientId = clientId || 'demo';
+      shopConfig = { shop_name: 'Demo Auto Shop', phone: '785-329-0202', hours: 'Mon–Fri 8AM–6PM', twilio_number: null };
+      loadApp();
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+    }
+  }
+}
+
+function doLogout() {
+  clientId = null; adminPass = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-err').style.display = 'none';
+}
+
+function loadApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('shop-badge').textContent = shopConfig.shop_name;
+  loadDashboardData();
+  loadSettings();
+  const empLink = `${window.location.origin}/status-employee.html?client=${clientId}`;
+  document.getElementById('emp-link-display').textContent = empLink;
+}
+
+async function loadDashboardData() {
+  try {
+    const [jobsR, updatesR, empsR] = await Promise.all([
+      fetch(`${API}/portal/status/jobs`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({client_id:clientId}) }),
+      fetch(`${API}/portal/status/recent-updates`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({client_id:clientId}) }),
+      fetch(`${API}/portal/status/employees`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({client_id:clientId, password:adminPass}) }),
+    ]);
+    const jobsD = await jobsR.json();
+    const updatesD = await updatesR.json();
+    const empsD = await empsR.json();
+    if (jobsD.success) { allJobs = jobsD.jobs; renderDashboard(); renderJobsTable(); }
+    if (empsD.success) { allEmployees = empsD.employees; renderEmployees(); }
+    if (updatesD.success) renderRecentActivity(updatesD.updates);
+  } catch(e) {
+    // Demo data
+    allJobs = [
+      { id:'j1', customer_name:'Mike Johnson', customer_phone:'785-555-0101', year:'2018', make:'Ford', model:'F-150', color:'Blue', job_type:'Brake Service', current_status_id:7, notes:'Front brakes', created_at:new Date().toISOString(), last_updated:new Date().toISOString() },
+      { id:'j2', customer_name:'Sarah Williams', customer_phone:'785-555-0102', year:'2021', make:'Honda', model:'Accord', color:'White', job_type:'Oil Change', current_status_id:0, notes:'', created_at:new Date().toISOString(), last_updated:new Date().toISOString() },
+      { id:'j3', customer_name:'Tom Davis', customer_phone:'785-555-0103', year:'2015', make:'Chevy', model:'Silverado', color:'Black', job_type:'Engine Repair', current_status_id:2, notes:'CEL on', created_at:new Date().toISOString(), last_updated:new Date().toISOString() },
+    ];
+    allEmployees = [
+      { id:'e1', name:'Jake Smith', pin:'1234', role:'technician' },
+      { id:'e2', name:'Maria Lopez', pin:'5678', role:'service_advisor' },
+    ];
+    renderDashboard();
+    renderJobsTable();
+    renderEmployees();
+    renderRecentActivity([]);
+  }
+}
+
+const STATUSES = [
+  {id:0,emoji:"🔍",name:"Vehicle Checked In"},
+  {id:1,emoji:"🔧",name:"Inspection in Progress"},
+  {id:2,emoji:"📋",name:"Estimate Ready — Awaiting Approval"},
+  {id:3,emoji:"⚠️",name:"Additional Work Found"},
+  {id:4,emoji:"⏳",name:"Waiting on Authorization"},
+  {id:5,emoji:"✅",name:"Repair Approved"},
+  {id:6,emoji:"🚗",name:"Parts Ordered"},
+  {id:7,emoji:"🔩",name:"Repair in Progress"},
+  {id:8,emoji:"📅",name:"Overnight Stay"},
+  {id:9,emoji:"🔍",name:"Quality Check"},
+  {id:10,emoji:"🎉",name:"Ready for Pickup"},
+  {id:11,emoji:"📞",name:"Called — No Answer"},
+  {id:12,emoji:"🏁",name:"Job Complete"},
+];
+
+function renderDashboard() {
+  const today = new Date().toDateString();
+  const active = allJobs.filter(j => j.current_status_id !== 12);
+  const addedToday = allJobs.filter(j => new Date(j.created_at).toDateString() === today);
+  const completedToday = allJobs.filter(j => j.current_status_id === 12 && new Date(j.last_updated||j.created_at).toDateString() === today);
+  document.getElementById('stat-active').textContent = active.length;
+  document.getElementById('stat-today').textContent = addedToday.length;
+  document.getElementById('stat-complete').textContent = completedToday.length;
+  document.getElementById('stat-texts').textContent = '—';
+
+  const list = document.getElementById('dashboard-jobs-list');
+  if (!active.length) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--gray);font-size:14px;">No active jobs right now</div>';
+    return;
+  }
+  list.innerHTML = active.map(j => {
+    const s = STATUSES[j.current_status_id]||STATUSES[0];
+    const v = [j.year,j.make,j.model].filter(Boolean).join(' ')||'Vehicle';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:14px;font-weight:700;">${j.customer_name}</div>
+        <div style="font-size:12px;color:var(--gray);">${v} · ${j.job_type}</div>
+      </div>
+      <div class="status-pill">${s.emoji} ${s.name}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderRecentActivity(updates) {
+  const el = document.getElementById('recent-activity');
+  if (!updates.length) {
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--gray);font-size:13px;">No activity yet today</div>';
+    return;
+  }
+  el.innerHTML = updates.slice(0,10).map(u => {
+    const s = STATUSES[u.status_id]||STATUSES[0];
+    return `<div class="history-item">
+      <div class="history-dot"></div>
+      <div class="history-content">
+        <div class="history-status">${s.emoji} ${s.name} — ${u.customer_name}</div>
+        <div class="history-meta">${u.employee_name} · ${new Date(u.created_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
+        ${u.message?`<div class="history-msg">"${u.message}"</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderJobsTable() {
+  const filter = document.getElementById('job-filter').value;
+  let filtered = allJobs;
+  if (filter === 'active') filtered = allJobs.filter(j => j.current_status_id !== 12);
+  if (filter === 'complete') filtered = allJobs.filter(j => j.current_status_id === 12);
+
+  const tbody = document.getElementById('jobs-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem;">No jobs found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(j => {
+    const s = STATUSES[j.current_status_id]||STATUSES[0];
+    const v = [j.year,j.make,j.model].filter(Boolean).join(' ')||'—';
+    const time = new Date(j.last_updated||j.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    return `<tr>
+      <td><div style="font-weight:700;">${j.customer_name}</div><div style="font-size:11px;color:var(--gray);">${j.customer_phone}</div></td>
+      <td>${v}</td>
+      <td>${j.job_type}</td>
+      <td><span class="status-pill">${s.emoji} ${s.name}</span></td>
+      <td style="font-size:12px;color:var(--gray);">${time}</td>
+      <td><button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;" onclick="viewHistory('${j.id}')">History</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterJobs() { renderJobsTable(); }
+
+async function viewHistory(jobId) {
+  const job = allJobs.find(j => j.id === jobId);
+  if (!job) return;
+  document.getElementById('job-history-panel').style.display = 'block';
+  document.getElementById('history-panel-title').textContent = `Status History — ${job.customer_name}`;
+  try {
+    const r = await fetch(`${API}/portal/status/job-history`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ client_id:clientId, job_id:jobId })
+    });
+    const d = await r.json();
+    if (d.success) renderHistoryList(d.updates);
+  } catch(e) {
+    renderHistoryList([]);
+  }
+}
+
+function renderHistoryList(updates) {
+  const el = document.getElementById('job-history-list');
+  if (!updates.length) {
+    el.innerHTML = '<div style="color:var(--gray);font-size:13px;padding:.5rem 0;">No updates recorded yet</div>';
+    return;
+  }
+  el.innerHTML = updates.map(u => {
+    const s = STATUSES[u.status_id]||STATUSES[0];
+    return `<div class="history-item">
+      <div class="history-dot"></div>
+      <div class="history-content">
+        <div class="history-status">${s.emoji} ${s.name}</div>
+        <div class="history-meta">${u.employee_name} · ${new Date(u.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div>
+        ${u.message?`<div class="history-msg">"${u.message}"</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function archiveCompleted() {
+  if (!confirm('Archive all completed jobs? They will be hidden from the active queue.')) return;
+  try {
+    await fetch(`${API}/portal/status/archive-completed`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ client_id:clientId, password:adminPass })
+    });
+  } catch(e) {}
+  allJobs = allJobs.filter(j => j.current_status_id !== 12);
+  renderDashboard(); renderJobsTable();
+  toast('Completed jobs archived', 'success');
+}
+
+function renderEmployees() {
+  const grid = document.getElementById('emp-grid');
+  if (!allEmployees.length) {
+    grid.innerHTML = '<div style="color:var(--gray);font-size:13px;">No employees yet. Add one to get started.</div>';
+    return;
+  }
+  grid.innerHTML = allEmployees.map(e => `
+    <div class="emp-card">
+      <div class="emp-name">${e.name}</div>
+      <div class="emp-pin">PIN: ${e.pin}</div>
+      <div class="emp-role">${e.role.replace('_',' ').toUpperCase()}</div>
+      <button class="emp-delete" onclick="deleteEmployee('${e.id}')">✕</button>
+    </div>`).join('');
+}
+
+async function addEmployee() {
+  const name = document.getElementById('new-emp-name').value.trim();
+  const pin  = document.getElementById('new-emp-pin').value.trim();
+  const role = document.getElementById('new-emp-role').value;
+  if (!name || !pin || pin.length !== 4 || !/^\d+$/.test(pin)) {
+    toast('Name and valid 4-digit PIN required', 'error'); return;
+  }
+  if (allEmployees.find(e => e.pin === pin)) {
+    toast('That PIN is already in use', 'error'); return;
+  }
+  const newEmp = { id:'emp-'+Date.now(), name, pin, role };
+  try {
+    const r = await fetch(`${API}/portal/status/add-employee`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ client_id:clientId, password:adminPass, ...newEmp })
+    });
+    const d = await r.json();
+    if (d.success) newEmp.id = d.employee_id;
+  } catch(e) {}
+  allEmployees.push(newEmp);
+  renderEmployees();
+  document.getElementById('new-emp-name').value = '';
+  document.getElementById('new-emp-pin').value = '';
+  toast(`✓ ${name} added`, 'success');
+}
+
+async function deleteEmployee(empId) {
+  const emp = allEmployees.find(e => e.id === empId);
+  if (!emp || !confirm(`Remove ${emp.name}?`)) return;
+  try {
+    await fetch(`${API}/portal/status/delete-employee`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ client_id:clientId, password:adminPass, employee_id:empId })
+    });
+  } catch(e) {}
+  allEmployees = allEmployees.filter(e => e.id !== empId);
+  renderEmployees();
+  toast(`${emp.name} removed`, 'success');
+}
+
+function loadSettings() {
+  if (!shopConfig) return;
+  document.getElementById('set-shopname').value = shopConfig.shop_name || '';
+  document.getElementById('set-phone').value    = shopConfig.phone || '';
+  document.getElementById('set-hours').value    = shopConfig.hours || '';
+  document.getElementById('set-twilio').value   = shopConfig.twilio_number || '';
+  document.getElementById('set-twilio-sid').value   = shopConfig.twilio_sid || '';
+}
+
+async function saveSettings() {
+  const settings = {
+    shop_name:    document.getElementById('set-shopname').value.trim(),
+    phone:        document.getElementById('set-phone').value.trim(),
+    hours:        document.getElementById('set-hours').value.trim(),
+    twilio_number: document.getElementById('set-twilio').value.trim(),
+    twilio_sid:   document.getElementById('set-twilio-sid').value.trim(),
+    twilio_token: document.getElementById('set-twilio-token').value.trim(),
+  };
+  if (!settings.shop_name) { toast('Shop name required', 'error'); return; }
+  try {
+    const r = await fetch(`${API}/portal/status/save-settings`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ client_id:clientId, password:adminPass, ...settings })
+    });
+    const d = await r.json();
+    if (d.success) { shopConfig = {...shopConfig,...settings}; toast('Settings saved', 'success'); }
+    else toast('Error: '+d.error, 'error');
+  } catch(e) { toast('Saved locally (demo mode)', 'success'); }
+}
+
+async function testSMS() {
+  const phone = prompt('Send test SMS to what number? (include country code: +17855550100)');
+  if (!phone) return;
+  try {
+    const r = await fetch(`${API}/portal/status/test-sms`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ client_id:clientId, password:adminPass, to_phone:phone })
+    });
+    const d = await r.json();
+    if (d.success) toast('✓ Test SMS sent', 'success');
+    else toast('SMS error: '+d.error, 'error');
+  } catch(e) { toast('Could not send test (demo mode)', 'error'); }
+}
+
+async function changePassword() {
+  const newPass = document.getElementById('new-password').value.trim();
+  if (!newPass || newPass.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
+  try {
+    const r = await fetch(`${API}/portal/status/change-password`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ client_id:clientId, password:adminPass, new_password:newPass })
+    });
+    const d = await r.json();
+    if (d.success) { adminPass = newPass; document.getElementById('new-password').value=''; toast('Password updated', 'success'); }
+    else toast('Error: '+d.error, 'error');
+  } catch(e) { toast('Could not update (demo mode)', 'error'); }
+}
+
+function copyEmpLink() {
+  const link = `${window.location.origin}/status-employee.html?client=${clientId}`;
+  navigator.clipboard.writeText(link).then(() => toast('Link copied', 'success')).catch(() => toast('Copy failed', 'error'));
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'jobs') renderJobsTable();
+}
+
+function toast(msg, type='') {
+  const t = document.getElementById('toast-el');
+  t.textContent = msg;
+  t.className = 'toast show'+(type?' '+type:'');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
