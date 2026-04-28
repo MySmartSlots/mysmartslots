@@ -306,44 +306,86 @@ textarea.inp{resize:vertical;min-height:60px;}
     <div class="tab-panel" id="tab-reports">
       <div class="section-head">
         <h2>Monthly Report Builder</h2>
-        <p>Build and save monthly reports for each active client. Clients can view these in their portal.</p>
+        <p>Fill in the numbers, auto-calculate revenue impact, preview, then send. Report goes to the client, their Account Manager, and you.</p>
       </div>
 
       <div class="card">
-        <div class="card-title">Create / Update Report</div>
+        <div class="card-title">Build Report</div>
         <div class="form-grid">
-          <div class="form-group"><label>Client Email</label>
-            <select class="inp" id="report-client">
+          <div class="form-group"><label>Client</label>
+            <select class="inp" id="report-client" onchange="loadClientReportHistory()">
               <option value="">Select client...</option>
             </select>
           </div>
           <div class="form-group"><label>Report Month</label>
             <input class="inp" type="month" id="report-month"/>
           </div>
+          <div class="form-group"><label>Average Job Value ($)</label>
+            <input class="inp" type="number" id="report-job-value" placeholder="e.g. 350" min="0" oninput="calcRevenue()"/>
+          </div>
           <div class="form-group"><label>Calls Recovered</label>
-            <input class="inp" type="number" id="report-calls" placeholder="e.g. 12" min="0"/>
+            <input class="inp" type="number" id="report-calls" placeholder="e.g. 12" min="0" oninput="calcRevenue()"/>
           </div>
           <div class="form-group"><label>Bookings Confirmed</label>
-            <input class="inp" type="number" id="report-bookings" placeholder="e.g. 8" min="0"/>
+            <input class="inp" type="number" id="report-bookings" placeholder="e.g. 8" min="0" oninput="calcRevenue()"/>
           </div>
           <div class="form-group"><label>Reviews Requested</label>
             <input class="inp" type="number" id="report-reviews" placeholder="e.g. 6" min="0"/>
           </div>
           <div class="form-group"><label>Est. Revenue Impact ($)</label>
-            <input class="inp" type="number" id="report-revenue" placeholder="e.g. 2400" min="0"/>
+            <input class="inp" type="number" id="report-revenue" placeholder="Auto-calculated" min="0"/>
+            <div style="font-size:11px;color:var(--gray);margin-top:4px;" id="revenue-calc-note"></div>
+          </div>
+          <div class="form-group"><label>Client Plan</label>
+            <select class="inp" id="report-plan">
+              <option value="starter">Starter</option>
+              <option value="pro" selected>Pro</option>
+              <option value="elite">Elite</option>
+            </select>
           </div>
         </div>
         <div class="form-group" style="margin-bottom:14px;">
-          <label>Notes for Client</label>
-          <textarea class="inp" id="report-notes" placeholder="Highlights, upcoming changes, recommendations..."></textarea>
+          <label>Notes for Client (shows in the email)</label>
+          <textarea class="inp" id="report-notes" placeholder="e.g. Great first month — missed call recovery already paying off. Next month we'll be watching review request performance closely..." style="min-height:90px;"></textarea>
         </div>
-        <button class="btn btn-orange" onclick="saveReport()">Save Report</button>
+
+        <!-- REP INFO — auto-filled from sales table, editable override -->
+        <div class="form-grid" style="margin-bottom:14px;">
+          <div class="form-group">
+            <label>Account Manager Name <span style="color:var(--gray);font-weight:400;">(auto-filled)</span></label>
+            <input class="inp" type="text" id="report-rep-name" placeholder="Loading..."/>
+          </div>
+          <div class="form-group">
+            <label>Account Manager Email <span style="color:var(--gray);font-weight:400;">(auto-filled)</span></label>
+            <input class="inp" type="email" id="report-rep-email" placeholder="Loading..."/>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-orange" onclick="saveReport()">💾 Save</button>
+          <button class="btn" style="background:var(--accent);color:#fff;" onclick="previewReport()">👁 Preview Email</button>
+          <button class="btn" style="background:var(--green);color:#fff;" onclick="saveAndSendReport()">📧 Save & Send Report</button>
+        </div>
+        <div style="font-size:12px;color:var(--gray);margin-top:.5rem;">
+          <strong>Send</strong> emails the report to: client · their Account Manager · you (hello@mysmartslots.com)
+        </div>
+      </div>
+
+      <!-- PREVIEW MODAL -->
+      <div id="report-preview-wrap" style="display:none;">
+        <div class="card" style="border:2px solid var(--accent);">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>📧 Email Preview</span>
+            <button onclick="document.getElementById('report-preview-wrap').style.display='none'" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:18px;">✕</button>
+          </div>
+          <div id="report-preview-content" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;"></div>
+        </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Saved Reports</div>
+        <div class="card-title">Report History — <span id="history-client-label" style="color:var(--accent);font-weight:400;">Select a client above</span></div>
         <div id="reports-list">
-          <div class="empty"><div class="icon">📈</div>No reports saved yet.</div>
+          <div class="empty"><div class="icon">📈</div>Select a client to view their report history.</div>
         </div>
       </div>
     </div>
@@ -799,30 +841,153 @@ function populateReportClients(){
   submissions.forEach(s=>{
     const o=document.createElement('option');
     o.value=s.contact_email;
+    o.dataset.biz=s.biz_name||'';
+    o.dataset.plan=s.plan||'pro';
     o.textContent=`${s.biz_name} (${s.contact_email})`;
     sel.appendChild(o);
   });
   const now=new Date();
-  document.getElementById('report-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  document.getElementById('reports-list').innerHTML=`<div style="font-size:13px;color:var(--gray);padding:.5rem 0;">Select a client above to view their report history.</div>`;
+  // Default to previous month
+  const prev=new Date(now.getFullYear(),now.getMonth()-1,1);
+  document.getElementById('report-month').value=`${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
 }
 
-async function saveReport(){
+function calcRevenue(){
+  const jobValue=parseInt(document.getElementById('report-job-value').value)||0;
+  const calls=parseInt(document.getElementById('report-calls').value)||0;
+  const bookings=parseInt(document.getElementById('report-bookings').value)||0;
+  if(!jobValue)return;
+  // Revenue = (calls recovered × job value) + (bookings confirmed × job value)
+  // Calls: 80% show rate assumption; bookings are confirmed so 100%
+  const fromCalls=Math.round(calls*0.8*jobValue);
+  const fromBookings=Math.round(bookings*jobValue);
+  const total=fromCalls+fromBookings;
+  document.getElementById('report-revenue').value=total;
+  document.getElementById('revenue-calc-note').textContent=
+    `${calls} calls × 80% × $${jobValue} = $${fromCalls.toLocaleString()} + ${bookings} bookings × $${jobValue} = $${fromBookings.toLocaleString()} → $${total.toLocaleString()} total`;
+}
+
+async function loadClientReportHistory(){
+  const email=document.getElementById('report-client').value;
+  const sel=document.getElementById('report-client');
+  const opt=sel.options[sel.selectedIndex];
+  const bizName=opt?.dataset?.biz||email;
+  const plan=opt?.dataset?.plan||'pro';
+
+  document.getElementById('history-client-label').textContent=bizName||'Select a client above';
+  document.getElementById('report-plan').value=plan;
+
+  if(!email){
+    document.getElementById('reports-list').innerHTML='<div style="font-size:13px;color:var(--gray);padding:.5rem 0;">Select a client to view their report history.</div>';
+    document.getElementById('report-rep-name').value='';
+    document.getElementById('report-rep-email').value='';
+    return;
+  }
+
+  // Auto-fill rep from sales table
+  try{
+    const salesData=dashData?.sales||[];
+    const sale=salesData.find(s=>s.client_email&&s.client_email.toLowerCase()===email.toLowerCase());
+    if(sale){
+      document.getElementById('report-rep-name').value=sale.rep_name||'';
+      document.getElementById('report-rep-email').value=sale.rep_email||'';
+    } else {
+      document.getElementById('report-rep-name').value='';
+      document.getElementById('report-rep-email').value='';
+    }
+  }catch(e){}
+
+  const d=await api('/portal/admin/report/history',{client_email:email});
+  if(!d.success||!d.reports?.length){
+    document.getElementById('reports-list').innerHTML='<div style="font-size:13px;color:var(--gray);padding:.5rem 0;">No reports sent yet for this client.</div>';
+    return;
+  }
+  document.getElementById('reports-list').innerHTML=d.reports.map(r=>{
+    const monthLabel=new Date(r.report_month+'-02').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:14px;font-weight:700;">${monthLabel}</div>
+        <div style="font-size:12px;color:var(--gray);">
+          📞 ${r.calls_recovered} calls · 📅 ${r.bookings_confirmed} bookings · ⭐ ${r.reviews_requested} reviews · 💰 $${(r.revenue_impact||0).toLocaleString()}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="font-size:12px;padding:5px 12px;" onclick="loadReportIntoForm('${r.report_month}',${r.calls_recovered},${r.bookings_confirmed},${r.reviews_requested},${r.revenue_impact},'${encodeURIComponent(r.notes||'')}')">Edit</button>
+        <button class="btn btn-orange" style="font-size:12px;padding:5px 12px;" onclick="resendReport('${email}','${r.report_month}')">Resend</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadReportIntoForm(month,calls,bookings,reviews,revenue,notes){
+  document.getElementById('report-month').value=month;
+  document.getElementById('report-calls').value=calls;
+  document.getElementById('report-bookings').value=bookings;
+  document.getElementById('report-reviews').value=reviews;
+  document.getElementById('report-revenue').value=revenue;
+  document.getElementById('report-notes').value=decodeURIComponent(notes);
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('Report loaded into form — edit and resave');
+}
+
+function getReportPayload(){
   const email=document.getElementById('report-client').value;
   const month=document.getElementById('report-month').value;
-  if(!email||!month){toast('Select a client and month first.',true);return;}
-  const d=await api('/portal/admin/report/save',{
-    client_email:email,report_month:month,
+  if(!email||!month){toast('Select a client and month first.',true);return null;}
+  const sel=document.getElementById('report-client');
+  const opt=sel.options[sel.selectedIndex];
+  return {
+    client_email:email,
+    client_name:opt?.dataset?.biz||email,
+    report_month:month,
     calls_recovered:parseInt(document.getElementById('report-calls').value)||0,
     bookings_confirmed:parseInt(document.getElementById('report-bookings').value)||0,
     reviews_requested:parseInt(document.getElementById('report-reviews').value)||0,
     revenue_impact:parseInt(document.getElementById('report-revenue').value)||0,
     notes:document.getElementById('report-notes').value.trim(),
-  });
-  if(d.success){
-    toast('✓ Report saved');
-    ['report-calls','report-bookings','report-reviews','report-revenue','report-notes'].forEach(id=>{document.getElementById(id).value='';});
-  } else {toast('Failed: '+(d.error||'unknown error'),true);}
+    plan:document.getElementById('report-plan').value||'pro',
+    rep_name:document.getElementById('report-rep-name').value.trim(),
+    rep_email:document.getElementById('report-rep-email').value.trim(),
+  };
+}
+
+async function saveReport(){
+  const payload=getReportPayload();if(!payload)return;
+  const d=await api('/portal/admin/report/save',payload);
+  if(d.success){toast('✓ Report saved');loadClientReportHistory();}
+  else toast('Failed: '+(d.error||'unknown error'),true);
+}
+
+async function saveAndSendReport(){
+  const payload=getReportPayload();if(!payload)return;
+  if(!payload.rep_email){
+    if(!confirm('No Account Manager email found. Send to client and you only?'))return;
+  }
+  const saveD=await api('/portal/admin/report/save',payload);
+  if(!saveD.success){toast('Save failed: '+(saveD.error||'error'),true);return;}
+  const sendD=await api('/portal/admin/report/send',payload);
+  if(sendD.success){
+    toast('✓ Report saved and sent to client, rep, and owner');
+    loadClientReportHistory();
+  } else {toast('Saved but send failed: '+(sendD.error||'error'),true);}
+}
+
+async function resendReport(email,month){
+  const sel=document.getElementById('report-client');
+  // Load this report from history and resend
+  const d=await api('/portal/admin/report/send-by-month',{client_email:email,report_month:month});
+  if(d.success)toast('✓ Report resent');
+  else toast('Resend failed: '+(d.error||'error'),true);
+}
+
+async function previewReport(){
+  const payload=getReportPayload();if(!payload)return;
+  const d=await api('/portal/admin/report/preview',payload);
+  if(!d.success){toast('Preview failed: '+(d.error||'error'),true);return;}
+  const wrap=document.getElementById('report-preview-wrap');
+  document.getElementById('report-preview-content').innerHTML=d.html;
+  wrap.style.display='block';
+  wrap.scrollIntoView({behavior:'smooth'});
 }
 </script>
 
