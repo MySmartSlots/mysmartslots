@@ -100,6 +100,7 @@ select option{background:var(--dark2);}
 
 .err-msg{background:rgba(232,93,93,.1);border:1px solid rgba(232,93,93,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:1rem;display:none;}
 
+.success-screen{display:none;max-width:620px;margin:4rem auto;padding:0 2rem;text-align:center;}
 .platform-tab{background:rgba(255,255,255,.06);border:1px solid var(--border2);color:var(--muted);font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit;transition:all .15s;}
 .platform-tab.active{background:rgba(0,200,150,.12);border-color:rgba(0,200,150,.3);color:var(--accent);}
 .auto-item{display:flex;align-items:center;gap:10px;padding:.6rem 0;border-bottom:1px solid var(--border2);font-size:13px;color:var(--muted);}
@@ -354,7 +355,7 @@ footer p{font-size:12px;color:var(--muted2);}
 </div>
 
 <!-- SUCCESS -->
-<div class="success-screen" id="success-screen">
+<div class="success-screen" id="success-screen" style="display:none;">
   <div class="success-icon">✓</div>
   <h2>You're All Set!</h2>
   <p>We've received everything we need. Your automations will be live within <strong style="color:var(--accent)">24 hours</strong>.</p>
