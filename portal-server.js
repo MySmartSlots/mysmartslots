@@ -784,10 +784,15 @@ app.post("/portal/admin/contacts/wipe", requireAuth, requireAdmin, async (req, r
 // ── AGREEMENT SYSTEM ─────────────────────────────────────────────────────────
 
 const emailTransporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 

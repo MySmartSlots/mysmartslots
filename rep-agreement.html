@@ -279,7 +279,12 @@ async function loadHistory(){
           <div style="font-size:12px;color:var(--gray-text);">${a.agreement_type==='rep'?'Rep Agreement':'Partnership Agreement'} · ${a.territory}</div>
           <div style="font-size:11px;color:var(--gray-text);">${new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
         </div>
-        <span class="status-badge s-${a.status}">${statusMap[a.status]||a.status}</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="status-badge s-${a.status}">${statusMap[a.status]||a.status}</span>
+          ${a.status==='rep_signed'&&a.owner_token
+            ? `<a href="/rep-countersign?token=${a.owner_token}" target="_blank" style="background:#00C896;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;">Countersign →</a>`
+            : ''}
+        </div>
       </div>`).join('');
   }catch(e){}
 }
