@@ -3,7 +3,7 @@ import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+// Email via Resend API (works on Render free tier)
 import PDFDocument from "pdfkit";
 
 const app = express();
@@ -516,7 +516,7 @@ app.post("/portal/admin/report/send", requireAuth, requireAdmin, async (req, res
     const subject = `Your ${monthLabel} Performance Report — My Smart Slots`;
 
     const emailBase = {
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      from: FROM_EMAIL,
       subject,
       html,
     };
@@ -561,7 +561,7 @@ app.post("/portal/admin/report/send-by-month", requireAuth, requireAdmin, async 
     const html = buildReportHTML(data);
     const monthLabel = new Date(report_month + "-02").toLocaleDateString("en-US", { month: "long", year: "numeric" });
     const subject = `Your ${monthLabel} Performance Report — My Smart Slots`;
-    const emailBase = { from: `"My Smart Slots" <${process.env.GMAIL_USER}>`, subject, html };
+    const emailBase = { from: FROM_EMAIL, subject, html };
     await emailTransporter.sendMail({ ...emailBase, to: client_email });
     if (data.rep_email) await emailTransporter.sendMail({ ...emailBase, to: data.rep_email, subject: `[Rep Copy] ${data.client_name||client_email} — ${monthLabel} Report` });
     await emailTransporter.sendMail({ ...emailBase, to: OWNER_EMAIL, subject: `[Owner Copy] ${data.client_name||client_email} — ${monthLabel} Report` });
@@ -783,18 +783,41 @@ app.post("/portal/admin/contacts/wipe", requireAuth, requireAdmin, async (req, r
 
 // ── AGREEMENT SYSTEM ─────────────────────────────────────────────────────────
 
-const emailTransporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+const FROM_EMAIL = "My Smart Slots <hello@mysmartslots.com>";
+
+const emailTransporter = {
+  sendMail: async ({ from, to, subject, html, attachments }) => {
+    // Handle attachments — Resend supports base64
+    const resendAttachments = attachments?.map(a => ({
+      filename: a.filename,
+      content: Buffer.isBuffer(a.content)
+        ? a.content.toString("base64")
+        : Buffer.from(a.content).toString("base64"),
+    })) || [];
+
+    const body = {
+      from: from || FROM_EMAIL,
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html,
+      ...(resendAttachments.length ? { attachments: resendAttachments } : {}),
+    };
+
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || d.name || "Resend API error");
+    return d;
+  }
+};
 
 // Create agreement and send to client
 app.post("/portal/agreement/create", requireAuth, async (req, res) => {
@@ -833,7 +856,7 @@ app.post("/portal/agreement/create", requireAuth, async (req, res) => {
   const signUrl = `https://mysmartslots.com/sign?token=${token}`;
   try {
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      from: FROM_EMAIL,
       to: client_email,
       subject: "My Smart Slots — Please Sign Your Services Agreement",
       html: `
@@ -910,7 +933,7 @@ app.post("/portal/agreement/sign", async (req, res) => {
   try {
     // 1. Email REP — client signed, send payment link now
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      from: FROM_EMAIL,
       to: agreement.rep_email,
       subject: `✓ ${agreement.client_name} signed — send payment link now`,
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -932,7 +955,7 @@ app.post("/portal/agreement/sign", async (req, res) => {
 
     // 2. Email CLIENT — confirmation they signed, waiting for countersign
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      from: FROM_EMAIL,
       to: agreement.client_email,
       subject: "✓ Agreement Received — Countersignature in Progress",
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -947,7 +970,7 @@ app.post("/portal/agreement/sign", async (req, res) => {
 
     // 3. Email OWNER — countersign request
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      from: FROM_EMAIL,
       to: OWNER_EMAIL,
       subject: `New agreement to countersign — ${agreement.client_name} (${agreement.plan_label})`,
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -1014,7 +1037,7 @@ app.post("/portal/agreement/countersign", async (req, res) => {
   generateAgreementPDF(fullAgreement)
     .then(pdfBuffer => {
       const emailOpts = {
-        from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+        from: FROM_EMAIL,
         subject: `✓ Fully Executed — My Smart Slots Services Agreement (${agreement.plan_label})`,
         attachments: [{ filename:`MySmartSlots_Agreement_${agreement.client_name.replace(/\s+/g,"_")}.pdf`, content:pdfBuffer }],
         html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -1055,7 +1078,7 @@ app.post("/portal/agreement/resend", requireAuth, async (req, res) => {
   const signUrl = `https://mysmartslots.com/sign?token=${token}`;
   try {
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      from: FROM_EMAIL,
       to: data.client_email,
       subject: "Reminder — Please Sign Your My Smart Slots Agreement",
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;"><p>Hi ${data.client_name}, this is a reminder to sign your My Smart Slots services agreement.</p><p><a href="${signUrl}" style="background:#00C896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;">Sign Agreement →</a></p></div>`,
@@ -1233,7 +1256,7 @@ app.post("/portal/rep-agreement/create", requireAuth, requireAdmin, async (req, 
   const signUrl = `https://mysmartslots.com/rep-sign?token=${token}`;
   try {
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      from: FROM_EMAIL,
       to: repEmail,
       subject: `My Smart Slots — Please Sign Your ${typeLabel}`,
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -1285,7 +1308,7 @@ app.post("/portal/rep-agreement/sign", async (req, res) => {
 
   try {
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`, to: OWNER_EMAIL,
+      from: FROM_EMAIL, to: OWNER_EMAIL,
       subject: `✓ ${agreement.rep_name} signed their ${typeLabel} — countersign needed`,
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
         <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
@@ -1303,7 +1326,7 @@ app.post("/portal/rep-agreement/sign", async (req, res) => {
         </div></div>`,
     });
     await emailTransporter.sendMail({
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`, to: agreement.rep_email,
+      from: FROM_EMAIL, to: agreement.rep_email,
       subject: `✓ ${typeLabel} Received — Countersignature in Progress`,
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
         <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
@@ -1348,7 +1371,7 @@ app.post("/portal/rep-agreement/countersign", async (req, res) => {
   generateRepAgreementPDF({ ...agreement, owner_signature_data, owner_name: owner_name || "My Smart Slots / Clair Group LLC", executed_at: executedDate })
     .then(pdfBuffer => {
       const emailOpts = {
-        from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+        from: FROM_EMAIL,
         subject: `✓ Fully Executed — My Smart Slots ${typeLabel}`,
         attachments: [{ filename:`MySmartSlots_${typeLabel.replace(/ /g,"_")}_${agreement.rep_name.replace(/ /g,"_")}.pdf`, content:pdfBuffer }],
         html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -1386,7 +1409,7 @@ app.post("/portal/rep-agreement/resend", requireAuth, requireAdmin, async (req, 
   generateRepAgreementPDF(agreement)
     .then(pdfBuffer => {
       const emailOpts = {
-        from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+        from: FROM_EMAIL,
         subject: `✓ Fully Executed — My Smart Slots ${typeLabel} (Resent)`,
         attachments: [{ filename:`MySmartSlots_${typeLabel.replace(/ /g,"_")}_${agreement.rep_name.replace(/ /g,"_")}.pdf`, content:pdfBuffer }],
         html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
