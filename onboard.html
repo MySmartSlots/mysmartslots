@@ -100,7 +100,11 @@ select option{background:var(--dark2);}
 
 .err-msg{background:rgba(232,93,93,.1);border:1px solid rgba(232,93,93,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:1rem;display:none;}
 
-.success-screen{display:none;max-width:620px;margin:4rem auto;padding:0 2rem;text-align:center;}
+.platform-tab{background:rgba(255,255,255,.06);border:1px solid var(--border2);color:var(--muted);font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.platform-tab.active{background:rgba(0,200,150,.12);border-color:rgba(0,200,150,.3);color:var(--accent);}
+.auto-item{display:flex;align-items:center;gap:10px;padding:.6rem 0;border-bottom:1px solid var(--border2);font-size:13px;color:var(--muted);}
+.auto-item:last-child{border-bottom:none;}
+.auto-check{width:20px;height:20px;border-radius:50%;background:rgba(0,200,150,.15);border:1px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
 .success-icon{width:72px;height:72px;border-radius:50%;background:var(--accent-glow);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:32px;}
 .success-screen h2{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;margin-bottom:1rem;}
 .success-screen p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:.75rem;}
@@ -354,14 +358,49 @@ footer p{font-size:12px;color:var(--muted2);}
   <div class="success-icon">✓</div>
   <h2>You're All Set!</h2>
   <p>We've received everything we need. Your automations will be live within <strong style="color:var(--accent)">24 hours</strong>.</p>
-  <p>Keep an eye on <strong id="success-email" style="color:var(--text)"></strong> — we'll send a confirmation and your setup details there.</p>
-  <div class="next-steps">
-    <h3>What Happens Next</h3>
-    <div class="ns-item"><div class="ns-num">1</div><span>We review your info and configure your chatbot, SMS flows, and calendar sync — usually within a few hours.</span></div>
-    <div class="ns-item"><div class="ns-num">2</div><span>You'll receive an email with your My Smart Slots booking page link, your new SMS number, and a quick-start guide.</span></div>
-    <div class="ns-item"><div class="ns-num">3</div><span>If you need a chat widget on your website, we'll send you a single line of code to paste — takes 2 minutes.</span></div>
-    <div class="ns-item"><div class="ns-num">4</div><span>Everything goes live. Missed calls get texted back. Bookings get confirmed. Your schedule fills itself.</span></div>
+  <p>Keep an eye on <strong id="success-email" style="color:var(--text)"></strong> — we'll send a confirmation and full setup details there.</p>
+
+  <!-- CHAT WIDGET CODE -->
+  <div style="background:var(--dark2);border:1px solid var(--border2);border-radius:14px;padding:1.5rem;margin:2rem 0;text-align:left;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.75rem;">💬 Your AI Chat Widget</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.7;">Paste this one line of code into your website to add your AI booking assistant. Place it just before the <code style="background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;">&lt;/body&gt;</code> tag.</p>
+    <div style="background:#0d1117;border:1px solid var(--border2);border-radius:10px;padding:1rem;font-family:monospace;font-size:13px;color:#7dd3fc;word-break:break-all;position:relative;" id="widget-code-block">
+      Loading your code...
+    </div>
+    <button onclick="copyWidgetCode()" style="margin-top:.75rem;background:var(--accent);color:#111;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Copy Code</button>
+
+    <!-- Platform instructions -->
+    <div style="margin-top:1.25rem;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:.5rem;">How to install on your platform:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="platform-tabs">
+        <button class="platform-tab active" onclick="showPlatform('wordpress',this)">WordPress</button>
+        <button class="platform-tab" onclick="showPlatform('wix',this)">Wix</button>
+        <button class="platform-tab" onclick="showPlatform('squarespace',this)">Squarespace</button>
+        <button class="platform-tab" onclick="showPlatform('html',this)">Custom HTML</button>
+      </div>
+      <div id="platform-instructions" style="background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;padding:1rem;margin-top:.75rem;font-size:13px;color:var(--muted);line-height:1.8;"></div>
+    </div>
   </div>
+
+  <!-- TWILIO FORWARDING INSTRUCTIONS -->
+  <div style="background:var(--dark2);border:1px solid var(--border2);border-radius:14px;padding:1.5rem;margin:2rem 0;text-align:left;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.75rem;">📞 Missed Call Text Back Setup</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.7;">To activate missed call text back, you need to forward your business number to your My Smart Slots number when a call goes unanswered. Your team handles this for you — but here's how it works:</p>
+    <div style="background:#0d1117;border:1px solid var(--border2);border-radius:10px;padding:1rem;font-size:13px;color:var(--muted);line-height:1.9;">
+      <div style="color:var(--text);font-weight:700;margin-bottom:.5rem;">Your business number: <span id="forward-from-display" style="color:var(--accent);">—</span></div>
+      <div style="color:var(--text);font-weight:700;margin-bottom:.75rem;">Forwards to your My Smart Slots number (assigned by your Account Manager)</div>
+      <div><strong style="color:var(--text);">For most carriers</strong> — dial this code from your business phone:</div>
+      <div style="background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.2);border-radius:8px;padding:.75rem 1rem;margin:.5rem 0;font-family:monospace;color:var(--accent);font-size:15px;" id="forward-code">*71[Your MSS Number]</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:.25rem;">Your Account Manager will send your specific My Smart Slots number and the exact forwarding code for your carrier within 24 hours.</div>
+    </div>
+  </div>
+
+  <!-- WHAT GOES LIVE -->
+  <div class="next-steps" style="text-align:left;">
+    <h3>What Goes Live in 24 Hours</h3>
+    <div id="automations-checklist"></div>
+  </div>
+
   <p style="margin-top:1.5rem;font-size:13px;color:var(--muted);">Questions? Call <a href="tel:7853290202" style="color:var(--accent)">785-329-0202</a> or email <a href="mailto:hello@mysmartslots.com" style="color:var(--accent)">hello@mysmartslots.com</a></p>
 </div>
 
@@ -565,6 +604,101 @@ function showSuccess(data){
   document.getElementById('success-screen').style.display='block';
   document.getElementById('success-email').textContent=data.contact_email;
   window.scrollTo({top:0,behavior:'smooth'});
+
+  // Generate client_id from business name
+  const clientId=(data.biz_name||'my-business')
+    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+  // Show widget code
+  const widgetScript=`<script src="https://mysmartslots.com/chat-widget.js?client=${clientId}"><\/script>`;
+  document.getElementById('widget-code-block').textContent=widgetScript;
+  window._widgetCode=widgetScript;
+
+  // Show forwarding number
+  if(data.forward_from){
+    document.getElementById('forward-from-display').textContent=data.forward_from;
+  }
+
+  // Show platform instructions
+  showPlatform('wordpress', document.querySelector('.platform-tab.active'));
+
+  // Build automations checklist based on plan
+  const plan=data.plan||'pro';
+  const allAutomations=[
+    {name:'AI Chat Booking', plans:['starter','pro','elite'], desc:'24/7 chatbot on your website answers questions and books appointments'},
+    {name:'SMS Confirmations', plans:['starter','pro','elite'], desc:'Every new booking triggers an automatic confirmation text'},
+    {name:'Appointment Reminders', plans:['starter','pro','elite'], desc:'Automated reminders the day before and morning of every appointment'},
+    {name:'Calendar Sync', plans:['starter','pro','elite'], desc:'Bookings go directly to your Google, Outlook, or Calendly calendar'},
+    {name:'Monthly Report', plans:['starter','pro','elite'], desc:'Monthly recap of calls recovered, bookings confirmed, and revenue impact'},
+    {name:'Missed Call Text Back', plans:['pro','elite'], desc:'Texts back anyone who calls and doesn\'t get an answer — within seconds'},
+    {name:'Live SMS Chat', plans:['pro','elite'], desc:'AI responds to inbound texts on behalf of your business instantly'},
+    {name:'Post-Job Review Requests', plans:['pro','elite'], desc:'Automatically requests Google reviews after every completed job'},
+    {name:'Lead Re-Engagement', plans:['elite'], desc:'Brings back cold leads and past customers automatically'},
+    {name:'Partial Email Replies', plans:['elite'], desc:'Instant auto-reply to inbound emails and form submissions'},
+    {name:'Job Status Update Texts', plans:['elite'], desc:'One-tap employee tool sends automatic customer updates'},
+  ];
+
+  const active=allAutomations.filter(a=>a.plans.includes(plan));
+  document.getElementById('automations-checklist').innerHTML=active.map(a=>`
+    <div class="auto-item">
+      <div class="auto-check">✓</div>
+      <div>
+        <div style="font-weight:700;color:var(--text);">${a.name}</div>
+        <div style="font-size:12px;">${a.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+const PLATFORM_INSTRUCTIONS={
+  wordpress:`<strong style="color:var(--text);">WordPress:</strong><br/>
+1. Go to <strong>Appearance → Theme Editor</strong> (or use a plugin like "Insert Headers and Footers")<br/>
+2. Find your theme's <strong>footer.php</strong> file<br/>
+3. Paste the code just before the closing <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;">&lt;/body&gt;</code> tag<br/>
+4. Save — the chat bubble appears on your site immediately<br/><br/>
+<em>Easier option: Install the free "Insert Headers and Footers" plugin → paste the code in the Footer section.</em>`,
+
+  wix:`<strong style="color:var(--text);">Wix:</strong><br/>
+1. Go to your Wix dashboard → <strong>Settings → Custom Code</strong><br/>
+2. Click <strong>+ Add Custom Code</strong><br/>
+3. Paste your widget code<br/>
+4. Set placement to <strong>Body - end</strong><br/>
+5. Set "Add code to pages" to <strong>All pages</strong><br/>
+6. Click <strong>Apply</strong> — done`,
+
+  squarespace:`<strong style="color:var(--text);">Squarespace:</strong><br/>
+1. Go to <strong>Settings → Advanced → Code Injection</strong><br/>
+2. Paste your widget code in the <strong>Footer</strong> box<br/>
+3. Click <strong>Save</strong><br/><br/>
+<em>Note: Code injection requires a Squarespace Business plan or higher.</em>`,
+
+  html:`<strong style="color:var(--text);">Custom HTML:</strong><br/>
+1. Open your website's HTML file in any text editor<br/>
+2. Find the closing <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;">&lt;/body&gt;</code> tag near the bottom<br/>
+3. Paste the code directly above it<br/>
+4. Save and upload — the chat bubble appears immediately`,
+};
+
+function showPlatform(platform, btn){
+  document.querySelectorAll('.platform-tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const el=document.getElementById('platform-instructions');
+  if(el)el.innerHTML=PLATFORM_INSTRUCTIONS[platform]||'';
+}
+
+function copyWidgetCode(){
+  const code=window._widgetCode||document.getElementById('widget-code-block').textContent;
+  navigator.clipboard.writeText(code)
+    .then(()=>{
+      const btn=event.target;
+      btn.textContent='Copied!';btn.style.background='#16a34a';
+      setTimeout(()=>{btn.textContent='Copy Code';btn.style.background='';},2000);
+    })
+    .catch(()=>{
+      // Fallback
+      const ta=document.createElement('textarea');
+      ta.value=code;document.body.appendChild(ta);ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+    });
 }
 </script>
 </body>

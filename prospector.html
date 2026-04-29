@@ -419,15 +419,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.25rem 0;}
     <div class="modal-step" id="ms-1">
       <div style="font-size:13px;color:var(--gray);margin-bottom:1rem;">Research <strong style="color:var(--white);" id="fit-biz-name">this business</strong> on Google, their website, and social media before answering. Everything below can be verified before you call.</div>
       <div class="fit-grid" id="modal-fit-questions"></div>
-      <div class="score-result-inline" id="modal-score-result">
-        <div class="score-big-sm" id="modal-score-num">—</div>
-        <div style="font-size:15px;font-weight:700;color:var(--white);margin:.35rem 0 .2rem;" id="modal-score-label">—</div>
-        <div style="font-size:12px;color:var(--gray);" id="modal-score-sub">—</div>
+      <div class="score-result-inline show" id="modal-score-result">
+        <div class="score-big-sm" id="modal-score-num" style="color:var(--gray);">—</div>
+        <div style="font-size:15px;font-weight:700;color:var(--white);margin:.35rem 0 .2rem;" id="modal-score-label">Answer questions to calculate fit score</div>
+        <div style="font-size:12px;color:var(--gray);" id="modal-score-sub">Score updates automatically as you answer</div>
       </div>
       <div class="step-nav">
         <button class="btn btn-ghost" onclick="nextModalStep(0)">← Back</button>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" onclick="calcModalFit()">Calculate Score</button>
           <button class="btn btn-blue" onclick="nextModalStep(2)">Next: Review →</button>
         </div>
       </div>
@@ -454,7 +453,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.25rem 0;}
 const API="https://mysmartslots-portal.onrender.com";
 let currentUser=null,currentU=null,currentP=null;
 let repProspects=[],currentCity='',pitchState={industry:'',pain:'',method:''};
-let modalStep=0,fitAnswers={},modalFitScore=0;
+let modalStep=0,fitAnswers={},modalFitScore=0,editingProspect=null;
 
 async function doLogin(){
   const u=document.getElementById('username').value.trim();
@@ -676,8 +675,10 @@ function iceFor(name,type,e){
 
 // ── ADD PROSPECT MODAL ────────────────────────────────────────────────────────
 function openAddModal(){
-  modalStep=0;fitAnswers={};modalFitScore=0;
+  modalStep=0;fitAnswers={};modalFitScore=0;editingProspect=null;
   document.getElementById('modal-score-result').classList.remove('show');
+  // Reset all fit question buttons
+  document.querySelectorAll('.fq-btn').forEach(b=>b.className='fq-btn');
   ['m-name','m-owner','m-phone','m-city','m-state','m-signals','m-notes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('m-type').value='';
   document.getElementById('m-size').value='';
@@ -717,49 +718,112 @@ function nextModalStep(n){
 }
 
 const FIT_QUESTIONS=[
-  {id:'reviews_count',  text:'Google reviews — how many?',          yes:3,no:0,maybe:1,
-   opts:['50+ reviews','10–49 reviews','Under 10 reviews','No Google listing'],
-   vals:['yes','maybe','no','no']},
-  {id:'reviews_rating', text:'Google rating?',                       yes:3,no:-1,maybe:1,
-   opts:['4.0 stars or higher','3.0–3.9 stars','Under 3.0 stars','No rating'],
-   vals:['yes','maybe','no','no']},
-  {id:'has_website',    text:'Do they have a website?',              yes:2,no:1,maybe:0,
-   opts:['Yes','No'],
-   vals:['yes','no']},
-  {id:'website_quality',text:'Website quality?',                     yes:2,no:0,maybe:1,
-   opts:['Modern & professional','Outdated but functional','Very poor / barely works','No website'],
-   vals:['yes','maybe','no','no']},
-  {id:'has_chatbot',    text:'Do they have a chatbot or live chat?', yes:-1,no:3,maybe:1,
-   opts:['Yes — chatbot visible','No chatbot','Can\'t tell'],
-   vals:['no','yes','maybe']},
-  {id:'booking_online', text:'Can customers book online?',           yes:-1,no:3,maybe:1,
-   opts:['Yes — online booking visible','No online booking','Can\'t tell'],
-   vals:['no','yes','maybe']},
-  {id:'google_biz',     text:'Google Business profile claimed?',     yes:1,no:3,maybe:2,
-   opts:['Yes — fully set up','Claimed but incomplete','Not claimed / no profile'],
-   vals:['yes','maybe','no']},
-  {id:'social_media',   text:'Active social media presence?',        yes:1,no:2,maybe:1,
-   opts:['Active (posts in last 30 days)','Has pages but inactive','No social presence'],
-   vals:['yes','maybe','no']},
-  {id:'hours_listed',   text:'Hours clearly listed online?',         yes:1,no:2,maybe:1,
-   opts:['Yes — clear hours listed','Partial / inconsistent','No hours listed'],
-   vals:['yes','maybe','no']},
-  {id:'phone_prominent',text:'Is their phone number easy to find?',  yes:0,no:3,maybe:1,
-   opts:['Yes — prominent on site & Google','Hard to find','No phone listed'],
-   vals:['yes','no','maybe']},
-  {id:'reviews_recent', text:'Recent negative reviews mentioning missed calls / no response?', yes:3,no:0,maybe:1,
-   opts:['Yes — complaints about not calling back','No negative patterns','Can\'t tell'],
-   vals:['yes','no','maybe']},
-  {id:'appointment_biz',text:'Is this clearly an appointment-based business?', yes:3,no:-2,maybe:1,
-   opts:['Yes — clearly books appointments','Probably — service-based','Unclear / walk-in only'],
-   vals:['yes','maybe','no']},
+  {
+    id:'appointment_biz',
+    text:'Is this clearly an appointment-based or booking-based business?',
+    weight:12,
+    opts:['Yes — clearly books appointments','Probably — service-based','Unclear / walk-in only'],
+    vals:['yes','maybe','no'],
+    tip:'Check their website and Google listing. Do they have a "Book Now" button, calendar, or scheduling language?'
+  },
+  {
+    id:'reviews_count',
+    text:'How many Google reviews do they have?',
+    weight:10,
+    opts:['50+ reviews','10–49 reviews','Under 10 reviews','No Google listing'],
+    vals:['yes','maybe','no','no'],
+    tip:'More reviews = more customers = more missed calls. 50+ is a strong signal of real volume.'
+  },
+  {
+    id:'reviews_rating',
+    text:'What is their Google rating?',
+    weight:8,
+    opts:['4.0 stars or higher','3.0–3.9 stars','Under 3.0 stars','No rating'],
+    vals:['yes','maybe','no','no'],
+    tip:'High rating = happy customers but maybe no review request system. Low rating = possible churn risk.'
+  },
+  {
+    id:'no_chatbot',
+    text:'Do they have a chatbot or AI chat on their website?',
+    weight:10,
+    opts:['No chatbot — gap to fill','Yes — chatbot already visible','Can\'t tell / no website'],
+    vals:['yes','no','maybe'],
+    tip:'No chatbot = opportunity. Open their site and look for a chat bubble in the bottom corner.'
+  },
+  {
+    id:'no_booking',
+    text:'Can customers book online directly?',
+    weight:10,
+    opts:['No online booking — gap to fill','Yes — online booking visible','Can\'t tell'],
+    vals:['yes','no','maybe'],
+    tip:'No booking = they rely on calls. Those calls get missed. That\'s your pitch.'
+  },
+  {
+    id:'google_biz',
+    text:'Is their Google Business profile claimed and complete?',
+    weight:8,
+    opts:['Claimed and fully set up','Claimed but incomplete','Not claimed / no profile'],
+    vals:['yes','maybe','no'],
+    tip:'Unclaimed profile = they\'re not managing their online presence. Strong buying signal.'
+  },
+  {
+    id:'missed_call_reviews',
+    text:'Do any reviews mention missed calls, no response, or hard to reach?',
+    weight:12,
+    opts:['Yes — complaints about not calling back','No negative patterns','Can\'t see reviews'],
+    vals:['yes','maybe','no'],
+    tip:'Search their reviews for keywords: "never called back", "couldn\'t reach", "no response". This is gold.'
+  },
+  {
+    id:'social_activity',
+    text:'How active is their social media presence?',
+    weight:6,
+    opts:['Active — posts in last 30 days','Has pages but inactive (60+ days)','No social presence'],
+    vals:['yes','maybe','no'],
+    tip:'Inactive social = they\'re busy working not marketing. Good prospect. Active but no automation = even better.'
+  },
+  {
+    id:'hours_listed',
+    text:'Are their business hours clearly listed online?',
+    weight:6,
+    opts:['Yes — clear hours on Google and site','Partial / inconsistent','No hours listed anywhere'],
+    vals:['yes','maybe','no'],
+    tip:'No hours = customers can\'t tell when to call. After-hours missed calls are the most painful.'
+  },
+  {
+    id:'phone_visible',
+    text:'Is their phone number easy to find and prominent?',
+    weight:8,
+    opts:['Yes — on Google and website header','Hard to find / buried','No phone listed'],
+    vals:['yes','maybe','no'],
+    tip:'Prominent phone = they want calls. Calls get missed. That\'s the setup for your pitch.'
+  },
+  {
+    id:'business_size',
+    text:'What is the estimated business size?',
+    weight:6,
+    opts:['2–6 employees (sweet spot)','Solo operator','7+ employees / larger operation'],
+    vals:['yes','maybe','maybe'],
+    tip:'2–6 is the sweet spot — busy enough to miss calls, small enough to not have full staff. Solo can work too.'
+  },
+  {
+    id:'website_quality',
+    text:'What is the quality of their website?',
+    weight:4,
+    opts:['Modern and professional','Outdated but functional','Very poor or no website'],
+    vals:['maybe','yes','yes'],
+    tip:'Outdated website = they\'re behind on digital tools. Easy to position My Smart Slots as a quick win.'
+  },
 ];
 
 function renderFitQuestionsModal(){
-  document.getElementById('modal-fit-questions').innerHTML=FIT_QUESTIONS.map(q=>`
-    <div class="fit-question">
-      <div class="fq-label">${q.text}</div>
-      <div class="fq-options" style="flex-wrap:wrap;gap:6px;">
+  document.getElementById('modal-fit-questions').innerHTML=FIT_QUESTIONS.map((q,idx)=>`
+    <div class="fit-question" id="fq-${q.id}">
+      <div class="fq-label">
+        ${idx+1}. ${q.text}
+        ${q.tip?`<div style="font-size:11px;color:var(--gray);margin-top:3px;font-style:italic;">💡 ${q.tip}</div>`:''}
+      </div>
+      <div class="fq-options" style="flex-wrap:wrap;gap:6px;margin-top:8px;">
         ${q.opts.map((opt,i)=>`<button class="fq-btn" onclick="setFitAnswerMulti('${q.id}','${q.vals[i]}',${i},this)">${opt}</button>`).join('')}
       </div>
     </div>`).join('');
@@ -770,32 +834,44 @@ function setFitAnswerMulti(id,val,idx,btn){
   btn.parentElement.querySelectorAll('.fq-btn').forEach(b=>{b.className='fq-btn';});
   const colorMap={yes:'sel-yes',no:'sel-no',maybe:'sel-maybe'};
   btn.classList.add(colorMap[val]||'sel-maybe');
+  // Auto-calculate score every time an answer changes
+  calcModalFit(true);
 }
 
 function setFitAnswer(id,val,btn){
   fitAnswers[id]=val;
   btn.parentElement.querySelectorAll('.fq-btn').forEach(b=>b.className='fq-btn');
   btn.classList.add('sel-'+val);
+  calcModalFit(true);
 }
 
-function calcModalFit(){
+function calcModalFit(silent=false){
   let score=0;
   let answered=0;
+  let totalWeight=0;
+
   FIT_QUESTIONS.forEach(q=>{
+    totalWeight+=q.weight;
     const a=fitAnswers[q.id];
     if(!a)return;
     answered++;
-    score+=a==='yes'?q.yes:a==='no'?q.no:q.maybe;
+    const multiplier=a==='yes'?1:a==='maybe'?0.5:0;
+    score+=q.weight*multiplier;
   });
-  if(answered===0){toast('Answer at least a few questions first.');return;}
 
-  // Calculate max possible and min possible scores
-  const max=FIT_QUESTIONS.reduce((a,q)=>a+Math.max(q.yes,q.no,q.maybe),0);
-  const min=FIT_QUESTIONS.reduce((a,q)=>a+Math.min(q.yes,q.no,q.maybe),0);
+  if(answered===0){
+    if(!silent)toast('Answer at least a few questions first.');
+    return;
+  }
 
-  // Scale score to 0-100 range
-  const range=max-min;
-  modalFitScore=range>0?Math.max(0,Math.min(100,Math.round(((score-min)/range)*100))):50;
+  // Scale to 0-100 based on answered questions only
+  const answeredWeight=FIT_QUESTIONS.filter(q=>fitAnswers[q.id]).reduce((a,q)=>a+q.weight,0);
+  modalFitScore=answeredWeight>0?Math.max(0,Math.min(100,Math.round((score/answeredWeight)*100))):0;
+
+  // Apply penalty for unanswered questions — partial score
+  const completeness=answered/FIT_QUESTIONS.length;
+  const adjustedScore=Math.round(modalFitScore*completeness+(50*(1-completeness)));
+  modalFitScore=adjustedScore;
 
   const res=document.getElementById('modal-score-result');
   const num=document.getElementById('modal-score-num');
@@ -808,16 +884,26 @@ function calcModalFit(){
   num.style.color=modalFitScore>=70?'var(--green)':modalFitScore>=45?'var(--orange)':'var(--red)';
 
   if(modalFitScore>=70){
-    lbl.textContent='🔥 Strong Fit';
-    sub.textContent=`Move on this one. Answered ${answered}/${FIT_QUESTIONS.length} questions.`;
+    lbl.textContent='🔥 Strong Fit — Move on this one';
+    lbl.style.color='var(--green)';
+    sub.textContent=`${answered}/${FIT_QUESTIONS.length} questions answered · High confidence`;
   } else if(modalFitScore>=45){
-    lbl.textContent='⚡ Warm Fit';
-    sub.textContent=`Worth pursuing. Answered ${answered}/${FIT_QUESTIONS.length} questions.`;
+    lbl.textContent='⚡ Warm Fit — Worth pursuing';
+    lbl.style.color='var(--orange)';
+    sub.textContent=`${answered}/${FIT_QUESTIONS.length} questions answered · Moderate confidence`;
   } else {
-    lbl.textContent='❄️ Low Fit';
-    sub.textContent=`Proceed carefully. Answered ${answered}/${FIT_QUESTIONS.length} questions.`;
+    lbl.textContent='❄️ Low Fit — Proceed carefully';
+    lbl.style.color='var(--red)';
+    sub.textContent=`${answered}/${FIT_QUESTIONS.length} questions answered · Low confidence`;
   }
+
   res.classList.add('show');
+
+  // Update the prospect in memory so the card shows the real score
+  if(editingProspect){
+    editingProspect.fitScore=modalFitScore;
+    editingProspect.fit=modalFitScore>=70?'hot':modalFitScore>=45?'warm':'cold';
+  }
 }
 
 function buildModalReview(){
