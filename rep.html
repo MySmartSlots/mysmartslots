@@ -633,6 +633,7 @@ async function doLogin(){
     }
     await loadContacts();
     updateScripts();calcAudit();calcComm();
+    renderObjections();renderCloses();
     initGoals();renderProcessSteps();
     document.getElementById('today-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   }catch(e){document.getElementById('login-error').style.display='block';}
@@ -664,45 +665,241 @@ function updateScripts(){
   const pros=document.getElementById('p-pros').value.trim()||'[Name]';
   const biz=document.getElementById('p-biz').value.trim()||'[Business Name]';
   const s={
-    's-open':`"Hey, is this <b>${pros}</b>? ... Hey ${pros}, my name's <b>${rep}</b> — I work with trade contractors in the area on something specific. I'll keep it short.<br><br>I noticed <b>${biz}</b> doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're on a job?"`,
-    's-q':`"How are you handling it when a call comes in while you or your guys are <b>on a job</b>? Is there a system for that or does it kind of just go to voicemail?"`,
-    's-vm':`"Yeah that's what most guys tell me. The problem is about 80% of people who hit voicemail just call the next guy on Google — they don't leave a message, they move on.<br><br>What we do is automatically text them back within seconds with a booking link — before they think about calling someone else. Most of our clients recover 3 to 5 jobs a month just from that.<br><br>I'm not trying to sell you anything today — I just do a free 10-minute audit where I show you exactly how many calls you're likely losing and what it's costing you monthly. Would that be worth 10 minutes?"`,
-    's-has':`"That's great — what are you using? ... [listen] ... Got it. Does it text people back automatically when a call gets missed, or is it more of a scheduling tool?"`,
-    's-cls':`"Perfect. I can do the audit over the phone — takes about 10 minutes. I just need a few numbers from you and I'll run the math live. What's a good time this week?"`,
-    's-ni':`"Totally fair. Can I just send you a quick link so you can see what it looks like? Takes 30 seconds."<br><br>Send: <b>mysmartslots.com/subdomain</b>`,
-    's-t1':`Hey <b>${pros}</b>, my name's <b>${rep}</b> — I work with trade contractors helping them recover missed calls automatically. Noticed <b>${biz}</b> doesn't have a follow-up system on your site.<br><br>Quick question — how are you handling calls that come in while you're on a job?<br><br>Not a sales pitch, just a 10-minute conversation if it's useful.`,
+    's-open':`"Hey, is this <b>${pros}</b>? ... Hey ${pros}, my name's <b>${rep}</b> — I'm an Account Manager with My Smart Slots. I work specifically with service businesses in the area on something pretty specific. I'll keep it under a minute."`,
+    's-q':`"Quick question — how are you handling it when a call comes in while you're with a customer or out on a job? Is there a system for that, or does it kind of just go to voicemail?"`,
+    's-vm':`"Yeah that's what most business owners tell me. The problem is about 80% of people who hit voicemail just call the next business on Google — they don't leave a message, they move on.<br><br>What we do is automatically text them back within seconds with a booking link — before they think about calling someone else. Most of our clients recover 3 to 5 jobs a month just from that one automation.<br><br>I'm not trying to sell you anything today — I just do a free 10-minute audit where I run the math live with you and show you exactly what missed calls are costing you per month. Would that be worth 10 minutes?"`,
+    's-has':`"That's great — what are you using? ... [listen] ... Got it. Does it text people back automatically the moment a call gets missed, or is it more of a scheduling tool? ... Because there's usually a gap there even when people have something in place."`,
+    's-cls':`"Perfect. I can do the audit over the phone — takes about 10 minutes. I just need a few numbers from you and I'll run the math live. What's a good time this week — does Thursday or Friday work?"`,
+    's-yes':`"Perfect. Here's what happens next — I'm going to send you a quick agreement to your email right now. It's our standard services agreement, takes about 2 minutes to sign on your phone. Once you sign I'll send you the payment link and we'll have everything live within 24 hours of your onboard form.<br><br>What's the best email for you?"<br><br><span style="color:var(--accent);font-weight:700;">→ Open /agreement immediately. Fill in their info. Hit send. Don't wait.</span>`,
+    's-ni':`"Totally fair. Can I just send you a quick link so you can see what it looks like? 30 seconds." → Send: <b>mysmartslots.com/subdomain</b><br><br>Then: "If the timing's ever right just reply and I'll set up a free audit — no pressure."`,
+    's-t1':`Hey <b>${pros}</b>, my name's <b>${rep}</b> — I'm an Account Manager with My Smart Slots. I work with service businesses helping them recover missed calls automatically.<br><br>Noticed <b>${biz}</b> doesn't have an automated follow-up when calls go unanswered. Quick question — how are you handling it when a call comes in while you're with a customer?<br><br>Not a sales pitch, just a 10-minute conversation if it's useful.`,
     's-t2':`Hey ${pros} — did this reach you? Happy to send the short version if easier.`,
-    's-t3':`Last reach out ${pros} — here's what we built for contractors like you: <b>mysmartslots.com/subdomain</b><br><br>If the timing's ever right, just reply and I'll set up a free audit.`,
+    's-t3':`Last reach out ${pros} — here's what we built: <b>mysmartslots.com/subdomain</b><br><br>If the timing's ever right, just reply and I'll set up a free audit.`,
     's-subj':`<b>${biz}</b> — how many calls went to voicemail this week?`,
-    's-email':`Hey <b>${pros}</b>,<br><br>I came across <b>${biz}</b> while looking at trade contractors in your area. Quick observation — you don't have any automated follow-up on your site, which means every call that goes unanswered while you're on a job is probably going to a competitor.<br><br>My Smart Slots sets up automated booking systems for trade contractors — missed call texts, AI chat booking, appointment reminders, review requests. 24 hours to set up, runs on its own after that.<br><br>Here's what a client page looks like: <b>mysmartslots.com/subdomain</b><br><br>Free 10-minute audit — no pitch, just the math. Worth a quick call?<br><br>${rep}<br>My Smart Slots · 785-329-0202`,
+    's-email':`Hey <b>${pros}</b>,<br><br>I came across <b>${biz}</b> and noticed there's no automated follow-up when calls go unanswered — which means every missed call while you're with a customer is probably going to a competitor.<br><br>My Smart Slots sets up AI-powered automation for service businesses — missed call texts, AI chat booking, appointment reminders, review requests. 24 hours to set up, runs on its own after that.<br><br>Here's what a client page looks like: <b>mysmartslots.com/subdomain</b><br><br>Free 10-minute audit — no pitch, just the math on your numbers. Worth a quick call?<br><br>${rep}<br>Account Manager · My Smart Slots · 785-329-0202`,
     's-efu':`Hey ${pros} — did this land in the right place? Happy to send the short version if easier.`,
   };
   Object.entries(s).forEach(([id,html])=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
 }
 
 const OBJECTIONS=[
-  ["I don't have time for this.","\"Totally get it — that's why this exists. It runs itself, you don't touch it. Can I send you the demo link? Takes 30 seconds.\" → mysmartslots.com/subdomain"],
-  ["I already have someone answering my phones.","\"This isn't replacing them — it's about what happens after hours, on weekends, or when they're on another call. Most shops lose 30–40% of after-hours inquiries before anyone can pick up.\""],
-  ["I already have voicemail / marketing.","\"This isn't marketing and it's not voicemail — 80% of people who hit voicemail call the next guy. We fire a text back within seconds before that happens.\""],
-  ["How much does it cost?","\"Starts at $125/mo with a one-time $199 setup. Most clients recover that in the first job. 30-day guarantee too — no improvement, month two is free. Let me show you the math on your numbers first.\""],
-  ["I'm not tech savvy.","\"You don't have to be — we set everything up in 24 hours. You just work the jobs, appointments land in your calendar. Nothing for you to learn.\""],
-  ["Send me some info.","Send mysmartslots.com + mysmartslots.com/subdomain. Follow up in 2 days: \"Hey, had a chance to look? Happy to walk through it on a quick call.\""],
-  ["I need to think about it.","\"Of course — what's the main thing you're unsure about?\" → Find the real objection. Always offer the free audit as the low-commitment next step."],
-  ["I'm too busy right now.","\"Busy season is exactly when this pays off most. Setup takes 24 hours, requires nothing from you. Could you spare 10 minutes this week for the audit?\""],
+  {
+    q:"\"$225 a month is too much.\"",
+    r:"\"Fair to think about it that way — let me reframe it. If we recover even one job a month for you, that's already paid for itself. The average job in your industry is $300–600. We're asking $225.\"",
+    a:"\"And here's what I'll do — if you want to move forward today I'll drop the setup fee by $50. That's my way of making it an easy yes right now. 30-day guarantee too — no measurable improvement, month two is free. Zero risk.\"",
+    c:"\"So realistically, what's one missed job worth to you? Want to run the numbers real quick?\""
+  },
+  {
+    q:"\"I already have voicemail.\"",
+    r:"\"Voicemail isn't the problem — 80% of people who hit voicemail never leave a message. They hang up and call the next business on Google. Your voicemail doesn't text them back before that happens. We do.\"",
+    a:"\"Let me prove it right now — give me your cell number. I'll fire a text to your phone in the next 10 seconds so you can see exactly what your customers would receive.\"",
+    c:"\"That's what fires automatically every time a call goes unanswered. Want to see the rest of what we set up?\""
+  },
+  {
+    q:"\"I need to think about it.\"",
+    r:"\"Of course — what's the main thing you're unsure about? Let's work through it right now while we're talking.\" [Find the real objection and resolve it]",
+    a:"\"I'll tell you what — if you want to move forward today I'll knock $50 off the setup fee. That offer is for right now, not next week. And the 30-day guarantee means if you don't see improvement, month two is on us.\"",
+    c:"\"What would make this a yes for you today?\""
+  },
+  {
+    q:"\"I'm not tech savvy.\"",
+    r:"\"You don't touch a single thing — we handle the entire setup in 24 hours. You just work your jobs, appointments land in your calendar, texts go out automatically. Nothing for you to learn.\"",
+    a:"\"I'll personally follow up on day 3 after go-live to make sure everything is running perfectly. You'll have my direct number. If anything isn't right we fix it same day.\"",
+    c:"\"The only thing you do is fill out a quick onboard form — takes 5 minutes. Want to move forward?\""
+  },
+  {
+    q:"\"I already have something for that.\"",
+    r:"\"Totally get it — what are you using? ... [listen] ... Does it text people back automatically the moment a call gets missed, or is it more of a scheduling tool? Because there's usually a gap there even when people have something in place.\"",
+    a:"\"If it's already covering everything we do, I won't waste your time. But if there's a gap — missed call texts, AI chat, review requests — I can show you what that looks like in 10 minutes and you decide. No pitch.\"",
+    c:"\"Worth a quick look just to confirm you're not leaving anything on the table?\""
+  },
+  {
+    q:"\"Send me some info.\"",
+    r:"\"Absolutely — I'll send you the link right now. mysmartslots.com/subdomain — that's a live demo of exactly what your customers would experience.\"",
+    a:"\"I'll also book a 10-minute follow-up right now so you don't have to chase me down. I'll have your numbers ready when we talk so you can see the exact dollar impact on your business specifically.\"",
+    c:"\"What's a good time Thursday or Friday — morning or afternoon?\""
+  },
+  {
+    q:"\"I tried something like this before and it didn't work.\"",
+    r:"\"I appreciate you saying that — what did you try and what went wrong? ... [listen] ... That's actually really common with generic platforms. Most of them aren't built specifically for your type of business.\"",
+    a:"\"My Smart Slots is configured specifically around how your business works — your hours, your services, your booking flow. Not a generic template. And I'll knock $50 off setup to make it worth giving it another shot.\"",
+    c:"\"If I can address exactly what went wrong before, would you be open to a 10-minute audit?\""
+  },
+  {
+    q:"\"I'm too busy right now.\"",
+    r:"\"Busy season is exactly when this pays off most — every missed call during your busy period is a lost job at full price. That's when the math hurts the most.\"",
+    a:"\"Setup takes 24 hours and requires nothing from you except a 5-minute onboard form. You don't slow down at all. And if you move forward this week I'll drop the setup by $50.\"",
+    c:"\"Could you spare 10 minutes this week? I'll have the numbers pulled up before we talk so we don't waste a second.\""
+  },
 ];
-const ol=document.getElementById('obj-list');
-OBJECTIONS.forEach(([q,a])=>{
-  const d=document.createElement('div');
-  d.style.cssText='border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;';
-  d.innerHTML=`<div style="background:var(--card2);padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.ot').textContent=this.nextElementSibling.classList.contains('open')?'−':'+'"><span>${q}</span><span class="ot" style="color:var(--accent);font-size:18px;">+</span></div><div style="padding:12px 14px;font-size:13px;line-height:1.7;color:#c5cfe0;display:none;background:var(--card);" class="">${a}</div>`;
-  const ans=d.querySelector('div:last-child');
-  d.querySelector('div:first-child').addEventListener('click',()=>{
-    const open=ans.style.display==='block';
-    ans.style.display=open?'none':'block';
-    d.querySelector('.ot').textContent=open?'+':'−';
+
+const CLOSES=[
+  {
+    name:"Assumptive Close",
+    desc:"Act like the decision is already made — just confirm the details.",
+    script:"\"So what works better for you — Monday or Wednesday for the audit call?\""
+  },
+  {
+    name:"Summary Close",
+    desc:"Recap everything they agreed with, then ask. Hard to say no when you've been saying yes.",
+    script:"\"So based on what you told me — you're missing about 5 calls a week, each job is worth $350, that's roughly $5,600 a month walking out the door. The Pro plan is $225. I mean... do you want to move forward?\""
+  },
+  {
+    name:"Urgency Close",
+    desc:"Create a real reason to decide now. Don't fake urgency — use real constraints.",
+    script:"\"I only have a couple audit spots open this week before I'm booked out. If you want one I can hold it for you right now — otherwise it might be a couple weeks.\""
+  },
+  {
+    name:"Choice Close",
+    desc:"Give them two yeses instead of a yes and a no. Either option moves the deal forward.",
+    script:"\"Would you want to start with monthly so you can test it first, or go annual and save the two months upfront?\""
+  },
+  {
+    name:"The $50 Close",
+    desc:"Use when they're on the fence. Real dollar off right now for moving forward today.",
+    script:"\"Here's what I'll do — if you want to lock this in today I'll drop the setup fee by $50. That's my way of making it an easy yes. The 30-day guarantee is already there, so there's really no risk. Want to move forward?\""
+  },
+  {
+    name:"Silence Close",
+    desc:"State the offer clearly. Stop talking. First one to speak loses. Works best after the number hits.",
+    script:"\"You're losing about $5,600 a month. We fix that for $225. [STOP TALKING. WAIT.]\"<br><br><span style='color:var(--orange);font-weight:700;'>⚠️ Do not fill the silence. Let it sit. This close lives or dies on your discipline to stay quiet.</span>"
+  },
+  {
+    name:"Takeaway Close",
+    desc:"Suggest it might not be for them. People want what they think they can't have.",
+    script:"\"Honestly — this works best for businesses doing at least 10 jobs a week. Are you at that volume? I don't want to set you up if the numbers don't make sense for you yet.\""
+  },
+  {
+    name:"The Direct Close",
+    desc:"Just ask. Most reps never actually ask. Be the one who does.",
+    script:"\"Do you want to move forward?\""
+  },
+];
+
+function renderObjections(){
+  const ol=document.getElementById('obj-list');
+  if(!ol)return;
+  ol.innerHTML='';
+  OBJECTIONS.forEach(({q,r,a,c})=>{
+    const d=document.createElement('div');
+    d.style.cssText='border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;';
+    d.innerHTML=`
+      <div style="background:var(--card2);padding:11px 14px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.ot').textContent=this.nextElementSibling.classList.contains('open')?'−':'+'">
+        <span>${q}</span><span class="ot" style="color:var(--accent);font-size:18px;">+</span>
+      </div>
+      <div style="display:none;background:var(--card);">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue2);margin-bottom:5px;">R — Resolve</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7;">${r}</div>
+        </div>
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:5px;">A — Ace (Add Value)</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7;">${a}</div>
+        </div>
+        <div style="padding:10px 14px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);margin-bottom:5px;">C — Close</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7;">${c}</div>
+        </div>
+      </div>`;
+    const body=d.querySelector('div:last-child');
+    d.querySelector('div:first-child').addEventListener('click',()=>{
+      const open=body.style.display==='block';
+      body.style.display=open?'none':'block';
+      d.querySelector('.ot').textContent=open?'+':'−';
+    });
+    ol.appendChild(d);
   });
-  ol.appendChild(d);
-});
+}
+
+function renderCloses(){
+  const cl=document.getElementById('closes-list');
+  if(!cl)return;
+  cl.innerHTML=CLOSES.map(({name,desc,script})=>`
+    <div style="border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;">
+      <div style="background:var(--card2);padding:11px 14px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="const b=this.nextElementSibling;const open=b.style.display==='block';b.style.display=open?'none':'block';this.querySelector('.ot').textContent=open?'+':'−'">
+        <span>🎯 ${name}</span><span class="ot" style="color:var(--accent);font-size:18px;">+</span>
+      </div>
+      <div style="display:none;background:var(--card);padding:12px 14px;">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:8px;font-style:italic;">${desc}</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.7;">${script}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderProcessSteps(){
+  const STEPS=[
+    {
+      n:1, icon:"🔍", title:"Research the Prospect",
+      desc:"Use the Prospector. Check Google reviews, website, fit score. Know something specific about their business before you call. 70%+ fit score = hot lead.",
+      action:null
+    },
+    {
+      n:2, icon:"✏️", title:"Build Your Pitch",
+      desc:"Use the Prospector pitch builder. Pick your icebreaker based on what you observed. Personalize the opening in the Scripts tab above.",
+      action:null
+    },
+    {
+      n:3, icon:"📞", title:"First Contact",
+      desc:"Call, text, or email. Your ONLY goal — book a 10-minute audit call. Nothing else. Don't try to sell the product on the first contact.",
+      action:null
+    },
+    {
+      n:4, icon:"📊", title:"Run the Audit Call",
+      desc:"Use the Audit Calculator tab. Run the revenue leak math live with them. Let the numbers do the selling. Recommend a plan based on their size.",
+      action:{label:"Open Audit Calc →", tab:"audit"}
+    },
+    {
+      n:5, icon:"📝", title:"Send the Agreement",
+      desc:"The moment they say yes — open /agreement, fill in their info, hit send. Client gets a secure email to sign electronically. You get notified when they sign. Don't wait, don't overthink it.",
+      action:{label:"Open /agreement →", href:"/agreement"}
+    },
+    {
+      n:6, icon:"💳", title:"Send Payment Link",
+      desc:"The moment they sign — open /financial, pull the client from your pipeline, generate the Stripe link. Copy the message and send it immediately. This is your close.",
+      action:{label:"Open /financial →", href:"/financial"}
+    },
+    {
+      n:7, icon:"📋", title:"Client Fills Onboard Form",
+      desc:"After payment, client receives the onboard link automatically. Follow up same day if they haven't completed it within a few hours. Setup can't begin without it.",
+      action:null
+    },
+    {
+      n:8, icon:"🔔", title:"Notify the Owner",
+      desc:"Text or call the owner: payment cleared, onboard form submitted. Setup begins within 24 hours. Don't wait for them to reach out — be proactive.",
+      action:null
+    },
+    {
+      n:9, icon:"✅", title:"Go Live Confirmation",
+      desc:"Confirm with the client that all automations are active. Walk them through what's running. This call builds the relationship and prevents early churn.",
+      action:null
+    },
+    {
+      n:10, icon:"📅", title:"14-Day Check-In",
+      desc:"Text or call the client 14 days after go-live. Ask how it's going. Share any early results you can see. This one call dramatically improves 90-day retention.",
+      action:null
+    },
+  ];
+
+  const os=document.getElementById('ob-steps');
+  if(!os)return;
+  os.innerHTML='';
+  STEPS.forEach(step=>{
+    const el=document.createElement('div');
+    el.style.cssText='display:flex;gap:14px;margin-bottom:18px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;';
+    el.innerHTML=`
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${step.n}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:15px;color:var(--white);margin-bottom:4px;">${step.icon} ${step.title}</div>
+        <div style="font-size:13px;color:var(--gray);line-height:1.65;margin-bottom:${step.action?'10px':'0'}">${step.desc}</div>
+        ${step.action
+          ? step.action.href
+            ? `<a href="${step.action.href}" target="_blank" style="display:inline-block;background:var(--accent);color:#111;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">${step.action.label}</a>`
+            : `<button onclick="switchTab('${step.action.tab}',document.querySelector('[onclick*=\\'${step.action.tab}\\']'))" style="background:var(--accent);color:#111;border:none;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">${step.action.label}</button>`
+          : ''}
+      </div>`;
+    os.appendChild(el);
+  });
+}
 
 function calcAudit(){
   const j=parseFloat(document.getElementById('a-jobs').value)||0;
@@ -1087,7 +1284,7 @@ async function loadAdmin(){
   }
 }
 
-updateScripts();calcAudit();calcComm();
+updateScripts();calcAudit();calcComm();renderObjections();renderCloses();
 </script>
 </body>
 </html>
