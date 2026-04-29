@@ -282,16 +282,19 @@ async function submitCountersign(){
   const token=params.get('token');
   const btn=document.getElementById('submit-btn');
   btn.disabled=true;btn.textContent='Processing...';
-
   try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),30000);
     const r=await fetch(`${API}/portal/agreement/countersign`,{
       method:'POST',headers:{'Content-Type':'application/json'},
+      signal:controller.signal,
       body:JSON.stringify({
         token,
         owner_name:document.getElementById('owner-name').value.trim()||'My Smart Slots / Clair Group LLC',
         owner_signature_data:getSigData()
       })
     });
+    clearTimeout(timeout);
     const d=await r.json();
     if(d.success){
       document.getElementById('app').style.display='none';
@@ -301,7 +304,10 @@ async function submitCountersign(){
       btn.disabled=false;btn.textContent='Countersign & Send Final Agreement';
     }
   }catch(e){
-    alert('Connection error. Please try again.');
+    const msg=e.name==='AbortError'
+      ? 'Request timed out. The agreement may still have been saved — check your email before trying again.'
+      : 'Connection error: '+e.message;
+    alert(msg);
     btn.disabled=false;btn.textContent='Countersign & Send Final Agreement';
   }
 }

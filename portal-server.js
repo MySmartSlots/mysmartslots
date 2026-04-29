@@ -996,53 +996,48 @@ app.post("/portal/agreement/countersign", async (req, res) => {
   if (agreement.status === "fully_executed") return res.status(409).json({ error: "Already countersigned." });
 
   const executedDate = new Date().toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+  const finalOwnerName = owner_name || "My Smart Slots";
 
-  // Update Supabase — fully executed
   const { error: updateErr } = await supabase.from("agreements").update({
-    status:               "fully_executed",
+    status: "fully_executed",
     owner_signature_data,
-    owner_name:           owner_name || "My Smart Slots",
-    executed_at:          new Date().toISOString(),
+    owner_name: finalOwnerName,
+    executed_at: new Date().toISOString(),
   }).eq("owner_token", token);
   if (updateErr) return res.status(500).json({ error: updateErr.message });
 
-  // Generate final PDF and send to all parties
-  try {
-    const pdfBuffer = await generateAgreementPDF({
-      ...agreement,
-      owner_signature_data,
-      owner_name: owner_name || "My Smart Slots",
-      executed_at: executedDate,
-    });
+  // Respond immediately — don't wait for email/PDF
+  res.json({ success: true, message: "Agreement fully executed. Final PDF sending to all parties." });
 
-    const emailOpts = {
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
-      subject: `✓ Fully Executed — My Smart Slots Services Agreement (${agreement.plan_label})`,
-      attachments: [{ filename:`MySmartSlots_Agreement_${agreement.client_name.replace(/\s+/g,"_")}.pdf`, content:pdfBuffer }],
-      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
-        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
-        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
-          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ Agreement Fully Executed</p>
-          <p style="color:#374151;line-height:1.7;">Your My Smart Slots Business Services Agreement has been signed by all parties. The fully executed copy is attached for your records.</p>
-          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
-            <div><strong>Client:</strong> ${agreement.client_name}</div>
-            <div><strong>Plan:</strong> ${agreement.plan_label} · ${agreement.billing_type}</div>
-            <div><strong>Executed:</strong> ${executedDate}</div>
-          </div>
-          <p style="color:#6b7280;font-size:13px;">Keep this email for your records. Questions? Call 785-329-0202 or email hello@mysmartslots.com.</p>
-        </div></div>`
-    };
-
-    // Send final PDF to client, rep, and owner
-    await emailTransporter.sendMail({ ...emailOpts, to: agreement.client_email });
-    await emailTransporter.sendMail({ ...emailOpts, to: agreement.rep_email });
-    await emailTransporter.sendMail({ ...emailOpts, to: OWNER_EMAIL });
-
-  } catch (e) {
-    console.error("Final PDF/email error:", e.message);
-  }
-
-  res.json({ success: true, message: "Agreement fully executed. Final PDF sent to all parties." });
+  // Send emails in background — non-blocking
+  const fullAgreement = { ...agreement, owner_signature_data, owner_name: finalOwnerName, executed_at: executedDate };
+  generateAgreementPDF(fullAgreement)
+    .then(pdfBuffer => {
+      const emailOpts = {
+        from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+        subject: `✓ Fully Executed — My Smart Slots Services Agreement (${agreement.plan_label})`,
+        attachments: [{ filename:`MySmartSlots_Agreement_${agreement.client_name.replace(/\s+/g,"_")}.pdf`, content:pdfBuffer }],
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+          <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+          <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+            <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ Agreement Fully Executed</p>
+            <p style="color:#374151;line-height:1.7;">Your My Smart Slots Business Services Agreement has been signed by all parties. The fully executed copy is attached for your records.</p>
+            <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+              <div><strong>Client:</strong> ${agreement.client_name}</div>
+              <div><strong>Plan:</strong> ${agreement.plan_label} · ${agreement.billing_type}</div>
+              <div><strong>Executed:</strong> ${executedDate}</div>
+            </div>
+            <p style="color:#6b7280;font-size:13px;">Keep this email for your records. Questions? Call 785-329-0202 or email hello@mysmartslots.com.</p>
+          </div></div>`
+      };
+      return Promise.all([
+        emailTransporter.sendMail({ ...emailOpts, to: agreement.client_email }),
+        emailTransporter.sendMail({ ...emailOpts, to: agreement.rep_email }),
+        emailTransporter.sendMail({ ...emailOpts, to: OWNER_EMAIL }),
+      ]);
+    })
+    .then(() => console.log(`Client agreement executed and emailed: ${agreement.client_name}`))
+    .catch(e => console.error("Final PDF/email error:", e.message));
 });
 
 // List agreements (admin)
@@ -1346,28 +1341,73 @@ app.post("/portal/rep-agreement/countersign", async (req, res) => {
   }).eq("owner_token", token);
   if (updateErr) return res.status(500).json({ error: updateErr.message });
 
-  try {
-    const pdfBuffer = await generateRepAgreementPDF({ ...agreement, owner_signature_data, executed_at: executedDate });
-    const emailOpts = {
-      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
-      subject: `✓ Fully Executed — My Smart Slots ${typeLabel}`,
-      attachments: [{ filename:`MySmartSlots_${typeLabel.replace(/ /g,"_")}_${agreement.rep_name.replace(/ /g,"_")}.pdf`, content:pdfBuffer }],
-      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
-        <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
-        <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
-          <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ ${typeLabel} Fully Executed</p>
-          <p style="color:#374151;line-height:1.7;">The fully executed copy is attached for your records.</p>
-          <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
-            <div><strong>Rep:</strong> ${agreement.rep_name}</div>
-            <div><strong>Territory:</strong> ${agreement.territory}</div>
-            <div><strong>Executed:</strong> ${executedDate}</div>
-          </div>
-        </div></div>`,
-    };
-    await emailTransporter.sendMail({ ...emailOpts, to: agreement.rep_email });
-    await emailTransporter.sendMail({ ...emailOpts, to: OWNER_EMAIL });
-  } catch(e) { console.error("Rep countersign PDF error:", e.message); }
+  // Respond immediately — don't wait for email/PDF
   res.json({ success: true });
+
+  // Send emails in background — non-blocking
+  generateRepAgreementPDF({ ...agreement, owner_signature_data, owner_name: owner_name || "My Smart Slots / Clair Group LLC", executed_at: executedDate })
+    .then(pdfBuffer => {
+      const emailOpts = {
+        from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+        subject: `✓ Fully Executed — My Smart Slots ${typeLabel}`,
+        attachments: [{ filename:`MySmartSlots_${typeLabel.replace(/ /g,"_")}_${agreement.rep_name.replace(/ /g,"_")}.pdf`, content:pdfBuffer }],
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+          <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+          <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+            <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ ${typeLabel} Fully Executed</p>
+            <p style="color:#374151;line-height:1.7;">The fully executed copy is attached for your records.</p>
+            <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+              <div><strong>Rep:</strong> ${agreement.rep_name}</div>
+              <div><strong>Territory:</strong> ${agreement.territory}</div>
+              <div><strong>Executed:</strong> ${executedDate}</div>
+            </div>
+          </div></div>`,
+      };
+      return Promise.all([
+        emailTransporter.sendMail({ ...emailOpts, to: agreement.rep_email }),
+        emailTransporter.sendMail({ ...emailOpts, to: OWNER_EMAIL }),
+      ]);
+    })
+    .then(() => console.log(`Rep agreement executed and emailed: ${agreement.rep_name}`))
+    .catch(e => console.error("Rep countersign PDF/email error:", e.message));
+});
+
+// Resend fully executed rep agreement PDF
+app.post("/portal/rep-agreement/resend", requireAuth, requireAdmin, async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: "Token required." });
+  const { data: agreement, error } = await supabase.from("rep_agreements").select("*").eq("owner_token", token).single();
+  if (error || !agreement) return res.status(404).json({ error: "Agreement not found." });
+  if (agreement.status !== "fully_executed") return res.status(400).json({ error: "Agreement not yet fully executed." });
+
+  res.json({ success: true, message: "Resending PDF in background." });
+
+  const typeLabel = agreement.agreement_type === "rep" ? "Rep Agreement" : "Partnership Agreement";
+  generateRepAgreementPDF(agreement)
+    .then(pdfBuffer => {
+      const emailOpts = {
+        from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+        subject: `✓ Fully Executed — My Smart Slots ${typeLabel} (Resent)`,
+        attachments: [{ filename:`MySmartSlots_${typeLabel.replace(/ /g,"_")}_${agreement.rep_name.replace(/ /g,"_")}.pdf`, content:pdfBuffer }],
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+          <div style="background:#1A1A2E;padding:24px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C896;margin:0;font-size:24px;">MY SMART SLOTS</h1></div>
+          <div style="background:#f5f7fb;padding:32px;border-radius:0 0 12px 12px;border:1px solid #e4e8f0;">
+            <p style="color:#16a34a;font-size:18px;font-weight:700;">✓ ${typeLabel} — Resent Copy</p>
+            <p style="color:#374151;line-height:1.7;">Your fully executed ${typeLabel} is attached.</p>
+            <div style="background:#fff;border:1px solid #e4e8f0;border-radius:10px;padding:20px;margin:16px 0;">
+              <div><strong>Rep:</strong> ${agreement.rep_name}</div>
+              <div><strong>Territory:</strong> ${agreement.territory}</div>
+              <div><strong>Executed:</strong> ${agreement.executed_at||"—"}</div>
+            </div>
+          </div></div>`,
+      };
+      return Promise.all([
+        emailTransporter.sendMail({ ...emailOpts, to: agreement.rep_email }),
+        emailTransporter.sendMail({ ...emailOpts, to: OWNER_EMAIL }),
+      ]);
+    })
+    .then(() => console.log(`Rep agreement resent: ${agreement.rep_name}`))
+    .catch(e => console.error("Resend error:", e.message));
 });
 
 app.post("/portal/rep-agreement/list", requireAuth, requireAdmin, async (req, res) => {

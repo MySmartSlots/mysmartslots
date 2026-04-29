@@ -284,6 +284,9 @@ async function loadHistory(){
           ${a.status==='rep_signed'&&a.owner_token
             ? `<a href="/rep-countersign?token=${a.owner_token}" target="_blank" style="background:#00C896;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;">Countersign →</a>`
             : ''}
+          ${a.status==='fully_executed'&&a.owner_token
+            ? `<button onclick="resendAgreement('${a.owner_token}')" style="background:none;border:1px solid var(--gray-border);color:var(--gray-text);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;">📧 Resend PDF</button>`
+            : ''}
         </div>
       </div>`).join('');
   }catch(e){}
@@ -302,6 +305,29 @@ function resetForm(){
   selectType('partnership');
   const btn=document.getElementById('send-btn');
   btn.disabled=false;btn.innerHTML='<span>Send Agreement to Rep</span><span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">📧 Email</span>';
+}
+
+async function resendAgreement(ownerToken){
+  const btn=event.target;
+  btn.textContent='Sending...';btn.disabled=true;
+  try{
+    const r=await fetch(`${API}/portal/rep-agreement/resend`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:currentU,password:currentP,token:ownerToken})
+    });
+    const d=await r.json();
+    if(d.success){
+      toast('✓ PDF resent to rep and your email');
+      btn.textContent='✓ Sent';
+      setTimeout(()=>{btn.textContent='📧 Resend PDF';btn.disabled=false;},3000);
+    } else {
+      toast('Error: '+(d.error||'Unknown'),true);
+      btn.textContent='📧 Resend PDF';btn.disabled=false;
+    }
+  }catch(e){
+    toast('Connection error',true);
+    btn.textContent='📧 Resend PDF';btn.disabled=false;
+  }
 }
 
 function toast(msg,err=false){
