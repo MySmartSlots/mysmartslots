@@ -366,19 +366,207 @@ app.post("/portal/admin/dashboard", requireAuth, requireAdmin, async (req, res) 
 
 // ── ADMIN — Save monthly report ───────────────────────────────────────────────
 app.post("/portal/admin/report/save", requireAuth, requireAdmin, async (req, res) => {
-  const { client_email, report_month, calls_recovered, bookings_confirmed, reviews_requested, revenue_impact, notes } = req.body;
+  const { client_email, report_month, calls_recovered, bookings_confirmed, reviews_requested, revenue_impact, notes, plan, rep_name, rep_email, client_name } = req.body;
   if (!client_email || !report_month) return res.status(400).json({ error: "Email and month required." });
   const { error } = await supabase.from("monthly_reports").upsert({
     client_email: client_email.toLowerCase(),
-    report_month, calls_recovered: calls_recovered || 0,
+    client_name: client_name || "",
+    report_month,
+    calls_recovered: calls_recovered || 0,
     bookings_confirmed: bookings_confirmed || 0,
     reviews_requested: reviews_requested || 0,
     revenue_impact: revenue_impact || 0,
     notes: notes || "",
+    plan: plan || "pro",
+    rep_name: rep_name || "",
+    rep_email: rep_email || "",
     created_at: new Date().toISOString(),
   }, { onConflict: "client_email,report_month" });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
+});
+
+// Get report history for a client
+app.post("/portal/admin/report/history", requireAuth, requireAdmin, async (req, res) => {
+  const { client_email } = req.body;
+  if (!client_email) return res.status(400).json({ error: "client_email required." });
+  const { data, error } = await supabase.from("monthly_reports")
+    .select("*").eq("client_email", client_email.toLowerCase())
+    .order("report_month", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, reports: data || [] });
+});
+
+// Build the report HTML (shared by preview and send)
+function buildReportHTML(r) {
+  const monthLabel = new Date(r.report_month + "-02").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const planLabels = { starter: "Starter", pro: "Pro", elite: "Elite" };
+  const planLabel = planLabels[r.plan] || "Pro";
+  const planAutomations = {
+    starter: ["AI Chat Booking", "SMS Confirmations", "Appointment Reminders", "Calendar Sync", "Monthly Report"],
+    pro:     ["AI Chat Booking", "Missed Call Text Back", "SMS Confirmations", "Appointment Reminders", "Live SMS Chat", "Post-Job Review Requests", "Calendar Sync", "Monthly Report"],
+    elite:   ["AI Chat Booking", "Missed Call Text Back", "SMS Confirmations", "Appointment Reminders", "Live SMS Chat", "Post-Job Review Requests", "Lead Re-Engagement", "Partial Email Replies", "Job Status Update Texts", "Calendar Sync", "Monthly Report"],
+  };
+  const automations = planAutomations[r.plan] || planAutomations.pro;
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#f5f7fb;font-family:Arial,sans-serif;">
+<div style="max-width:620px;margin:0 auto;padding:32px 16px;">
+
+  <!-- HEADER -->
+  <div style="background:#1a1a2e;border-radius:14px 14px 0 0;padding:28px 32px;text-align:center;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#00c896;text-transform:uppercase;margin-bottom:8px;">Monthly Performance Report</div>
+    <div style="font-size:26px;font-weight:800;color:#fff;margin-bottom:4px;">${r.client_name || r.client_email}</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.5);">${monthLabel} · ${planLabel} Plan</div>
+  </div>
+
+  <!-- STATS -->
+  <div style="background:#fff;padding:28px 32px;border-left:1px solid #e4e8f0;border-right:1px solid #e4e8f0;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+
+      <div style="background:#f5f7fb;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:#00c896;">${r.calls_recovered}</div>
+        <div style="font-size:12px;color:#6b7280;font-weight:600;margin-top:4px;">📞 Calls Recovered</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Missed calls turned into leads</div>
+      </div>
+
+      <div style="background:#f5f7fb;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:#3b82f6;">${r.bookings_confirmed}</div>
+        <div style="font-size:12px;color:#6b7280;font-weight:600;margin-top:4px;">📅 Bookings Confirmed</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Appointments automatically booked</div>
+      </div>
+
+      <div style="background:#f5f7fb;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:#f59e0b;">${r.reviews_requested}</div>
+        <div style="font-size:12px;color:#6b7280;font-weight:600;margin-top:4px;">⭐ Reviews Requested</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Google review requests sent</div>
+      </div>
+
+      <div style="background:#1a1a2e;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:36px;font-weight:800;color:#00c896;">$${(r.revenue_impact||0).toLocaleString()}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);font-weight:600;margin-top:4px;">💰 Est. Revenue Impact</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;">From recovered calls & bookings</div>
+      </div>
+
+    </div>
+
+    <!-- ROI CALLOUT -->
+    <div style="background:#e6faf5;border:1px solid #a7f3d0;border-radius:10px;padding:16px 20px;margin-bottom:24px;text-align:center;">
+      <div style="font-size:13px;color:#065f46;font-weight:700;">
+        💡 Your My Smart Slots subscription costs ${planLabel === "Starter" ? "$125" : planLabel === "Pro" ? "$225" : "$375"}/mo —
+        this month's estimated return was <strong>$${(r.revenue_impact||0).toLocaleString()}</strong>.
+        That's a <strong>${r.revenue_impact ? Math.round(r.revenue_impact / (planLabel === "Starter" ? 125 : planLabel === "Pro" ? 225 : 375)) : "—"}x</strong> return on your investment.
+      </div>
+    </div>
+
+    <!-- ACTIVE AUTOMATIONS -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:12px;">Active Automations</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${automations.map(a => `<span style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">✓ ${a}</span>`).join("")}
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    ${r.notes ? `
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+      <div style="font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Note from Your Account Manager</div>
+      <div style="font-size:14px;color:#78350f;line-height:1.7;">${r.notes}</div>
+      ${r.rep_name ? `<div style="font-size:12px;color:#92400e;margin-top:8px;font-weight:600;">— ${r.rep_name}</div>` : ""}
+    </div>` : ""}
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:8px;">
+      <a href="https://mysmartslots.com/client" style="background:#00c896;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">View Your Dashboard →</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#1a1a2e;border-radius:0 0 14px 14px;padding:20px 32px;text-align:center;">
+    <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">My Smart Slots · Clair Group LLC</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.4);">785-329-0202 · hello@mysmartslots.com · mysmartslots.com</div>
+    ${r.rep_name && r.rep_email ? `<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px;">Your Account Manager: ${r.rep_name} · ${r.rep_email}</div>` : ""}
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+// Preview report HTML
+app.post("/portal/admin/report/preview", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const html = buildReportHTML(req.body);
+    res.json({ success: true, html });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Send report email
+app.post("/portal/admin/report/send", requireAuth, requireAdmin, async (req, res) => {
+  const { client_email, client_name, report_month, rep_name, rep_email } = req.body;
+  if (!client_email || !report_month) return res.status(400).json({ error: "client_email and report_month required." });
+
+  try {
+    const html = buildReportHTML(req.body);
+    const monthLabel = new Date(report_month + "-02").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const subject = `Your ${monthLabel} Performance Report — My Smart Slots`;
+
+    const emailBase = {
+      from: `"My Smart Slots" <${process.env.GMAIL_USER}>`,
+      subject,
+      html,
+    };
+
+    // Send to client
+    await emailTransporter.sendMail({ ...emailBase, to: client_email });
+
+    // Send to Account Manager if we have their email
+    if (rep_email && rep_email !== client_email) {
+      await emailTransporter.sendMail({
+        ...emailBase,
+        to: rep_email,
+        subject: `[Rep Copy] ${client_name || client_email} — ${monthLabel} Report`,
+        html: html.replace(
+          "Note from Your Account Manager",
+          "Your Client Report — Use This for the Monthly Review Meeting"
+        ),
+      });
+    }
+
+    // Send copy to owner
+    await emailTransporter.sendMail({
+      ...emailBase,
+      to: OWNER_EMAIL,
+      subject: `[Owner Copy] ${client_name || client_email} — ${monthLabel} Report`,
+    });
+
+    res.json({ success: true });
+  } catch(e) {
+    console.error("Report send error:", e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Resend a saved report by month
+app.post("/portal/admin/report/send-by-month", requireAuth, requireAdmin, async (req, res) => {
+  const { client_email, report_month } = req.body;
+  const { data, error } = await supabase.from("monthly_reports")
+    .select("*").eq("client_email", client_email.toLowerCase()).eq("report_month", report_month).single();
+  if (error || !data) return res.status(404).json({ error: "Report not found." });
+  try {
+    const html = buildReportHTML(data);
+    const monthLabel = new Date(report_month + "-02").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const subject = `Your ${monthLabel} Performance Report — My Smart Slots`;
+    const emailBase = { from: `"My Smart Slots" <${process.env.GMAIL_USER}>`, subject, html };
+    await emailTransporter.sendMail({ ...emailBase, to: client_email });
+    if (data.rep_email) await emailTransporter.sendMail({ ...emailBase, to: data.rep_email, subject: `[Rep Copy] ${data.client_name||client_email} — ${monthLabel} Report` });
+    await emailTransporter.sendMail({ ...emailBase, to: OWNER_EMAIL, subject: `[Owner Copy] ${data.client_name||client_email} — ${monthLabel} Report` });
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ── STRIPE — Create Checkout Session ─────────────────────────────────────────
@@ -1731,6 +1919,69 @@ app.post("/portal/status/create-client", requireAuth, requireAdmin, async (req, 
   });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
+});
+
+// ── MISSED CALL TEXT BACK ─────────────────────────────────────────────────────
+
+const MSS_TWILIO_SID    = process.env.MSS_TWILIO_SID    || "";
+const MSS_TWILIO_TOKEN  = process.env.MSS_TWILIO_TOKEN  || "";
+const MSS_TWILIO_NUMBER = process.env.MSS_TWILIO_NUMBER || "";
+const MSS_BOOKING_URL   = "https://calendly.com/audit-mysmartslots/free-audit";
+const MSS_BUSINESS_NAME = "My Smart Slots";
+
+async function sendMissedCallText(to) {
+  const msg = `Hi! Sorry we missed your call — this is ${MSS_BUSINESS_NAME}. We don't want you to wait. You can book a free 10-minute audit directly here: ${MSS_BOOKING_URL} — we'll show you exactly what missed calls are costing your business. Talk soon! Reply STOP to opt out.`;
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${MSS_TWILIO_SID}/Messages.json`;
+  const auth = "Basic " + Buffer.from(`${MSS_TWILIO_SID}:${MSS_TWILIO_TOKEN}`).toString("base64");
+  const body = new URLSearchParams({ To: to, From: MSS_TWILIO_NUMBER, Body: msg });
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "Authorization": auth, "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+  const d = await r.json();
+  if (!d.sid) throw new Error(d.message || "Twilio error");
+  return d.sid;
+}
+
+// Twilio webhook — fires automatically when MSS number misses a call
+// Set this URL in Twilio console: https://mysmartslots-portal.onrender.com/twilio/missed-call
+app.post("/twilio/missed-call", async (req, res) => {
+  const callerNumber = req.body?.From || req.body?.Caller;
+  console.log("Missed call from:", callerNumber);
+
+  if (callerNumber) {
+    try {
+      const sid = await sendMissedCallText(callerNumber);
+      console.log("Missed call text sent:", sid);
+    } catch(e) {
+      console.error("Missed call text failed:", e.message);
+    }
+  }
+
+  // Return TwiML — tells Twilio we handled it
+  res.set("Content-Type", "text/xml");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say>Thank you for calling My Smart Slots. We just sent you a text with a link to book a free audit. We look forward to speaking with you soon.</Say>
+</Response>`);
+});
+
+// Demo trigger — used on audit calls to show prospects the automation live
+app.post("/portal/demo/missed-call", async (req, res) => {
+  const { to_phone } = req.body;
+  if (!to_phone) return res.status(400).json({ error: "to_phone required." });
+
+  // Clean the number
+  const cleaned = to_phone.replace(/\D/g, "");
+  const formatted = cleaned.startsWith("1") ? `+${cleaned}` : `+1${cleaned}`;
+
+  try {
+    const sid = await sendMissedCallText(formatted);
+    res.json({ success: true, sid, to: formatted });
+  } catch(e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
