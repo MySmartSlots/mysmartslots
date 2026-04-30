@@ -22,30 +22,38 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-// ── USERS ─────────────────────────────────────────────────────────────────────
-// Same users as rep.html — keep these in sync when you add new reps
-const USERS = {
-  "admin":   { password: process.env.ADMIN_PASSWORD   || "slots2025",   name: "Owner",  isAdmin: true  },
-  "orion1":  { password: process.env.REP1_PASSWORD    || "Orion2026$",  name: "Orion",  isAdmin: false },
-  "braden1": { password: process.env.BRADEN_PASSWORD  || "Braden2026$", name: "Braden", isAdmin: false },
-  "carson1": { password: process.env.CARSON_PASSWORD  || "Carson2026$", name: "Carson", isAdmin: false },
-  "rep2":    { password: process.env.REP2_PASSWORD    || "rep2pass",    name: "Rep 2",  isAdmin: false },
-};
+// ── AUTH — Supabase-based rep management ─────────────────────────────────────
+// Reps are stored in the 'reps' Supabase table — no code changes needed to add/remove reps
+
+async function getRepByUsername(username) {
+  if (!username) return null;
+  const u = username.toLowerCase().trim();
+  const { data, error } = await supabase.from("reps").select("*").eq("username", u).single();
+  if (error || !data) return null;
+  if (!data.is_active) return null;
+  return data;
+}
 
 // ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
 function requireAuth(req, res, next) {
   const { username, password } = req.body;
-  const user = USERS[username?.toLowerCase()];
-  if (!user || user.password !== password) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  req.user = { username: username.toLowerCase(), name: user.name, isAdmin: user.isAdmin };
-  next();
+  if (!username || !password) return res.status(401).json({ error: "Credentials required." });
+  getRepByUsername(username).then(rep => {
+    if (!rep || rep.password !== password) {
+      return res.status(401).json({ error: "Incorrect username or password." });
+    }
+    req.user = { username: rep.username, name: rep.name, isAdmin: rep.is_admin, email: rep.email, role: rep.role };
+    req.rep = rep;
+    next();
+  }).catch(e => {
+    console.error("Auth error:", e.message);
+    res.status(500).json({ error: "Auth error." });
+  });
 }
 
 function requireAdmin(req, res, next) {
   if (!req.user?.isAdmin) {
-    return res.status(403).json({ error: "Admin access required" });
+    return res.status(403).json({ error: "Admin access required." });
   }
   next();
 }
@@ -58,25 +66,28 @@ app.get("/health", (_, res) => res.json({ status: "ok" }));
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
 app.post("/portal/login", async (req, res) => {
   const { username, password } = req.body;
-  const user = USERS[username?.toLowerCase()];
+  if (!username || !password) return res.status(400).json({ error: "Username and password required." });
 
-  if (!user || user.password !== password) {
+  const rep = await getRepByUsername(username);
+  if (!rep || rep.password !== password) {
     return res.status(401).json({ error: "Incorrect username or password." });
   }
 
-  // Log the login to Supabase
-  const { error } = await supabase.from("logins").insert({
-    username: username.toLowerCase(),
-    rep_name: user.name,
+  // Log the login
+  await supabase.from("logins").insert({
+    username: rep.username,
+    rep_name: rep.name,
     logged_in_at: new Date().toISOString(),
-  });
-
-  if (error) console.error("Login log error:", error);
+  }).catch(e => console.error("Login log error:", e.message));
 
   res.json({
-    success: true,
-    name: user.name,
-    isAdmin: user.isAdmin,
+    success:   true,
+    name:      rep.name,
+    email:     rep.email,
+    isAdmin:   rep.is_admin,
+    role:      rep.role,
+    territory: rep.territory,
+    username:  rep.username,
   });
 });
 
@@ -625,6 +636,61 @@ async function sendAgreement({ rep_name, rep_email, client_name, client_email, p
     return { success: false, error: e.message };
   }
 }
+
+// ── REP MANAGEMENT (Admin only) ───────────────────────────────────────────────
+
+app.post("/portal/admin/reps/list", requireAuth, requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from("reps")
+    .select("id,username,name,email,territory,region,role,is_admin,is_active,created_at")
+    .order("created_at", { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, reps: data || [] });
+});
+
+app.post("/portal/admin/reps/add", requireAuth, requireAdmin, async (req, res) => {
+  const { username, name, email, password, territory, region, role } = req.body;
+  if (!username || !name || !email || !password) return res.status(400).json({ error: "username, name, email, password required." });
+  const { data, error } = await supabase.from("reps").insert({
+    username: username.toLowerCase().trim(), name, email, password,
+    territory: territory || "Unassigned", region: region || "",
+    role: role || "account_manager", is_admin: false, is_active: true,
+    created_at: new Date().toISOString(),
+  }).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, rep: data });
+});
+
+app.post("/portal/admin/reps/update", requireAuth, requireAdmin, async (req, res) => {
+  const { id, name, email, password, territory, region, role, is_active } = req.body;
+  if (!id) return res.status(400).json({ error: "id required." });
+  const updates = {};
+  if (name !== undefined)      updates.name      = name;
+  if (email !== undefined)     updates.email     = email;
+  if (password !== undefined && password !== "") updates.password = password;
+  if (territory !== undefined) updates.territory = territory;
+  if (region !== undefined)    updates.region    = region;
+  if (role !== undefined)      updates.role      = role;
+  if (is_active !== undefined) updates.is_active = is_active;
+  const { error } = await supabase.from("reps").update(updates).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.post("/portal/admin/reps/deactivate", requireAuth, requireAdmin, async (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.status(400).json({ error: "id required." });
+  const { error } = await supabase.from("reps").update({ is_active: false }).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.post("/portal/admin/reps/reactivate", requireAuth, requireAdmin, async (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.status(400).json({ error: "id required." });
+  const { error } = await supabase.from("reps").update({ is_active: true }).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
 
 app.post("/portal/billing/create-checkout", async (req, res) => {
   const { rep_name, rep_email, client_name, client_email, plan, billing_type, setup_fee_cents, web_design_cents, description, success_url, cancel_url, test_mode } = req.body;
@@ -1219,23 +1285,27 @@ function generateAgreementPDF(agreement) {
 }
 
 // ── REP AGREEMENT SYSTEM (Admin only) ────────────────────────────────────────
-const REP_DETAILS = {
-  orion1:  { name:"Orion",  email:"orion@mysmartslots.com"  },
-  braden1: { name:"Braden", email:"braden@mysmartslots.com" },
-  carson1: { name:"Carson", email:"carson@mysmartslots.com" },
-  rep2:    { name:"Rep 2",  email:"rep2@mysmartslots.com"   },
-};
+
+async function getRepDetails(rep_username) {
+  const { data } = await supabase.from("reps").select("name,email").eq("username", rep_username).single();
+  return data || null;
+}
 
 app.post("/portal/rep-agreement/create", requireAuth, requireAdmin, async (req, res) => {
   const { rep_username, rep_name_custom, rep_email_custom, territory, start_date, agreement_type, referring_manager } = req.body;
   let repName, repEmail;
-  if (rep_username && REP_DETAILS[rep_username]) {
-    repName = REP_DETAILS[rep_username].name;
-    repEmail = REP_DETAILS[rep_username].email;
-  } else if (rep_name_custom && rep_email_custom) {
-    repName = rep_name_custom;
+  if (rep_username) {
+    const repData = await getRepDetails(rep_username);
+    if (repData) {
+      repName  = repData.name;
+      repEmail = repData.email;
+    }
+  }
+  if (rep_name_custom && rep_email_custom) {
+    repName  = rep_name_custom;
     repEmail = rep_email_custom;
-  } else {
+  }
+  if (!repName || !repEmail) {
     return res.status(400).json({ error: "Rep name and email required." });
   }
   const token      = crypto.randomBytes(32).toString("hex");

@@ -118,23 +118,8 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
 
       <div class="card">
         <div class="card-title">👤 Select Rep</div>
-        <div class="rep-grid">
-          <div class="rep-card" id="rep-orion1" onclick="selectRep('orion1','Orion','orion@mysmartslots.com')">
-            <div class="rn">Orion</div>
-            <div class="re">orion@mysmartslots.com</div>
-          </div>
-          <div class="rep-card" id="rep-braden1" onclick="selectRep('braden1','Braden','braden@mysmartslots.com')">
-            <div class="rn">Braden</div>
-            <div class="re">braden@mysmartslots.com</div>
-          </div>
-          <div class="rep-card" id="rep-carson1" onclick="selectRep('carson1','Carson','carson@mysmartslots.com')">
-            <div class="rn">Carson</div>
-            <div class="re">carson@mysmartslots.com</div>
-          </div>
-          <div class="rep-card custom" id="rep-custom" onclick="selectRep('custom','','')">
-            <div class="rn">+ Custom Rep</div>
-            <div class="re">Enter manually below</div>
-          </div>
+        <div class="rep-grid" id="rep-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--gray-text);font-size:13px;">Loading team members...</div>
         </div>
         <div id="custom-wrap" style="display:none;">
           <div class="fg-row">
@@ -205,8 +190,29 @@ async function doLogin(){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     document.getElementById('start-date').value=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    await loadReps();
     loadHistory();
   }catch(e){document.getElementById('lerr').style.display='block';}
+}
+
+async function loadReps(){
+  try{
+    const r=await fetch(`${API}/portal/admin/reps/list`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP})});
+    const d=await r.json();
+    if(!d.success)return;
+    const grid=document.getElementById('rep-grid');
+    const active=d.reps.filter(r=>r.is_active&&!r.is_admin);
+    grid.innerHTML=active.map(rep=>`
+      <div class="rep-card" id="rep-${rep.username}" onclick="selectRep('${rep.username}','${rep.name}','${rep.email}')">
+        <div class="rn">${rep.name}</div>
+        <div class="re">${rep.email}</div>
+        ${rep.territory&&rep.territory!=='Unassigned'?`<div style="font-size:10px;color:var(--accent);margin-top:2px;">${rep.territory}</div>`:''}
+      </div>`).join('')+`
+      <div class="rep-card custom" id="rep-custom" onclick="selectRep('custom','','')">
+        <div class="rn">+ Custom</div>
+        <div class="re">Enter manually</div>
+      </div>`;
+  }catch(e){console.error('loadReps error:',e);}
 }
 
 function doLogout(){

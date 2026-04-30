@@ -228,13 +228,8 @@ const API="https://mysmartslots-portal.onrender.com";
 let currentU=null,currentP=null,currentName=null;
 let selectedPlan='pro',selectedBilling='monthly',selectedFee=199;
 
-const REP_EMAILS={
-  'orion1':'orion@mysmartslots.com','braden1':'braden@mysmartslots.com',
-  'carson1':'carson@mysmartslots.com','rep2':'rep2@mysmartslots.com','admin':'hello@mysmartslots.com'
-};
-const REP_NAMES={
-  'orion1':'Orion','braden1':'Braden','carson1':'Carson','rep2':'Rep 2','admin':'Owner'
-};
+// Loaded dynamically after login
+let REP_DATA = [];
 
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none') doLogin();
@@ -251,8 +246,18 @@ async function doLogin(){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     document.getElementById('header-name').textContent=d.name;
-    document.getElementById('rep-name').value=REP_NAMES[currentU]||d.name;
-    document.getElementById('rep-email').value=REP_EMAILS[currentU]||'hello@mysmartslots.com';
+    // Load reps dynamically
+    try {
+      const rr = await fetch(`${API}/portal/admin/reps/list`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentU,password:currentP})});
+      const rd = await rr.json();
+      if(rd.success){
+        const myRep = rd.reps.find(r=>r.username===currentU);
+        if(myRep){
+          document.getElementById('rep-name').value=myRep.name;
+          document.getElementById('rep-email').value=myRep.email;
+        }
+      }
+    }catch(e){}
     loadPipeline();
     loadPreviousAgreements();
   }catch(e){document.getElementById('login-err').style.display='block';}
@@ -376,7 +381,7 @@ async function loadPreviousAgreements(){
 
     // Filter to this rep's agreements (admin sees all)
     const isAdmin=currentU==='admin';
-    const mine=isAdmin?d.agreements:d.agreements.filter(a=>a.rep_email===REP_EMAILS[currentU]);
+    const mine=isAdmin?d.agreements:d.agreements.filter(a=>a.rep_email&&currentU&&a.rep_email.toLowerCase().includes(currentU.replace(/\d/g,'')));
     if(!mine.length)return;
 
     document.getElementById('prev-agreements').style.display='block';

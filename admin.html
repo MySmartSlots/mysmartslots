@@ -200,6 +200,7 @@ textarea.inp{resize:vertical;min-height:60px;}
     <div class="nav-tab active" onclick="switchTab('overview',this)">📊 Overview</div>
     <div class="nav-tab" onclick="switchTab('clients',this)">👥 Clients</div>
     <div class="nav-tab" onclick="switchTab('reps',this)">🏆 Rep Performance</div>
+    <div class="nav-tab" onclick="switchTab('team',this)">👤 Team</div>
     <div class="nav-tab" onclick="switchTab('pipeline',this)">📋 Pipeline</div>
     <div class="nav-tab" onclick="switchTab('reports',this)">📈 Monthly Reports</div>
     <div class="nav-tab" onclick="switchTab('logins',this)">🔑 Login History</div>
@@ -273,6 +274,67 @@ textarea.inp{resize:vertical;min-height:60px;}
       </div>
       <div id="rep-detail-grid">
         <div class="empty"><div class="icon">⏳</div>Loading...</div>
+      </div>
+    </div>
+
+    <!-- TEAM MANAGEMENT -->
+    <div class="tab-panel" id="tab-team">
+      <div class="section-head">
+        <h2>Team Management</h2>
+        <p>Add, edit, deactivate, or reactivate Account Managers. Changes take effect immediately — no code push needed.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;" class="team-layout">
+        <div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">Active Team Members</div>
+          <div id="team-list" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">➕ Add New Account Manager</div>
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input class="inp" type="text" id="new-rep-name" placeholder="Ben Powell" style="width:100%;"/>
+            </div>
+            <div class="form-group">
+              <label>Username * <span style="color:var(--gray);font-weight:400;">(they log in with this)</span></label>
+              <input class="inp" type="text" id="new-rep-username" placeholder="ben1" style="width:100%;"/>
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input class="inp" type="email" id="new-rep-email" placeholder="ben@mysmartslots.com" style="width:100%;"/>
+            </div>
+            <div class="form-group">
+              <label>Password *</label>
+              <input class="inp" type="text" id="new-rep-password" placeholder="Ben2026$" style="width:100%;"/>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Territory</label>
+                <input class="inp" type="text" id="new-rep-territory" placeholder="Northeast" style="width:100%;"/>
+              </div>
+              <div class="form-group">
+                <label>Region</label>
+                <select class="inp" id="new-rep-region" style="width:100%;">
+                  <option value="">Select region...</option>
+                  <option value="Northeast">Northeast</option>
+                  <option value="Southeast">Southeast</option>
+                  <option value="Midwest">Midwest</option>
+                  <option value="West">West</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select class="inp" id="new-rep-role" style="width:100%;">
+                <option value="account_manager">Account Manager</option>
+                <option value="jr_regional_manager">Jr Regional Manager</option>
+                <option value="sr_regional_manager">Sr Regional Manager</option>
+              </select>
+            </div>
+            <button class="btn btn-orange" onclick="addRep()" style="width:100%;">Add Team Member</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -493,6 +555,8 @@ function switchTab(name,el){
   document.getElementById('tab-'+name).classList.add('active');
   if(el)el.classList.add('active');
   if(name==='data')renderDataManagement();
+  if(name==='team')loadTeam();
+  if(name==='reports')populateReportClients();
 }
 
 async function api(endpoint,body={}){
@@ -832,6 +896,67 @@ async function saveClientStatus(){
   const d=await api('/portal/onboard/update',{id:selectedClientId,onboard_status:status,admin_notes:notes});
   if(d.success){toast('✓ Status updated');await loadDashboard();closeClientModal();}
   else{toast('Failed to update: '+(d.error||'unknown error'),true);}
+}
+
+async function loadTeam(){
+  const d=await api('/portal/admin/reps/list',{});
+  if(!d.success)return;
+  const list=document.getElementById('team-list');
+  if(!list)return;
+  const reps=d.reps.filter(r=>!r.is_admin);
+  if(!reps.length){list.innerHTML='<div style="font-size:13px;color:var(--gray);">No team members yet.</div>';return;}
+  list.innerHTML=reps.map(r=>`
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:1rem;opacity:${r.is_active?1:.5};">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;">${r.name} <span style="font-size:12px;color:var(--gray);font-weight:400;">@${r.username}</span></div>
+          <div style="font-size:12px;color:var(--gray);margin-top:2px;">${r.email}</div>
+          <div style="font-size:11px;color:var(--accent);margin-top:2px;">${r.role.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase())} ${r.territory&&r.territory!=='Unassigned'?'· '+r.territory:''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${r.is_active
+            ? `<button class="btn" style="font-size:11px;padding:5px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);" onclick="deactivateRep(${r.id},'${r.name}')">Deactivate</button>`
+            : `<button class="btn" style="font-size:11px;padding:5px 10px;background:rgba(0,200,150,.1);color:var(--accent);border:1px solid rgba(0,200,150,.3);" onclick="reactivateRep(${r.id},'${r.name}')">Reactivate</button>`
+          }
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function addRep(){
+  const name=document.getElementById('new-rep-name').value.trim();
+  const username=document.getElementById('new-rep-username').value.trim().toLowerCase();
+  const email=document.getElementById('new-rep-email').value.trim();
+  const password=document.getElementById('new-rep-password').value.trim();
+  const territory=document.getElementById('new-rep-territory').value.trim();
+  const region=document.getElementById('new-rep-region').value;
+  const role=document.getElementById('new-rep-role').value;
+  if(!name||!username||!email||!password){toast('Name, username, email, and password are required.',true);return;}
+  const d=await api('/portal/admin/reps/add',{username,name,email,password,territory,region,role});
+  if(d.success){
+    toast(`✓ ${name} added — they can log in as "${username}" immediately`);
+    document.getElementById('new-rep-name').value='';
+    document.getElementById('new-rep-username').value='';
+    document.getElementById('new-rep-email').value='';
+    document.getElementById('new-rep-password').value='';
+    document.getElementById('new-rep-territory').value='';
+    loadTeam();
+  } else {
+    toast('Error: '+(d.error||'Unknown — username may already exist'),true);
+  }
+}
+
+async function deactivateRep(id,name){
+  if(!confirm(`Deactivate ${name}? They will no longer be able to log in. Their data is preserved.`))return;
+  const d=await api('/portal/admin/reps/deactivate',{id});
+  if(d.success){toast(`${name} deactivated`);loadTeam();}
+  else toast('Error: '+(d.error||'Unknown'),true);
+}
+
+async function reactivateRep(id,name){
+  const d=await api('/portal/admin/reps/reactivate',{id});
+  if(d.success){toast(`✓ ${name} reactivated — they can log in immediately`);loadTeam();}
+  else toast('Error: '+(d.error||'Unknown'),true);
 }
 
 function populateReportClients(){

@@ -337,18 +337,39 @@ header{background:var(--navy);padding:1rem 1.5rem;display:flex;align-items:cente
 const API="https://mysmartslots-portal.onrender.com";
 let currentU=null,currentP=null,currentName=null;
 
-const REP_EMAILS={
-  'Orion':   'orion@mysmartslots.com',
-  'Braden':  'braden@mysmartslots.com',
-  'Carson':  'carson@mysmartslots.com',
-  'Rep 2':   'rep2@mysmartslots.com',
-  'Owner':   'hello@mysmartslots.com',
-};
+// REP_EMAILS populated dynamically from Supabase via loadReps()
+let REP_EMAILS = {};
 
-// Map username to rep name for auto-selecting dropdown
-const USERNAME_TO_REP={
-  'orion1':'Orion','braden1':'Braden','carson1':'Carson','rep2':'Rep 2','admin':'Owner'
-};
+// Reps loaded dynamically from Supabase
+let REP_DATA = []; // [{username, name, email}]
+
+async function loadReps() {
+  try {
+    const r = await fetch(`${API}/portal/admin/reps/list`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({username: currentU, password: currentP})
+    });
+    const d = await r.json();
+    if (d.success) {
+      REP_DATA = d.reps.filter(r => r.is_active);
+      REP_EMAILS = {};
+      REP_DATA.forEach(r => { REP_EMAILS[r.name] = r.email; });
+      const sel = document.getElementById('rep-select');
+      sel.innerHTML = '<option value="">Select Account Manager...</option>';
+      REP_DATA.forEach(r => {
+        const o = document.createElement('option');
+        o.value = r.name;
+        o.textContent = r.name + (r.territory && r.territory !== 'Unassigned' ? ' — ' + r.territory : '');
+        sel.appendChild(o);
+      });
+      // Auto-select logged in rep
+      const myRep = REP_DATA.find(r => r.username === currentU);
+      if (myRep) { sel.value = myRep.name; updateRepEmail(); }
+    }
+  } catch(e) {
+    console.error('loadReps error:', e);
+  }
+}
 
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none') doFinancialLogin();
@@ -362,17 +383,11 @@ async function doFinancialLogin(){
     const d=await r.json();
     if(!r.ok){document.getElementById('login-error').style.display='block';return;}
     currentU=u.toLowerCase();currentP=p;currentName=d.name;
-    // Hide login, show app
     document.getElementById('login-screen').style.display='none';
     document.getElementById('main-header').style.display='flex';
     document.getElementById('main-content').style.display='block';
     document.getElementById('header-name').textContent=d.name;
-    // Auto-select this rep in the dropdown
-    const repName=USERNAME_TO_REP[currentU];
-    if(repName){
-      document.getElementById('rep-select').value=repName;
-      updateRepEmail();
-    }
+    await loadReps();
     updateBill();
   }catch(e){document.getElementById('login-error').style.display='block';}
 }
