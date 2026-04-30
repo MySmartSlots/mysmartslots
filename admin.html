@@ -453,6 +453,18 @@ textarea.inp{resize:vertical;min-height:60px;}
     </div>
 
     <!-- DATA MANAGEMENT -->
+    <div class="tab-panel" id="tab-logins">
+      <div class="section-head">
+        <h2>Login History</h2>
+        <p>All rep and admin logins recorded in real time.</p>
+      </div>
+      <div class="card">
+        <div id="logins-table-wrap">
+          <div class="empty"><div class="icon">🔑</div>Loading login history...</div>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-panel" id="tab-data">
       <div class="section-head">
         <h2>Data Management</h2>
@@ -552,11 +564,14 @@ function toast(msg,err=false){
 function switchTab(name,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  const panel=document.getElementById('tab-'+name);
+  if(!panel){console.error('Tab panel not found: tab-'+name);return;}
+  panel.classList.add('active');
   if(el)el.classList.add('active');
   if(name==='data')renderDataManagement();
   if(name==='team')loadTeam();
   if(name==='reports')populateReportClients();
+  if(name==='logins')renderLogins();
 }
 
 async function api(endpoint,body={}){
@@ -906,21 +921,95 @@ async function loadTeam(){
   const reps=d.reps.filter(r=>!r.is_admin);
   if(!reps.length){list.innerHTML='<div style="font-size:13px;color:var(--gray);">No team members yet.</div>';return;}
   list.innerHTML=reps.map(r=>`
-    <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:1rem;opacity:${r.is_active?1:.5};">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <div>
-          <div style="font-size:15px;font-weight:700;">${r.name} <span style="font-size:12px;color:var(--gray);font-weight:400;">@${r.username}</span></div>
-          <div style="font-size:12px;color:var(--gray);margin-top:2px;">${r.email}</div>
-          <div style="font-size:11px;color:var(--accent);margin-top:2px;">${r.role.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase())} ${r.territory&&r.territory!=='Unassigned'?'· '+r.territory:''}</div>
+    <div id="rep-card-${r.id}" style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:1rem;opacity:${r.is_active?1:.5};">
+      <!-- VIEW MODE -->
+      <div id="rep-view-${r.id}">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;">${r.name} <span style="font-size:12px;color:var(--gray);font-weight:400;">@${r.username}</span></div>
+            <div style="font-size:12px;color:var(--gray);margin-top:2px;">${r.email}</div>
+            <div style="font-size:11px;color:var(--accent);margin-top:2px;">${r.role.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase())} ${r.territory&&r.territory!=='Unassigned'?'· '+r.territory:''} ${r.region?'· '+r.region:''}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="showRepEdit(${r.id})">Edit</button>
+            ${r.is_active
+              ? `<button class="btn" style="font-size:11px;padding:5px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);" onclick="deactivateRep(${r.id},'${r.name}')">Deactivate</button>`
+              : `<button class="btn" style="font-size:11px;padding:5px 10px;background:rgba(0,200,150,.1);color:var(--accent);border:1px solid rgba(0,200,150,.3);" onclick="reactivateRep(${r.id},'${r.name}')">Reactivate</button>`
+            }
+          </div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${r.is_active
-            ? `<button class="btn" style="font-size:11px;padding:5px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);" onclick="deactivateRep(${r.id},'${r.name}')">Deactivate</button>`
-            : `<button class="btn" style="font-size:11px;padding:5px 10px;background:rgba(0,200,150,.1);color:var(--accent);border:1px solid rgba(0,200,150,.3);" onclick="reactivateRep(${r.id},'${r.name}')">Reactivate</button>`
-          }
+      </div>
+      <!-- EDIT MODE -->
+      <div id="rep-edit-${r.id}" style="display:none;">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:.75rem;">Editing ${r.name}</div>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input class="inp" id="edit-name-${r.id}" value="${r.name}" style="width:100%;"/>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input class="inp" id="edit-email-${r.id}" value="${r.email}" style="width:100%;"/>
+          </div>
+          <div class="form-group">
+            <label>New Password <span style="color:var(--gray);font-weight:400;">(leave blank to keep)</span></label>
+            <input class="inp" type="text" id="edit-password-${r.id}" placeholder="Leave blank to keep current" style="width:100%;"/>
+          </div>
+          <div class="form-group">
+            <label>Territory</label>
+            <input class="inp" id="edit-territory-${r.id}" value="${r.territory||''}" style="width:100%;"/>
+          </div>
+          <div class="form-group">
+            <label>Region</label>
+            <select class="inp" id="edit-region-${r.id}" style="width:100%;">
+              <option value="">None</option>
+              <option value="Northeast" ${r.region==='Northeast'?'selected':''}>Northeast</option>
+              <option value="Southeast" ${r.region==='Southeast'?'selected':''}>Southeast</option>
+              <option value="Midwest" ${r.region==='Midwest'?'selected':''}>Midwest</option>
+              <option value="West" ${r.region==='West'?'selected':''}>West</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select class="inp" id="edit-role-${r.id}" style="width:100%;">
+              <option value="account_manager" ${r.role==='account_manager'?'selected':''}>Account Manager</option>
+              <option value="jr_regional_manager" ${r.role==='jr_regional_manager'?'selected':''}>Jr Regional Manager</option>
+              <option value="sr_regional_manager" ${r.role==='sr_regional_manager'?'selected':''}>Sr Regional Manager</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-orange" onclick="saveRepEdit(${r.id})">Save Changes</button>
+          <button class="btn" style="background:none;border:1px solid var(--border);color:var(--gray);" onclick="hideRepEdit(${r.id})">Cancel</button>
         </div>
       </div>
     </div>`).join('');
+}
+
+function showRepEdit(id){
+  document.getElementById('rep-view-'+id).style.display='none';
+  document.getElementById('rep-edit-'+id).style.display='block';
+}
+
+function hideRepEdit(id){
+  document.getElementById('rep-view-'+id).style.display='block';
+  document.getElementById('rep-edit-'+id).style.display='none';
+}
+
+async function saveRepEdit(id){
+  const updates={
+    id,
+    name:      document.getElementById('edit-name-'+id).value.trim(),
+    email:     document.getElementById('edit-email-'+id).value.trim(),
+    password:  document.getElementById('edit-password-'+id).value.trim(),
+    territory: document.getElementById('edit-territory-'+id).value.trim(),
+    region:    document.getElementById('edit-region-'+id).value,
+    role:      document.getElementById('edit-role-'+id).value,
+  };
+  if(!updates.name||!updates.email){toast('Name and email required.',true);return;}
+  const d=await api('/portal/admin/reps/update',updates);
+  if(d.success){toast('✓ '+updates.name+' updated');loadTeam();}
+  else toast('Error: '+(d.error||'Unknown'),true);
 }
 
 async function addRep(){
