@@ -74,11 +74,13 @@ app.post("/portal/login", async (req, res) => {
   }
 
   // Log the login
-  await supabase.from("logins").insert({
-    username: rep.username,
-    rep_name: rep.name,
-    logged_in_at: new Date().toISOString(),
-  }).catch(e => console.error("Login log error:", e.message));
+  try {
+    await supabase.from("logins").insert({
+      username: rep.username,
+      rep_name: rep.name,
+      logged_in_at: new Date().toISOString(),
+    });
+  } catch(e) { console.error("Login log error:", e.message); }
 
   res.json({
     success:   true,
