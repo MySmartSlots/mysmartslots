@@ -42,31 +42,24 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* LAYOUT */
 .app-body{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 56px);}
 @media(max-width:768px){
-  .app-body{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
-  .sidebar{
-    height:auto;position:relative;top:0;
-    border-right:none;border-bottom:1px solid var(--border);
-    padding:.5rem 0;
-    display:flex;flex-direction:column;
-  }
-  .sidebar-title{display:none;}
-  .sidebar-modules{display:flex;flex-direction:row;overflow-x:auto;padding:.25rem .5rem;gap:.25rem;-webkit-overflow-scrolling:touch;}
-  .sidebar-modules::-webkit-scrollbar{height:3px;}
-  .sidebar-modules::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-  .module-item{
-    flex-shrink:0;flex-direction:column;align-items:center;
-    padding:.5rem .75rem;min-width:80px;max-width:100px;
-    border-left:none;border-bottom:3px solid transparent;
-    border-radius:8px 8px 0 0;text-align:center;
-  }
-  .module-item.active{border-left-color:transparent;border-bottom-color:var(--accent);}
-  .module-item.completed{border-left-color:transparent;border-bottom-color:var(--green);}
-  .mod-num{width:28px;height:28px;font-size:11px;}
-  .mod-info{display:flex;flex-direction:column;align-items:center;}
-  .mod-title{font-size:10px;line-height:1.2;text-align:center;max-width:75px;}
-  .mod-sub,.mod-status{display:none;}
-  .sidebar-progress{display:none;}
+  .app-body{grid-template-columns:1fr;}
+  .sidebar{display:none;}
   .main{padding:1.25rem 1rem 5rem;}
+}
+/* Mobile hamburger menu */
+.mobile-nav-bar{display:none;background:var(--card);border-bottom:1px solid var(--border);padding:.75rem 1rem;align-items:center;justify-content:space-between;position:sticky;top:56px;z-index:90;}
+.mobile-module-title{font-size:13px;font-weight:700;color:var(--white);flex:1;margin:0 .75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hamburger-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.hamburger-btn span{display:block;width:18px;height:2px;background:var(--white);border-radius:2px;transition:all .2s;}
+.mobile-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;}
+.mobile-menu-overlay.open{display:block;}
+.mobile-menu-panel{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--card);z-index:201;transform:translateX(-100%);transition:transform .25s ease;overflow-y:auto;}
+.mobile-menu-panel.open{transform:translateX(0);}
+.mobile-menu-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
+.mobile-menu-header h3{font-size:14px;font-weight:700;color:var(--white);}
+.mobile-close-btn{background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1;padding:0 4px;}
+@media(max-width:768px){
+  .mobile-nav-bar{display:flex;}
 }
 
 /* SIDEBAR */
@@ -207,13 +200,30 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
 
+  <!-- MOBILE HAMBURGER BAR -->
+  <div class="mobile-nav-bar" id="mobile-nav-bar">
+    <button class="hamburger-btn" onclick="openMobileMenu()" aria-label="Open modules menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-module-title" id="mobile-module-title">Select a Module</div>
+    <div style="font-size:11px;color:var(--gray);" id="mobile-prog-label">0%</div>
+  </div>
+
+  <!-- MOBILE SLIDE-OUT MENU -->
+  <div class="mobile-menu-overlay" id="mobile-overlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-menu-panel" id="mobile-menu-panel">
+    <div class="mobile-menu-header">
+      <h3>📚 Training Modules</h3>
+      <button class="mobile-close-btn" onclick="closeMobileMenu()">×</button>
+    </div>
+    <div id="mobile-module-nav"></div>
+  </div>
+
   <div class="app-body">
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
       <div class="sidebar-title">Training Modules</div>
-      <div class="sidebar-modules">
-        <div id="module-nav"></div>
-      </div>
+      <div id="module-nav"></div>
       <div class="sidebar-progress">
         <div class="prog-label"><span>Overall Progress</span><span id="prog-pct">0%</span></div>
         <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
@@ -1041,8 +1051,7 @@ function getAvgScore(){
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 function renderSidebar(){
-  const nav=document.getElementById('module-nav');
-  nav.innerHTML=MODULES.map((m,i)=>{
+  const navHTML = MODULES.map((m,i)=>{
     const p=progress[i];
     const completed=p?.completed;
     const score=p?.score;
@@ -1061,14 +1070,39 @@ function renderSidebar(){
     </div>`;
   }).join('');
 
+  // Populate both desktop and mobile nav
+  document.getElementById('module-nav').innerHTML = navHTML;
+  document.getElementById('mobile-module-nav').innerHTML = navHTML;
+
   const total=MODULES.length;
   const done=getCompletedCount();
   const pct=Math.round((done/total)*100);
   document.getElementById('prog-pct').textContent=pct+'%';
   document.getElementById('prog-fill').style.width=pct+'%';
+
+  // Update mobile bar
+  const mobileTitle = document.getElementById('mobile-module-title');
+  const mobileProg = document.getElementById('mobile-prog-label');
+  if(mobileTitle && currentModule >= 0 && MODULES[currentModule]){
+    mobileTitle.textContent = MODULES[currentModule].emoji + ' ' + MODULES[currentModule].title;
+  }
+  if(mobileProg) mobileProg.textContent = pct + '%';
+}
+
+function openMobileMenu(){
+  document.getElementById('mobile-overlay').classList.add('open');
+  document.getElementById('mobile-menu-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu(){
+  document.getElementById('mobile-overlay').classList.remove('open');
+  document.getElementById('mobile-menu-panel').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 function tryLoadModule(i){
+  closeMobileMenu();
   // Admins can access any module freely
   if(isAdmin){loadModule(i);return;}
   if(i>0&&!progress[i-1]?.completed){
